@@ -3,3 +3,4 @@
 ^\.httr-oauth$
 ^development/*
 ^LICENSE\.md$
+^README\.Rmd$

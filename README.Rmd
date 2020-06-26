@@ -1,0 +1,21 @@
+  
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+# getarc
+
+
+# Overview
+getarc provides a few functions for querying feature server data via the ArcGIS RestAPI.
+
+# Installation
+The package can currently be installed from github:
+```{r eval=FALSE}
+# Install the development version from GitHub:
+# install.packages("devtools")
+devtools::install_github("matthewjwhittle/getarc")
+```
+
+
