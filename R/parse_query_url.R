@@ -8,12 +8,14 @@
 #' @param url a string defining the url of the query.
 #' @import stringr
 #' @importFrom magrittr %>%
+#' @importFrom utils URLdecode
 #' @return a function created by \code{specifiy_layer_params}
+#' @export parse_query_url
 #' @examples
 #' # Specify the URL for SSSIs
 #' url <- "https://services.arcgis.com/JJzESW51TqeY9uat/arcgis/rest/services/SSSI_England/FeatureServer/0/query?where=1%3D1&outFields=*&outSR=4326&f=json"
 #' # Parse the url into a get function
-#' get_sssi <- parse_query_url(url, include_query = TRUE)
+#' get_sssi <- parse_query_url(url)
 #' # Get the data, passing an additional parameter to only return one feature
 #' one_sssi <- get_sssi(query = c("resultRecordCount" = "1"))
 

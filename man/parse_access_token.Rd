@@ -9,6 +9,9 @@ parse_access_token(my_token)
 \arguments{
 \item{my_token}{an access token acquired via get_token}
 }
+\value{
+the access token as a string
+}
 \description{
 Helper function to parse access tokens
 }

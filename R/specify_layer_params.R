@@ -7,6 +7,7 @@
 #' @param feature_server a string defining the name of the feature server
 #' @param layer_id an integar defining the layer id (starting at 0)
 #' @return a function that can be used to query the features of that layer
+#' @export specify_layer_params
 
 
 specify_layer_params <- function(host,

@@ -4,6 +4,9 @@
 #'
 #' @import purrr
 #' @importFrom magrittr %>%
+#' @param  x a named list of query parameters
+#' @param drop_null logical value should null list elements be dropped
+#' @return a string of query parameters
 collapse_query_parameters <-
   function(x, drop_null = FALSE) {
     # Map in parallel along the query param list

@@ -4,7 +4,15 @@
 \alias{collapse_query_parameters}
 \title{Collapse Query Parameters}
 \usage{
-collapse_query_parameters(x)
+collapse_query_parameters(x, drop_null = FALSE)
+}
+\arguments{
+\item{x}{a named list of query parameters}
+
+\item{drop_null}{logical value should null list elements be dropped}
+}
+\value{
+a string of query parameters
 }
 \description{
 Helper functino to collapse parameters into a typical url query

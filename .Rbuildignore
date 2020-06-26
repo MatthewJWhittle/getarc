@@ -1,3 +1,5 @@
 ^getarc\.Rproj$
 ^\.Rproj\.user$
 ^\.httr-oauth$
+^development/*
+^LICENSE\.md$

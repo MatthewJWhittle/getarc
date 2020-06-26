@@ -9,6 +9,9 @@
 #' @param my_token an access token acquired via \code{get_token}
 #' @param query a named vector of parameters to include in the query
 #'
+#' @return an sf object
+#' @export get_layer
+#'
 #' @import httr
 #' @import sf
 #' @importFrom magrittr %>%

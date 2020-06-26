@@ -4,6 +4,7 @@
 #'
 #' @param my_token an access token acquired via get_token
 #' @import jsonlite
+#' @return the access token as a string
 parse_access_token <-
   function(my_token){
     creds <- jsonlite::fromJSON(my_token$credentials)

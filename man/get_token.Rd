@@ -4,7 +4,7 @@
 \alias{get_token}
 \title{Get Access Token}
 \usage{
-get_token(use_cache = TRUE)
+get_token(use_cache = FALSE)
 }
 \arguments{
 \item{use_cache}{should the token be cached? Currently not working}

@@ -3,10 +3,10 @@
 #' Get an access token for accessing a service
 #'
 #' @param use_cache should the token be cached? Currently not working
-#'
+#' @export get_token
 #' @import httr
 get_token <-
-  function(use_cache = TRUE) {
+  function(use_cache = FALSE) {
     client_id <- "yKYDBnaubsMqB4qv"
     # Client secret embedded in source code as recomended by:
     # https://cran.r-project.org/web/packages/httr/vignettes/secrets.html

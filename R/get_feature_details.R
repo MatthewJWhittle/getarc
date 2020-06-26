@@ -5,18 +5,20 @@
 #' @param host url for the ArcGIS Server host e.g 'https://services9.arcgis.com'
 #' @param instance a string defining the ArcGIS Server instance
 #' @param feature_server a string defining the name of the feature server
-#' @param layer_id an integar defining the layer id (starting at 0)
 #' @param my_token an access token acquired via \code{get_token}
 #'
 #' @import httr
 #' @import sf
+#' @import purrr
+#' @import dplyr
 #' @importFrom magrittr %>%
+#' @export get_feature_details
 #'
 #'
 get_feature_details <-
   function(host,
            instance,
-           feature_server_name,
+           feature_server,
            my_token = NULL) {
     #https://developers.arcgis.com/rest/services-reference/layer-feature-service-.htm
 
@@ -73,7 +75,7 @@ get_feature_details <-
     feature_tables <-
       feature_tables %>% purrr::discard(~ length(.x) == 0)
 
-    map2(feature_tables,
+    purrr::map2(feature_tables,
          .y = names(feature_tables),
          ~ .x %>% dplyr::mutate(data_type = .y)) %>%
       dplyr::bind_rows() %>% return()
