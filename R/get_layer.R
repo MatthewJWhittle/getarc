@@ -53,6 +53,14 @@ get_layer <-
     # This where clause is taken from the natural england arc gis api example
     where <- "1=1"
 
+
+# Use this for bboxs
+'c("geometry" = paste0(.x, collapse = ","),
+                          "geometryType" = "esriGeometryEnvelope",
+                          "spatialRel" = "esriSpatialRelIntersects",
+                          inSR = st_crs(.x)$epsg
+                          )'
+
     # Get the token from the supplied access token
     if (!is.null(my_token)) {
       token <- parse_access_token(my_token)
@@ -106,8 +114,8 @@ get_layer <-
     data <- possible_read(temp_file, stringsAsFactors = FALSE)
 
     if (is.null(data)) {
-      stop(paste0("Error: ",
-                  print(httr::content(request))))
+      message(paste0("No data: returning empty tibble"))
+      return(tibble())
     }
 
     # If the specified crs is not 4326 (the current crs) then transform the data
