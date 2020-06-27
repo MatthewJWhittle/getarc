@@ -14,7 +14,7 @@ specify_layer_params <- function(host,
                                  instance,
                                  feature_server,
                                  layer_id = 0, query = NULL) {
-  function(my_token = NULL, out_crs = 4326, query) {
+  function(my_token = NULL, out_crs = 4326, query = query) {
     get_layer(
       host,
       instance,
