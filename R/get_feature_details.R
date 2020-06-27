@@ -35,7 +35,7 @@ get_feature_details <-
            "ArcGIS",
            rest,
            services,
-           feature_server_name,
+           feature_server,
            server_type) %>% paste0(collapse = "/")
 
     f <- "json"

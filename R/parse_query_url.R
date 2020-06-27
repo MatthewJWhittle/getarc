@@ -18,7 +18,6 @@
 #' get_sssi <- parse_query_url(url)
 #' # Get the data, passing an additional parameter to only return one feature
 #' one_sssi <- get_sssi(query = c("resultRecordCount" = "1"))
-
 parse_query_url <-
   function(url){
     url <- URLdecode(url)
