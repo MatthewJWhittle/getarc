@@ -4,13 +4,7 @@
 \alias{specify_layer_params}
 \title{Specify Layer Parameters}
 \usage{
-specify_layer_params(
-  host,
-  instance,
-  feature_server,
-  layer_id = 0,
-  query = NULL
-)
+specify_layer_params(host, instance, feature_server, layer_id = 0)
 }
 \arguments{
 \item{host}{url for the ArcGIS Server host e.g 'https://services9.arcgis.com'}

@@ -8,6 +8,7 @@
 #' @param layer_id an integar defining the layer id (starting at 0)
 #' @param my_token an access token acquired via \code{get_token}
 #' @param query a named vector of parameters to include in the query
+#' @param crs the output crs, defaulting to 4326
 #'
 #' @return an sf object
 #' @export get_layer
@@ -15,8 +16,6 @@
 #' @import httr
 #' @import sf
 #' @importFrom magrittr %>%
-
-
 get_layer <-
   function(host,
            instance,
@@ -26,7 +25,6 @@ get_layer <-
            layer_id = 0,
            query = NULL) {
     #https://developers.arcgis.com/rest/services-reference/layer-feature-service-.htm
-
 
     rest <- "rest"
     services <- "services"
@@ -52,14 +50,6 @@ get_layer <-
     # "where=FID>=0" was causing a 400 error
     # This where clause is taken from the natural england arc gis api example
     where <- "1=1"
-
-
-# Use this for bboxs
-'c("geometry" = paste0(.x, collapse = ","),
-                          "geometryType" = "esriGeometryEnvelope",
-                          "spatialRel" = "esriSpatialRelIntersects",
-                          inSR = st_crs(.x)$epsg
-                          )'
 
     # Get the token from the supplied access token
     if (!is.null(my_token)) {
@@ -114,8 +104,8 @@ get_layer <-
     data <- possible_read(temp_file, stringsAsFactors = FALSE)
 
     if (is.null(data)) {
-      message(paste0("No data: returning empty tibble"))
-      return(tibble())
+      stop(paste0("Error: ",
+                  print(httr::content(request))))
     }
 
     # If the specified crs is not 4326 (the current crs) then transform the data

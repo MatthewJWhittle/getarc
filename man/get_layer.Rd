@@ -23,6 +23,8 @@ get_layer(
 
 \item{my_token}{an access token acquired via \code{get_token}}
 
+\item{crs}{the output crs, defaulting to 4326}
+
 \item{layer_id}{an integar defining the layer id (starting at 0)}
 
 \item{query}{a named vector of parameters to include in the query}
