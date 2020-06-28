@@ -1,8 +1,8 @@
-load_all()
+
 test_that("return standard attr", {
   expect_equal(
     query_string(query = NULL),
-    "query?f=json&where=1=1&outSR=4326&returnIdsOnly=false&outFields=*&returnCountOnly=false"
+    "query?f=json&outSR=4326&returnIdsOnly=false&where=1=1&outFields=*&returnCountOnly=false"
   )
   expect_equal(
     # Overwrite default where clause parameter

@@ -2,18 +2,15 @@
 #'
 #' Generate a query string to combine with the endpoint
 #'
-#'  This function accepts a named list or vector of query parameters. It compares the
-#'  parameters with standard parameters and returns a string.
-#'  @param a named list or vector of query parameters where the names are the
-#'  parameter names and the values are the parameter values. For example: list(outFields = "*")
-#'  @param my_token An access token to be included in the string if specified
-#'  @return a string, beginning with "query?" to concatenate with the end point
+#' This function accepts a named list or vector of query parameters. It compares the
+#' parameters with standard parameters and returns a string.
+#' @param query a named list or vector of query parameters where the names are the parameter names and the values are the parameter values. For example: list(outFields = "*")
+#' @param my_token An access token to be included in the string if specified
+#' @return a string, beginning with "query?" to concatenate with the end point
 query_string <-
   function(query, my_token = NULL) {
 
     # "where=FID>=0" was causing a 400 error
-
-
     # Get the token from the supplied access token
     if (!is.null(my_token)) {
       token <- parse_access_token(my_token)
