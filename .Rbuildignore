@@ -4,3 +4,4 @@
 ^development/*
 ^LICENSE\.md$
 ^README\.Rmd$
+^\.travis\.yml$
