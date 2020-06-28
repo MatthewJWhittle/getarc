@@ -19,10 +19,12 @@ feature_server_endpoint <-
     server_type <- "FeatureServer"
     request_type <- "query"
 
+    if(!grepl("arcgis", instance)){
+      instance <- paste0(instance, "/arcgis")
+    }
     endpoint <-
       list(host,
            instance,
-           "arcgis",
            rest,
            services,
            feature_server,

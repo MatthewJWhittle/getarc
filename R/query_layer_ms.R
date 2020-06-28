@@ -43,7 +43,8 @@ query_layer_ms <- function(host,
   query_string <- query_string(query = query, my_token = my_token)
 
   query_url <- paste0(endpoint, query_string)
-
+  message(paste0("Requesting data:\n", query_url))
+  print(query_url)
   data <- get_geojson(query_url)
 
 

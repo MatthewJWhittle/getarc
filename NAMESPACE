@@ -3,6 +3,7 @@
 export(get_feature_details)
 export(get_layer)
 export(get_token)
+export(make_query_function)
 export(parse_query_url)
 export(query_layer_fs)
 export(query_ms_layer)
