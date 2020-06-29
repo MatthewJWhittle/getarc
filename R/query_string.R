@@ -54,5 +54,5 @@ query_string <-
     query_string <-
       collapse_query_parameters(query_list, drop_null = TRUE)
 
-    paste0("query?", query_string)
+    URLencode(paste0("query?", query_string))
   }

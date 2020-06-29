@@ -8,14 +8,134 @@ output: github_document
 
 
 # Overview
-getarc provides a few functions for querying feature server data via the ArcGIS RestAPI.
+`getarc` is an R wrapper for the [ArcGIS Rest API](https://developers.arcgis.com/rest/services-reference/). It currently only supports functionality for querying data on Feature and Map Servers. 
 
 # Installation
 The package can currently be installed from github:
 ```{r eval=FALSE}
 # Install the development version from GitHub:
-# install.packages("devtools")
+install.packages("devtools")
 devtools::install_github("matthewjwhittle/getarc")
 ```
+```{r include=FALSE}
+devtools::load_all()
+```
+
+# Examples
+```{r warning=FALSE, message=FALSE}
+library(getarc)
+library(sf)
+library(tidyverse)
+```
+
+Get arc provides two functions for querying data on an arcgis server:
+
+* `query_layer_fs` for querying data hosted on feature servers
+* `query_layer_ms` for querying data hosted on map servers
+
+Both functions work in the same way. The key difference is that resources on feature servers are defined using a `feature_server` parameter and map servers accept a `folder` and `layer_name` argument.
+
+# Getting data from a Feature Server - National Parks in England
+```{r cache=T}
+# Basic operation
+national_parks <- 
+  query_layer_fs(
+  host = "https://services.arcgis.com/",
+  instance = "JJzESW51TqeY9uat",
+  feature_server = "National_Parks_England",
+  layer_id = 0
+)
+
+head(national_parks)
+# Plot the first 15 features
+plot(national_parks$geometry[1])
+```
+
+## Querys
+A query can be included in the request by either supplying a named list to the `query` parameter, or passing a bounding box to `bounding_box` to return intersecting features.
+
+The query parameter supports any query parameter supported by the API Please review the [API documentation](https://developers.arcgis.com/rest/services-reference/query-feature-service-layer-.htm) on querying Feature Server layers for detail on how to query data. I intend to provide more R-friendly support for query operations in the future.
+
+Returning only one feature.
+```{r}
+one_park <- 
+  query_layer_fs(
+  host = "https://services.arcgis.com/",
+  instance = "JJzESW51TqeY9uat",
+  feature_server = "National_Parks_England",
+  layer_id = 0, 
+  # Return only one record
+  query = c(resultRecordCount = 1)
+)
+print(one_park)
+plot(one_park$geometry)
+
+# Including a sql where query to only return the yorkshire dales
+yorkshire_dales <- 
+  query_layer_fs(
+  host = "https://services.arcgis.com/",
+  instance = "JJzESW51TqeY9uat",
+  feature_server = "National_Parks_England",
+  layer_id = 0, 
+  # SQL query to return data for the yorkshire dales 
+  query = c("where" = "NAME='YORKSHIRE DALES'")
+)
+```
+
+You can also pass the `query_layer_fs` function a bounding box and it will perform a spatial query. This will return only features intersecting with the bounding box. I intend to add support for more advanced query operations in the future. If you need this functionality, you could read the documentation and supply it to the `query` parameter.
+
+```{r cache = TRUE}
+dales_bbox <- st_bbox(yorkshire_dales)
+
+# Which SSSI are in the yorkshire dales?
+dales_sssi <- 
+  query_layer_fs(
+  host = "https://services.arcgis.com/",
+  instance = "JJzESW51TqeY9uat",
+  feature_server = "SSSI_England",
+  layer_id = 0, 
+  # Supply a bounding box for a spatial intersects query
+  bounding_box = dales_bbox
+)
+
+yorkshire_dales <- yorkshire_dales %>% st_transform(crs = 27700)
+dales_sssi <- dales_sssi %>% st_transform(crs = 27700)
+plot(yorkshire_dales$geometry)
+plot(dales_sssi$geometry, add = TRUE, border = "red", col = "orange")
+```
+
+# Parse Query URLs
+`getarc` provides `parse_query_url` which parses the parameters from a query url (such as those you can find on api explorer apps). The function will return another function with all the api endpoints already specified.
+```{r}
+url <- "https://services.arcgis.com/JJzESW51TqeY9uat/arcgis/rest/services/Local_Nature_Reserves_England/FeatureServer/0/query?where=1%3D1&outFields=*&outSR=4326&f=json"
+
+get_local_nature_reserves <- 
+  parse_query_url(url)
+
+one_lnr <- 
+  get_local_nature_reserves(
+  # Return only one record to speed up processing for example
+  query = c(resultRecordCount = 1))
+
+print(one_lnr)
+```
+
+
+# Authentication
+Authentication is done via oauth2.0 and the `get_token` function. Sign in is done via a popup browser window and the token can be passed to the query functions via the `my_token` argument.
+```{r, eval=FALSE}
+my_token <- get_token()
+
+data <-
+  query_layer_fs(
+  host = "https://services.arcgis.com/",
+  instance = "JJzESW51TqeY9uat",
+  feature_server = "Private_Service",
+  layer_id = 0, 
+  # Pass in token for a private service
+  my_token = my_token
+)
+```
+
 
 

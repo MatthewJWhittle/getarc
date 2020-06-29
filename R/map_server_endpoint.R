@@ -31,5 +31,5 @@ map_server_endpoint <-
            server_type,
            layer_id) %>% paste0(collapse = "/")
 
-    return(paste0(endpoint, "/"))
+    URLencode(paste0(endpoint, "/"))
   }
