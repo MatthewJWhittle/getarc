@@ -3,6 +3,11 @@
 
 # getarc
 
+<!-- badges: start --> [![Codecov test
+coverage](https://codecov.io/gh/MatthewJWhittle/getarc/branch/master/graph/badge.svg)](https://codecov.io/gh/MatthewJWhittle/getarc?branch=master)
+
+<!-- badges: end -->
+
 # Overview
 
 `getarc` is an R wrapper for the [ArcGIS Rest
@@ -128,7 +133,7 @@ one_park <-
     ## Requesting data:
     ## https://services.arcgis.com//JJzESW51TqeY9uat/arcgis/rest/services/National_Parks_England/FeatureServer/0/query?f=json&outSR=4326&returnIdsOnly=false&where=1=1&outFields=*&returnCountOnly=false&resultRecordCount=1
 
-    ## Reading layer `file10ce13b14a6' from data source `/private/var/folders/v1/fwlnbmlx02gbqt40n73l823c0000gn/T/RtmppKZPK5/file10ce13b14a6.geojson' using driver `ESRIJSON'
+    ## Reading layer `file125d7df2d962' from data source `/private/var/folders/v1/fwlnbmlx02gbqt40n73l823c0000gn/T/RtmpwMvsvo/file125d7df2d962.geojson' using driver `ESRIJSON'
     ## Simple feature collection with 1 feature and 9 fields
     ## geometry type:  POLYGON
     ## dimension:      XY
@@ -171,7 +176,7 @@ yorkshire_dales <-
     ## Requesting data:
     ## https://services.arcgis.com//JJzESW51TqeY9uat/arcgis/rest/services/National_Parks_England/FeatureServer/0/query?f=json&outSR=4326&returnIdsOnly=false&outFields=*&returnCountOnly=false&where=NAME='YORKSHIRE%20DALES'
 
-    ## Reading layer `file10ce4dc89eeb' from data source `/private/var/folders/v1/fwlnbmlx02gbqt40n73l823c0000gn/T/RtmppKZPK5/file10ce4dc89eeb.geojson' using driver `ESRIJSON'
+    ## Reading layer `file125d529df187' from data source `/private/var/folders/v1/fwlnbmlx02gbqt40n73l823c0000gn/T/RtmpwMvsvo/file125d529df187.geojson' using driver `ESRIJSON'
     ## Simple feature collection with 1 feature and 9 fields
     ## geometry type:  POLYGON
     ## dimension:      XY
@@ -240,7 +245,7 @@ one_lnr <-
     ## Requesting data:
     ## https://services.arcgis.com/JJzESW51TqeY9uat/arcgis/rest/services/Local_Nature_Reserves_England/FeatureServer/0/query?f=json&outSR=4326&returnIdsOnly=false&where=1=1&outFields=*&returnCountOnly=false&resultRecordCount=1
 
-    ## Reading layer `file10ce683103a5' from data source `/private/var/folders/v1/fwlnbmlx02gbqt40n73l823c0000gn/T/RtmppKZPK5/file10ce683103a5.geojson' using driver `ESRIJSON'
+    ## Reading layer `file125d7120fa62' from data source `/private/var/folders/v1/fwlnbmlx02gbqt40n73l823c0000gn/T/RtmpwMvsvo/file125d7120fa62.geojson' using driver `ESRIJSON'
     ## Simple feature collection with 1 feature and 19 fields
     ## geometry type:  POLYGON
     ## dimension:      XY

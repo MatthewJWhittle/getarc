@@ -5,7 +5,10 @@ output: github_document
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 # getarc
-
+  <!-- badges: start -->
+  [![Codecov test coverage](https://codecov.io/gh/MatthewJWhittle/getarc/branch/master/graph/badge.svg)](https://codecov.io/gh/MatthewJWhittle/getarc?branch=master)
+  
+  <!-- badges: end -->
 
 # Overview
 `getarc` is an R wrapper for the [ArcGIS Rest API](https://developers.arcgis.com/rest/services-reference/). It currently only supports functionality for querying data on Feature and Map Servers. 
