@@ -29,8 +29,8 @@ feature_server_endpoint <-
            services,
            feature_server,
            server_type,
-           layer_id) %>% paste0(collapse = "/")
+           layer_id) %>% collapse_url_parameters(drop_null = T)
 
-    URLencode(paste0(endpoint, "/"))
+    URLencode(paste0(endpoint))
 
   }

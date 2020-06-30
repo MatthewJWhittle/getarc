@@ -15,5 +15,5 @@ collapse_query_parameters(x, drop_null = FALSE)
 a string of query parameters
 }
 \description{
-Helper functino to collapse parameters into a typical url query
+Helper function to collapse parameters into a typical url query
 }

@@ -1,6 +1,6 @@
 #' Collapse Query Parameters
 #'
-#' Helper functino to collapse parameters into a typical url query
+#' Helper function to collapse parameters into a typical url query
 #'
 #' @import purrr
 #' @importFrom magrittr %>%
