@@ -1,4 +1,5 @@
 base
+testthat
 getarc
 sf
 tidyverse
@@ -10,4 +11,3 @@ purrr
 dplyr
 stringr
 forcats
-testthat

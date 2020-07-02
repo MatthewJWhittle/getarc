@@ -34,15 +34,35 @@ query_layer_fs <-
                               feature_server,
                               layer_id)
 
+    # Get the details of the layer to
+    layer_details <- get_layer_details(endpoint = endpoint, my_token = my_token)
+
     # If a bounding box has been specified then generate the spatial query and combine with the query parameters
     if (!is.null(bounding_box)) {
       query <- c(query, spatial_query_to_list(bbox = bounding_box))
     }
 
+    # Define a named vecotr of default query parameters for returning spatial data
+    default_parameters <- c(
+      returnIdsOnly = "false",
+      # Get all features with sql query 1 = 1
+      where = "1=1",
+      outFields = "*",
+      returnCountOnly = "false",
+      f = "json",
+      token = NULL,
+      # Assert that the data is lat lon if writing to geojson
+      outSR = 4326
+    )
+
+    default_parameters <-
+      default_parameters[!(names(default_parameters) %in% names(query))]
+    query <- c(default_parameters, query)
+
     # Generate the query string
     query_string <- query_string(query = query, my_token = my_token)
 
-    query_url <- paste0(endpoint, "/", query_string)
+    query_url <- paste0(endpoint, "/query", query_string)
     message(paste0("Requesting data:\n", query_url))
     data <- get_geojson(query_url)
 
@@ -50,6 +70,11 @@ query_layer_fs <-
     # If the specified crs is not 4326 (the current crs) then transform the data
     if (crs != 4326) {
       data <- data %>% sf::st_transform(crs = crs)
+    }
+
+    # Warn if the number of rows in the data is
+    if(nrow(data) == layer_details$maxRecordCount){
+      warning("May have reached limit of maximum features to return, try performing query to narrow down results.")
     }
 
     return(data)

@@ -18,11 +18,9 @@ get_layer_details <-
       token <- my_token
     }
     # Build the parameters - json & token
-    query_string <-
-      collapse_query_parameters(x = c(f = "pjson",
-                                      token = token))
+    query_string <- query_string(my_token = my_token)
 
-    query_url <- paste0(endpoint, "?", query_string)
+    query_url <- paste0(endpoint, query_string)
 
     response <- GET(query_url)
 

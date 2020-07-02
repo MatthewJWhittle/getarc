@@ -11,7 +11,7 @@ spatial_query_to_list <-
     list(
       geometry = paste0(bbox, collapse = ","),
       geometryType = "esriGeometryEnvelope",
-      spatialRel = "esriSpatialRelEnvelopeIntersects",
+      spatialRel = "esriSpatialRelIntersects",
       inSR = st_crs(bbox)$epsg
     )
   }

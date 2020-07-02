@@ -24,6 +24,7 @@ get_geojson <- function(query_url) {
   data <- possible_read(temp_file, stringsAsFactors = FALSE)
 
   if (is.null(data)) {
+
     stop(paste0("Error: ",
                 print(httr::content(request))))
   }
