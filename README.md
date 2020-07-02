@@ -56,9 +56,9 @@ national_parks <-
 ```
 
     ## Requesting data:
-    ## https://services.arcgis.com//JJzESW51TqeY9uat/arcgis/rest/services/National_Parks_England/FeatureServer/0/query?f=json&outSR=4326&returnIdsOnly=false&where=1=1&outFields=*&returnCountOnly=false
+    ## https://services.arcgis.com//JJzESW51TqeY9uat/arcgis/rest/services/National_Parks_England/FeatureServer/0/query?returnIdsOnly=false&where=1=1&outFields=*&returnCountOnly=false&f=json&outSR=4326
 
-    ## Reading layer `file10ce4f36e2dd' from data source `/private/var/folders/v1/fwlnbmlx02gbqt40n73l823c0000gn/T/RtmppKZPK5/file10ce4f36e2dd.geojson' using driver `ESRIJSON'
+    ## Reading layer `file63b9511ff613' from data source `/private/var/folders/v1/fwlnbmlx02gbqt40n73l823c0000gn/T/RtmpZabTow/file63b9511ff613.geojson' using driver `ESRIJSON'
     ## Simple feature collection with 10 features and 9 fields
     ## geometry type:  POLYGON
     ## dimension:      XY
@@ -131,9 +131,9 @@ one_park <-
 ```
 
     ## Requesting data:
-    ## https://services.arcgis.com//JJzESW51TqeY9uat/arcgis/rest/services/National_Parks_England/FeatureServer/0/query?f=json&outSR=4326&returnIdsOnly=false&where=1=1&outFields=*&returnCountOnly=false&resultRecordCount=1
+    ## https://services.arcgis.com//JJzESW51TqeY9uat/arcgis/rest/services/National_Parks_England/FeatureServer/0/query?returnIdsOnly=false&where=1=1&outFields=*&returnCountOnly=false&f=json&outSR=4326&resultRecordCount=1
 
-    ## Reading layer `file125d7df2d962' from data source `/private/var/folders/v1/fwlnbmlx02gbqt40n73l823c0000gn/T/RtmpwMvsvo/file125d7df2d962.geojson' using driver `ESRIJSON'
+    ## Reading layer `file63b9b64bb70' from data source `/private/var/folders/v1/fwlnbmlx02gbqt40n73l823c0000gn/T/RtmpZabTow/file63b9b64bb70.geojson' using driver `ESRIJSON'
     ## Simple feature collection with 1 feature and 9 fields
     ## geometry type:  POLYGON
     ## dimension:      XY
@@ -174,9 +174,9 @@ yorkshire_dales <-
 ```
 
     ## Requesting data:
-    ## https://services.arcgis.com//JJzESW51TqeY9uat/arcgis/rest/services/National_Parks_England/FeatureServer/0/query?f=json&outSR=4326&returnIdsOnly=false&outFields=*&returnCountOnly=false&where=NAME='YORKSHIRE%20DALES'
+    ## https://services.arcgis.com//JJzESW51TqeY9uat/arcgis/rest/services/National_Parks_England/FeatureServer/0/query?returnIdsOnly=false&outFields=*&returnCountOnly=false&f=json&outSR=4326&where=NAME='YORKSHIRE%20DALES'
 
-    ## Reading layer `file125d529df187' from data source `/private/var/folders/v1/fwlnbmlx02gbqt40n73l823c0000gn/T/RtmpwMvsvo/file125d529df187.geojson' using driver `ESRIJSON'
+    ## Reading layer `file63b924dbbe8' from data source `/private/var/folders/v1/fwlnbmlx02gbqt40n73l823c0000gn/T/RtmpZabTow/file63b924dbbe8.geojson' using driver `ESRIJSON'
     ## Simple feature collection with 1 feature and 9 fields
     ## geometry type:  POLYGON
     ## dimension:      XY
@@ -205,9 +205,9 @@ dales_sssi <-
 ```
 
     ## Requesting data:
-    ## https://services.arcgis.com//JJzESW51TqeY9uat/arcgis/rest/services/SSSI_England/FeatureServer/0/query?f=json&outSR=4326&returnIdsOnly=false&where=1=1&outFields=*&returnCountOnly=false&geometry=-2.64780374735191,53.9541205345554,-1.76083788577198,54.5690087833252&geometryType=esriGeometryEnvelope&spatialRel=esriSpatialRelEnvelopeIntersects&inSR=4326
+    ## https://services.arcgis.com//JJzESW51TqeY9uat/arcgis/rest/services/SSSI_England/FeatureServer/0/query?returnIdsOnly=false&where=1=1&outFields=*&returnCountOnly=false&f=json&outSR=4326&geometry=-2.64780374735191,53.9541205345554,-1.76083788577198,54.5690087833252&geometryType=esriGeometryEnvelope&spatialRel=esriSpatialRelIntersects&inSR=4326
 
-    ## Reading layer `file10ce408c1c53' from data source `/private/var/folders/v1/fwlnbmlx02gbqt40n73l823c0000gn/T/RtmppKZPK5/file10ce408c1c53.geojson' using driver `ESRIJSON'
+    ## Reading layer `file63b95bfe07ea' from data source `/private/var/folders/v1/fwlnbmlx02gbqt40n73l823c0000gn/T/RtmpZabTow/file63b95bfe07ea.geojson' using driver `ESRIJSON'
     ## Simple feature collection with 287 features and 19 fields
     ## geometry type:  POLYGON
     ## dimension:      XY
@@ -243,9 +243,9 @@ one_lnr <-
 ```
 
     ## Requesting data:
-    ## https://services.arcgis.com/JJzESW51TqeY9uat/arcgis/rest/services/Local_Nature_Reserves_England/FeatureServer/0/query?f=json&outSR=4326&returnIdsOnly=false&where=1=1&outFields=*&returnCountOnly=false&resultRecordCount=1
+    ## https://services.arcgis.com/JJzESW51TqeY9uat/arcgis/rest/services/Local_Nature_Reserves_England/FeatureServer/0/query?returnIdsOnly=false&where=1=1&outFields=*&returnCountOnly=false&f=json&outSR=4326&resultRecordCount=1
 
-    ## Reading layer `file125d7120fa62' from data source `/private/var/folders/v1/fwlnbmlx02gbqt40n73l823c0000gn/T/RtmpwMvsvo/file125d7120fa62.geojson' using driver `ESRIJSON'
+    ## Reading layer `file63b971a62f58' from data source `/private/var/folders/v1/fwlnbmlx02gbqt40n73l823c0000gn/T/RtmpZabTow/file63b971a62f58.geojson' using driver `ESRIJSON'
     ## Simple feature collection with 1 feature and 19 fields
     ## geometry type:  POLYGON
     ## dimension:      XY

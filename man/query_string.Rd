@@ -4,12 +4,14 @@
 \alias{query_string}
 \title{Query String}
 \usage{
-query_string(query, my_token = NULL)
+query_string(f = "json", my_token = NULL, ...)
 }
 \arguments{
-\item{query}{a named list or vector of query parameters where the names are the parameter names and the values are the parameter values. For example: list(outFields = "*")}
+\item{f}{return format "json by default}
 
 \item{my_token}{An access token to be included in the string if specified}
+
+\item{...}{additional query parameters passed as named pairs. Names are the parameter names and the values are the parameter values. For example: list(outFields = "*")}
 }
 \value{
 a string, beginning with "query?" to concatenate with the end point

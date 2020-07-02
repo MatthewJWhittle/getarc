@@ -38,11 +38,24 @@ query_layer_ms <- function(host,
   if (!is.null(bounding_box)) {
     query <- c(query, spatial_query_to_list(bbox = bounding_box))
   }
+  # Define a named vecotr of default query parameters for returning spatial data
+  default_parameters <- c(returnIdsOnly = "false",
+                          # Get all features with sql query 1 = 1
+                          where = "1=1",
+                          outFields = "*",
+                          returnCountOnly = "false",
+                          f = "json",
+                          token = NULL,
+                          # Assert that the data is lat lon if writing to geojson
+                          outSR = 4326)
+
+  default_parameters <- default_parameters[!(names(default_parameters) %in% names(query))]
+  query <- c(default_parameters, query)
 
   # Generate the query string
   query_string <- query_string(query = query, my_token = my_token)
 
-  query_url <- paste0(endpoint, query_string)
+  query_url <- paste0(endpoint, "/query", query_string)
   message(paste0("Requesting data:\n", query_url))
   print(query_url)
   data <- get_geojson(query_url)
