@@ -40,7 +40,7 @@ library(tidyverse)
 Data on an arc gis server can be accessed via the `query_layer` function. This function also supports any query operation supported by the ArcGIS Rest API.
 
 # Getting data from a Feature Server - National Parks in England
-```{r cache=T}
+```{r}
 # Define the endpoint URL
 parks_endpoint <- "https://services.arcgis.com//JJzESW51TqeY9uat/arcgis/rest/services/National_Parks_England/FeatureServer/0"
 # Get the data
@@ -77,7 +77,7 @@ yorkshire_dales <-
 
 Spatial querys can be perform either via the `query` argument or by passing a bounding box to the `bounding_box` argument. This will perform a spatial query and return only features intersecting with the bounding box. I intend to add support for more advanced query operations in the future.
 
-```{r cache = TRUE}
+```{r}
 dales_bbox <- st_bbox(yorkshire_dales)
 
 # Which Sites of Special Scientific Interest are in the yorkshire dales?

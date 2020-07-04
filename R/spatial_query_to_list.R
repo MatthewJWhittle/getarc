@@ -4,7 +4,7 @@
 #'
 #' @param bbox a bounding box created by st_bbox()
 #' @return a list of spatial query elements
-#' @import sf
+#' @importFrom sf st_crs
 spatial_query_to_list <-
   function(bbox) {
     stopifnot("bbox" %in% class(bbox))

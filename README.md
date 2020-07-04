@@ -12,8 +12,16 @@ coverage](https://codecov.io/gh/MatthewJWhittle/getarc/branch/master/graph/badge
 
 `getarc` is an R wrapper for the [ArcGIS Rest
 API](https://developers.arcgis.com/rest/services-reference/). It
-currently only supports functionality for querying data on Feature and
-Map Servers.
+provides access to the extensive open data available from [Arc
+GIS](https://hub.arcgis.com/search). It currently only supports
+functionality for querying data.
+
+  - `query_layer` gets data from an arc gis server and supports query
+    operations
+  - `get_layer_details` gets metadata about a layer such as the field
+    names and maxRecordCount
+  - `get_token` gets an access token via a web browser login to access
+    private services
 
 # Installation
 
@@ -33,32 +41,26 @@ library(sf)
 library(tidyverse)
 ```
 
-Get arc provides two functions for querying data on an arcgis server:
+# Getting data
 
-  - `query_layer_fs` for querying data hosted on feature servers
-  - `query_layer_ms` for querying data hosted on map servers
-
-Both functions work in the same way. The key difference is that
-resources on feature servers are defined using a `feature_server`
-parameter and map servers accept a `folder` and `layer_name` argument.
+Data on an arc gis server can be accessed via the `query_layer`
+function. This function also supports any query operation supported by
+the ArcGIS Rest API.
 
 # Getting data from a Feature Server - National Parks in England
 
 ``` r
-# Basic operation
+# Define the endpoint URL
+parks_endpoint <- "https://services.arcgis.com//JJzESW51TqeY9uat/arcgis/rest/services/National_Parks_England/FeatureServer/0"
+# Get the data
 national_parks <- 
-  query_layer_fs(
-  host = "https://services.arcgis.com/",
-  instance = "JJzESW51TqeY9uat",
-  feature_server = "National_Parks_England",
-  layer_id = 0
-)
+  query_layer(endpoint = parks_endpoint)
 ```
 
     ## Requesting data:
     ## https://services.arcgis.com//JJzESW51TqeY9uat/arcgis/rest/services/National_Parks_England/FeatureServer/0/query?returnIdsOnly=false&where=1=1&outFields=*&returnCountOnly=false&f=json&outSR=4326
 
-    ## Reading layer `file63b9511ff613' from data source `/private/var/folders/v1/fwlnbmlx02gbqt40n73l823c0000gn/T/RtmpZabTow/file63b9511ff613.geojson' using driver `ESRIJSON'
+    ## Reading layer `file22aa5a62693c' from data source `/private/var/folders/v1/fwlnbmlx02gbqt40n73l823c0000gn/T/RtmpGWqPqZ/file22aa5a62693c.geojson' using driver `ESRIJSON'
     ## Simple feature collection with 10 features and 9 fields
     ## geometry type:  POLYGON
     ## dimension:      XY
@@ -97,7 +99,7 @@ head(national_parks)
     ## 6 POLYGON ((-1.304131 54.3253...
 
 ``` r
-# Plot the first 15 features
+# Plot the first feature
 plot(national_parks$geometry[1])
 ```
 
@@ -120,11 +122,7 @@ Returning only one feature.
 
 ``` r
 one_park <- 
-  query_layer_fs(
-  host = "https://services.arcgis.com/",
-  instance = "JJzESW51TqeY9uat",
-  feature_server = "National_Parks_England",
-  layer_id = 0, 
+  query_layer(endpoint = parks_endpoint,
   # Return only one record
   query = c(resultRecordCount = 1)
 )
@@ -133,7 +131,7 @@ one_park <-
     ## Requesting data:
     ## https://services.arcgis.com//JJzESW51TqeY9uat/arcgis/rest/services/National_Parks_England/FeatureServer/0/query?returnIdsOnly=false&where=1=1&outFields=*&returnCountOnly=false&f=json&outSR=4326&resultRecordCount=1
 
-    ## Reading layer `file63b9b64bb70' from data source `/private/var/folders/v1/fwlnbmlx02gbqt40n73l823c0000gn/T/RtmpZabTow/file63b9b64bb70.geojson' using driver `ESRIJSON'
+    ## Reading layer `file22aa26883cca' from data source `/private/var/folders/v1/fwlnbmlx02gbqt40n73l823c0000gn/T/RtmpGWqPqZ/file22aa26883cca.geojson' using driver `ESRIJSON'
     ## Simple feature collection with 1 feature and 9 fields
     ## geometry type:  POLYGON
     ## dimension:      XY
@@ -163,11 +161,7 @@ plot(one_park$geometry)
 ``` r
 # Including a sql where query to only return the yorkshire dales
 yorkshire_dales <- 
-  query_layer_fs(
-  host = "https://services.arcgis.com/",
-  instance = "JJzESW51TqeY9uat",
-  feature_server = "National_Parks_England",
-  layer_id = 0, 
+  query_layer(endpoint = parks_endpoint,
   # SQL query to return data for the yorkshire dales 
   query = c("where" = "NAME='YORKSHIRE DALES'")
 )
@@ -176,29 +170,26 @@ yorkshire_dales <-
     ## Requesting data:
     ## https://services.arcgis.com//JJzESW51TqeY9uat/arcgis/rest/services/National_Parks_England/FeatureServer/0/query?returnIdsOnly=false&outFields=*&returnCountOnly=false&f=json&outSR=4326&where=NAME='YORKSHIRE%20DALES'
 
-    ## Reading layer `file63b924dbbe8' from data source `/private/var/folders/v1/fwlnbmlx02gbqt40n73l823c0000gn/T/RtmpZabTow/file63b924dbbe8.geojson' using driver `ESRIJSON'
+    ## Reading layer `file22aa3a4f0589' from data source `/private/var/folders/v1/fwlnbmlx02gbqt40n73l823c0000gn/T/RtmpGWqPqZ/file22aa3a4f0589.geojson' using driver `ESRIJSON'
     ## Simple feature collection with 1 feature and 9 fields
     ## geometry type:  POLYGON
     ## dimension:      XY
     ## bbox:           xmin: -2.647804 ymin: 53.95412 xmax: -1.760838 ymax: 54.56901
     ## CRS:            4326
 
-You can also pass the `query_layer_fs` function a bounding box and it
-will perform a spatial query. This will return only features
-intersecting with the bounding box. I intend to add support for more
-advanced query operations in the future. If you need this functionality,
-you could read the documentation and supply it to the `query` parameter.
+Spatial querys can be perform either via the `query` argument or by
+passing a bounding box to the `bounding_box` argument. This will perform
+a spatial query and return only features intersecting with the bounding
+box. I intend to add support for more advanced query operations in the
+future.
 
 ``` r
 dales_bbox <- st_bbox(yorkshire_dales)
 
-# Which SSSI are in the yorkshire dales?
+# Which Sites of Special Scientific Interest are in the yorkshire dales?
+sssi_endpoint <- "https://services.arcgis.com//JJzESW51TqeY9uat/arcgis/rest/services/SSSI_England/FeatureServer/0"
 dales_sssi <- 
-  query_layer_fs(
-  host = "https://services.arcgis.com/",
-  instance = "JJzESW51TqeY9uat",
-  feature_server = "SSSI_England",
-  layer_id = 0, 
+  query_layer(sssi_endpoint, 
   # Supply a bounding box for a spatial intersects query
   bounding_box = dales_bbox
 )
@@ -207,7 +198,7 @@ dales_sssi <-
     ## Requesting data:
     ## https://services.arcgis.com//JJzESW51TqeY9uat/arcgis/rest/services/SSSI_England/FeatureServer/0/query?returnIdsOnly=false&where=1=1&outFields=*&returnCountOnly=false&f=json&outSR=4326&geometry=-2.64780374735191,53.9541205345554,-1.76083788577198,54.5690087833252&geometryType=esriGeometryEnvelope&spatialRel=esriSpatialRelIntersects&inSR=4326
 
-    ## Reading layer `file63b95bfe07ea' from data source `/private/var/folders/v1/fwlnbmlx02gbqt40n73l823c0000gn/T/RtmpZabTow/file63b95bfe07ea.geojson' using driver `ESRIJSON'
+    ## Reading layer `file22aa3d6b7a1' from data source `/private/var/folders/v1/fwlnbmlx02gbqt40n73l823c0000gn/T/RtmpGWqPqZ/file22aa3d6b7a1.geojson' using driver `ESRIJSON'
     ## Simple feature collection with 287 features and 19 fields
     ## geometry type:  POLYGON
     ## dimension:      XY
@@ -215,58 +206,146 @@ dales_sssi <-
     ## CRS:            4326
 
 ``` r
+# Transform the data for plotting
 yorkshire_dales <- yorkshire_dales %>% st_transform(crs = 27700)
 dales_sssi <- dales_sssi %>% st_transform(crs = 27700)
+
+# Plot the yorkshire dales and it's SSSIs
 plot(yorkshire_dales$geometry)
 plot(dales_sssi$geometry, add = TRUE, border = "red", col = "orange")
 ```
 
 ![](README_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
 
-# Parse Query URLs
+# Endpoints
 
-`getarc` provides `parse_query_url` which parses the parameters from a
-query url (such as those you can find on api explorer apps). The
-function will return another function with all the api endpoints already
-specified.
+The endpoint url can be copied from Query URL box of th Arc GIS API
+explorer, or created using the `feature_server_endpoint` or
+`map_server_endpoint` functions.
+
+Both `feature_server_endpoint` and `map_server_endpoint` work in the
+same way. The key difference is that resources on feature servers are
+defined using a `feature_server` parameter and map servers accept a
+`folder` and `layer_name` argument.
 
 ``` r
-url <- "https://services.arcgis.com/JJzESW51TqeY9uat/arcgis/rest/services/Local_Nature_Reserves_England/FeatureServer/0/query?where=1%3D1&outFields=*&outSR=4326&f=json"
+national_parks_endpoint <- 
+  feature_server_endpoint(
+  host = "https://services.arcgis.com/",
+  instance = "JJzESW51TqeY9uat",
+  feature_server = "National_Parks_England",
+  layer_id = 0
+)
+postcodes_endpoint <- 
+  map_server_endpoint(
+  host = "https://ons-inspire.esriuk.com",
+  instance = "arcgis",
+  folder = "Postcodes",
+  service_name = "ONS_Postcode_Directory_Latest_Centroids",
+  layer_id = 0
+)
 
-get_local_nature_reserves <- 
-  parse_query_url(url)
-
-one_lnr <- 
-  get_local_nature_reserves(
-  # Return only one record to speed up processing for example
-  query = c(resultRecordCount = 1))
+query_layer(postcodes_endpoint, 
+            query = c(maxRecordCount = 1))
 ```
 
     ## Requesting data:
-    ## https://services.arcgis.com/JJzESW51TqeY9uat/arcgis/rest/services/Local_Nature_Reserves_England/FeatureServer/0/query?returnIdsOnly=false&where=1=1&outFields=*&returnCountOnly=false&f=json&outSR=4326&resultRecordCount=1
+    ## https://ons-inspire.esriuk.com/arcgis/rest/services/Postcodes/ONS_Postcode_Directory_Latest_Centroids/MapServer/0//query?returnIdsOnly=false&where=1=1&outFields=*&returnCountOnly=false&f=json&outSR=4326&maxRecordCount=1
 
-    ## Reading layer `file63b971a62f58' from data source `/private/var/folders/v1/fwlnbmlx02gbqt40n73l823c0000gn/T/RtmpZabTow/file63b971a62f58.geojson' using driver `ESRIJSON'
-    ## Simple feature collection with 1 feature and 19 fields
-    ## geometry type:  POLYGON
+    ## Reading layer `file22aa53d49c44' from data source `/private/var/folders/v1/fwlnbmlx02gbqt40n73l823c0000gn/T/RtmpGWqPqZ/file22aa53d49c44.geojson' using driver `ESRIJSON'
+    ## Simple feature collection with 1000 features and 51 fields
+    ## geometry type:  POINT
     ## dimension:      XY
-    ## bbox:           xmin: -2.184972 ymin: 53.86497 xmax: -2.179005 ymax: 53.86747
+    ## bbox:           xmin: -2.489735 ymin: 57.05139 xmax: -2.069235 ymax: 57.66384
     ## CRS:            4326
 
-``` r
-print(one_lnr)
-```
+    ## Warning in query_layer(postcodes_endpoint, query = c(maxRecordCount = 1)): May
+    ## have reached limit of maximum features to return, try performing query to narrow
+    ## down results.
 
-    ## Simple feature collection with 1 feature and 19 fields
-    ## geometry type:  POLYGON
+    ## Simple feature collection with 1000 features and 51 fields
+    ## geometry type:  POINT
     ## dimension:      XY
-    ## bbox:           xmin: -2.184972 ymin: 53.86497 xmax: -2.179005 ymax: 53.86747
+    ## bbox:           xmin: -2.489735 ymin: 57.05139 xmax: -2.069235 ymax: 57.66384
     ## CRS:            4326
-    ##   OBJECTID            LNR_NAME LNR_AREA  EASTING NORTHING  LATITUDE LONGITUDE
-    ## 1        1 Alkincoats Woodland 8.120372 388121.4 441137.3 53:52:01N  2:11:04W
-    ##   REFERENCE   STATUS     GID GIS_FILE NUMBER     AREA EASTING0 NORTHING0
-    ## 1  SD881411 Declared 1421535                 8.120372 388121.4  441137.3
-    ##   GIS_DATE VERSION Shape__Area Shape__Length                       geometry
-    ## 1 20120328       1    81203.72       1260.17 POLYGON ((-2.180326 53.8649...
+    ## First 10 features:
+    ##    objectid     pcd     pcd2    pcds dointr doterm     oscty       ced
+    ## 1         1 AB1 0AA AB1  0AA AB1 0AA 198001 199606 S99999999 S99999999
+    ## 2         2 AB1 0AB AB1  0AB AB1 0AB 198001 199606 S99999999 S99999999
+    ## 3         3 AB1 0AD AB1  0AD AB1 0AD 198001 199606 S99999999 S99999999
+    ## 4         4 AB1 0AE AB1  0AE AB1 0AE 199402 199606 S99999999 S99999999
+    ## 5         5 AB1 0AF AB1  0AF AB1 0AF 199012 199207 S99999999 S99999999
+    ## 6         6 AB1 0AG AB1  0AG AB1 0AG 199012 199207 S99999999 S99999999
+    ## 7         7 AB1 0AJ AB1  0AJ AB1 0AJ 198001 199606 S99999999 S99999999
+    ## 8         8 AB1 0AL AB1  0AL AB1 0AL 198001 199606 S99999999 S99999999
+    ## 9         9 AB1 0AN AB1  0AN AB1 0AN 198001 199606 S99999999 S99999999
+    ## 10       10 AB1 0AP AB1  0AP AB1 0AP 198001 199606 S99999999 S99999999
+    ##       oslaua    osward usertype oseast1m osnrth1m osgrdind  oshlthau     nhser
+    ## 1  S12000033 S13002843        0   385386  0801193        1 S08000020 S99999999
+    ## 2  S12000033 S13002843        0   385177  0801314        1 S08000020 S99999999
+    ## 3  S12000033 S13002843        0   385053  0801092        1 S08000020 S99999999
+    ## 4  S12000034 S13002864        0   384600  0799300        8 S08000020 S99999999
+    ## 5  S12000033 S13002843        1   384460  0800660        8 S08000020 S99999999
+    ## 6  S12000033 S13002843        1   383890  0800710        8 S08000020 S99999999
+    ## 7  S12000033 S13002843        0   384779  0800921        1 S08000020 S99999999
+    ## 8  S12000033 S13002843        0   384669  0801228        1 S08000020 S99999999
+    ## 9  S12000033 S13002843        1   385225  0800757        1 S08000020 S99999999
+    ## 10 S12000033 S13002843        0   385208  0800834        1 S08000020 S99999999
+    ##         ctry       rgn streg      pcon       eer    teclec      ttwa       pct
+    ## 1  S92000003 S99999999     0 S14000002 S15000001 S09000001 S22000047 S03000012
+    ## 2  S92000003 S99999999     0 S14000002 S15000001 S09000001 S22000047 S03000012
+    ## 3  S92000003 S99999999     0 S14000002 S15000001 S09000001 S22000047 S03000012
+    ## 4  S92000003 S99999999     0 S14000058 S15000001 S09000001 S22000047 S03000013
+    ## 5  S92000003 S99999999     0 S14000002 S15000001 S09000001 S22000047 S03000012
+    ## 6  S92000003 S99999999     0 S14000002 S15000001 S09000001 S22000047 S03000012
+    ## 7  S92000003 S99999999     0 S14000002 S15000001 S09000001 S22000047 S03000012
+    ## 8  S92000003 S99999999     0 S14000002 S15000001 S09000001 S22000047 S03000012
+    ## 9  S92000003 S99999999     0 S14000002 S15000001 S09000001 S22000047 S03000012
+    ## 10 S92000003 S99999999     0 S14000002 S15000001 S09000001 S22000047 S03000012
+    ##         nuts statsward      oa01 casward      park    lsoa01    msoa01 ur01ind
+    ## 1  S31000935    99ZZ00 S00001364   01C30 S99999999 S01000011 S02000007       6
+    ## 2  S31000935    99ZZ00 S00001270   01C31 S99999999 S01000011 S02000007       6
+    ## 3  S31000935    99ZZ00 S00001364   01C30 S99999999 S01000011 S02000007       6
+    ## 4  S31001005    99ZZ00 S00002142   02C58 S99999999 S01000333 S02000061       6
+    ## 5  S31000934    99ZZ00 S00001266   01C30 S99999999 S01000007 S02000003       3
+    ## 6  S31000934    99ZZ00 S00001258   01C30 S99999999 S01000001 S02000003       3
+    ## 7  S31000934    99ZZ00 S00001364   01C30 S99999999 S01000011 S02000007       6
+    ## 8  S31000935    99ZZ00 S00001364   01C30 S99999999 S01000011 S02000007       6
+    ## 9  S31000935    99ZZ00 S00001364   01C30 S99999999 S01000011 S02000007       6
+    ## 10 S31000935    99ZZ00 S00001364   01C30 S99999999 S01000011 S02000007       6
+    ##    oac01      oa11    lsoa11    msoa11    parish      wz11       ccg     bua11
+    ## 1    3C2 S00090303 S01006514 S02001237 S99999999 S34002990 S03000012 S99999999
+    ## 2    4B3 S00090303 S01006514 S02001237 S99999999 S34002990 S03000012 S99999999
+    ## 3    3C2 S00090399 S01006514 S02001237 S99999999 S34003015 S03000012 S99999999
+    ## 4    3B1 S00091322 S01006853 S02001296 S99999999 S34003292 S03000013 S99999999
+    ## 5    4D2 S00090299 S01006511 S02001236 S99999999 S34003015 S03000012 S99999999
+    ## 6    5B4 S00090291 S01006506 S02001236 S99999999 S34003124 S03000012 S99999999
+    ## 7    3C2 S00090399 S01006514 S02001237 S99999999 S34003015 S03000012 S99999999
+    ## 8    3C2 S00090381 S01006511 S02001236 S99999999 S34002990 S03000012 S99999999
+    ## 9    3C2 S00090399 S01006514 S02001237 S99999999 S34003015 S03000012 S99999999
+    ## 10   3C2 S00090399 S01006514 S02001237 S99999999 S34003015 S03000012 S99999999
+    ##      buasd11 ru11ind oac11      lat      long      lep1      lep2       pfa
+    ## 1  S99999999       3   1C3 57.10147 -2.242851 S99999999 S99999999 S23000009
+    ## 2  S99999999       3   1C3 57.10255 -2.246308 S99999999 S99999999 S23000009
+    ## 3  S99999999       3   6A1 57.10056 -2.248342 S99999999 S99999999 S23000009
+    ## 4  S99999999       6   1A2 57.08444 -2.255708 S99999999 S99999999 S23000009
+    ## 5  S99999999       3   6A4 57.09666 -2.258102 S99999999 S99999999 S23000009
+    ## 6  S99999999       3   7C3 57.09708 -2.267513 S99999999 S99999999 S23000009
+    ## 7  S99999999       3   6A1 57.09901 -2.252854 S99999999 S99999999 S23000009
+    ## 8  S99999999       3   6B3 57.10177 -2.254688 S99999999 S99999999 S23000009
+    ## 9  S99999999       3   6A1 57.09755 -2.245483 S99999999 S99999999 S23000009
+    ## 10 S99999999       3   6A1 57.09824 -2.245768 S99999999 S99999999 S23000009
+    ##     imd    calncv       stp                   geometry
+    ## 1  6808 S99999999 S99999999 POINT (-2.242858 57.10146)
+    ## 2  6808 S99999999 S99999999 POINT (-2.246315 57.10254)
+    ## 3  6808 S99999999 S99999999 POINT (-2.248348 57.10054)
+    ## 4  5503 S99999999 S99999999 POINT (-2.255714 57.08443)
+    ## 5  6668 S99999999 S99999999 POINT (-2.258109 57.09664)
+    ## 6  5272 S99999999 S99999999 POINT (-2.267519 57.09707)
+    ## 7  6808 S99999999 S99999999    POINT (-2.25286 57.099)
+    ## 8  6668 S99999999 S99999999 POINT (-2.254695 57.10175)
+    ## 9  6808 S99999999 S99999999  POINT (-2.24549 57.09754)
+    ## 10 6808 S99999999 S99999999 POINT (-2.245775 57.09823)
 
 # Authentication
 
@@ -278,11 +357,7 @@ query functions via the `my_token` argument.
 my_token <- get_token()
 
 data <-
-  query_layer_fs(
-  host = "https://services.arcgis.com/",
-  instance = "JJzESW51TqeY9uat",
-  feature_server = "Private_Service",
-  layer_id = 0, 
+  query_layer(endpoint = private_endpoint,
   # Pass in token for a private service
   my_token = my_token
 )

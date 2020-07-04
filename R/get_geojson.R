@@ -6,7 +6,7 @@
 #'
 #' @param query_url the query url which is passed to httr::GET()
 #' @return an sf object
-#' @import sf
+#' @importFrom sf st_read
 #' @importFrom magrittr %>%
 #' @import httr
 #' @import purrr

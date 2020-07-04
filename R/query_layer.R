@@ -14,7 +14,7 @@
   #' @export query_layer
   #'
   #' @import httr
-  #' @import sf
+  #' @importFrom sf st_transform
   #' @importFrom magrittr %>%
   #' @import tibble
 query_layer <-

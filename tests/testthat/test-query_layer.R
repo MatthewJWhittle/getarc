@@ -1,3 +1,4 @@
+require(sf)
 endpoint <-
   "https://services.arcgis.com/JJzESW51TqeY9uat/arcgis/rest/services/Wood_Pasture_and_Parkland/FeatureServer/0"
 one_row <- query_layer(endpoint = endpoint,
@@ -12,9 +13,6 @@ small_feature <-
   query_layer(endpoint,
               query = c("where" = "Shape__Area < 30", resultRecordCount = 1))
 
-
-ten_rows <- query_layer(endpoint = endpoint,
-                        query = c(resultRecordCount = 10))
 
 sql_query <- query_layer(
   endpoint = endpoint,
