@@ -25,7 +25,11 @@ get_layer_details <-
     response <- GET(query_url)
 
     # Convert the json to a list
-    layer_details <- content(response) %>% fromJSON()
+    content <- content(response)
+    if (is.list(content)) {
+      return(content)
+    } else{
+      return(jsonlite::fromJSON(content))
+    }
 
-    return(layer_details)
   }

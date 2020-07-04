@@ -32,6 +32,10 @@ get_feature_ids <-
     stopifnot(response$status_code == 200)
 
     # Parse the content and return a vecotr of featureIds
-    response_content <- fromJSON(content(response))
-    response_content$objectIds
+    content <- content(response)
+    if(is.list(content)){
+      return(content)
+    }else{
+      return(jsonlite::fromJSON(content))
+    }
   }

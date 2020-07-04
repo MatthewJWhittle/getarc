@@ -23,4 +23,5 @@ Imports:
     magrittr,
     purrr,
     sf,
-    stringr
+    stringr,
+    tibble
