@@ -16,6 +16,7 @@
   #' @import httr
   #' @import sf
   #' @importFrom magrittr %>%
+  #' @import tibble
 query_layer <-
   function(endpoint,
            query = NULL,
@@ -52,9 +53,9 @@ query_layer <-
 
     feature_ids <- get_feature_ids(endpoint = endpoint, query = query, my_token = my_token)
 
-    if(length(feature_ids) < 1){
+    if(length(feature_ids$objectIds) < 1){
       warning("No data matching query, returning an empty tibble")
-      return(tibble())
+      return(tibble::tibble())
     }
 
     # Generate the query string
