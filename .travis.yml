@@ -1,6 +1,19 @@
 # R for travis: see documentation at https://docs.travis-ci.com/user/languages/r
 
 language: R
+
+os: linux
+dist: trusty
+
 cache: packages
-apt_packages:
-  - libudunits2-dev
+
+sudo: required
+
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - libudunits2-dev
+  brew_packages:
+      - udunits
