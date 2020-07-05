@@ -2,9 +2,6 @@
 
 language: R
 
-warnings_are_errors: false
-
-addons:
-  apt:
-    packages:
-      - libudunits2-dev
+before_install: 
+  - sudo apt update
+  - sudo apt install libudunits2-dev
