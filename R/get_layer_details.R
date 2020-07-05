@@ -24,12 +24,26 @@ get_layer_details <-
 
     response <- GET(query_url)
 
+    # Fail if api Error
+    # This does not fail properly if the layer is not found
+    # because api still returns a 200 code
+    stopifnot(httr::status_code(response) == 200)
+
     # Convert the json to a list
     content <- content(response)
     if (is.list(content)) {
-      return(content)
+      parsed_content <-  content
     } else{
-      return(jsonlite::fromJSON(content))
+      parsed_content <- jsonlite::fromJSON(content)
     }
 
+    # This code is added to catch an error where the api doesn't return a failed code but
+    # should still error (where the layer wasn't found)
+    #Add all clause to avoid R warning message
+    if (all(names(parsed_content) == "error")) {
+      stop(paste0("\n", paste0(paste0("- ",
+        names(parsed_content$error), ": ", parsed_content$error
+      ), collapse = "\n")))
+    }
+    return(parsed_content)
   }

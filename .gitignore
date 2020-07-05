@@ -1,5 +1,4 @@
 .Rhistory
 .RData
 .Rproj.user
-development/*
-
+development/private/*
