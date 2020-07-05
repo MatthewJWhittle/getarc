@@ -2,4 +2,9 @@
 
 language: R
 
-os: osx
+warnings_are_errors: false
+
+addons:
+  apt:
+    packages:
+      - libudunits2-dev
