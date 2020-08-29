@@ -67,6 +67,9 @@ query_layer <-
 
     data <- get_geojson(query_url)
 
+    data <-
+      parse_coded_domains(data,
+                          domain_lookup(layer_details))
 
     # If the specified crs is not 4326 (the current crs) then transform the data
     if (crs != 4326) {
