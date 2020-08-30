@@ -35,17 +35,7 @@ query_layer <-
     }
 
     # Define a named vecotr of default query parameters for returning spatial data
-    default_parameters <- c(
-      returnIdsOnly = "false",
-      # Get all features with sql query 1 = 1
-      where = "1=1",
-      outFields = "*",
-      returnCountOnly = "false",
-      f = "json",
-      token = NULL,
-      # Assert that the data is lat lon if writing to geojson
-      outSR = 4326
-    )
+    default_parameters <- default_query_parameters()
 
     default_parameters <-
       default_parameters[!(names(default_parameters) %in% names(query))]
@@ -67,11 +57,17 @@ query_layer <-
 
     data <- get_geojson(query_url)
 
+    # Parse the variables -----
+    # This should probably be wrapped up into one parsing function at some point
     data <-
       parse_coded_domains(data,
                           domain_lookup(layer_details))
 
+    data <- parse_datetimes(data = data,
+                            feature_details = layer_details)
+
     # If the specified crs is not 4326 (the current crs) then transform the data
+    # This might be redundant as we can specify the outcrs when requesting the data
     if (crs != 4326) {
       data <- data %>% sf::st_transform(crs = crs)
     }

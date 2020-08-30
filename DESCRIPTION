@@ -24,4 +24,5 @@ Imports:
     purrr,
     sf,
     stringr,
-    tibble
+    tibble,
+    lubridate
