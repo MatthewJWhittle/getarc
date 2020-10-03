@@ -7,6 +7,5 @@
 #' @return the access token as a string
 parse_access_token <-
   function(my_token){
-    creds <- jsonlite::fromJSON(my_token$credentials)
-    creds$access_token
+    my_token$credentials$access_token
   }

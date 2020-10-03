@@ -26,6 +26,7 @@ query_layer <-
     #https://developers.arcgis.com/rest/services-reference/layer-feature-service-.htm
 
 
+    # It would be useful to add a line of code in here to check and auto refresh the token
     # Get the details of the layer to
     layer_details <- get_layer_details(endpoint = endpoint, my_token = my_token)
 

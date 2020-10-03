@@ -30,12 +30,23 @@ get_token <-
     my_token <-
       httr::oauth2.0_token(endpoint = endpoint, app = app, cache = use_cache,
                            query_authorize_extra = list(grant_datetime = Sys.time()))
-    # Check expiry and refresh once
-    # Auto refresh stops the function running recursively as this step is not called in the run below
-    if(auto_refresh & token_expired(my_token)){
-      my_token <- get_token(use_cache = use_cache, auto_refresh = FALSE)
-    }
 
+    # httr doesn't parse the credentials correctly into a list
+    my_token$credentials <- jsonlite::fromJSON(my_token$credentials)
+
+    # Check expiry and refresh if neccessary
+    # The refresh token is an alteration to httr:::refresh_oauth2.0
+    if(auto_refresh & token_expired(my_token)){
+      my_token$credentials <-
+        refresh_token(
+          endpoint = endpoint,
+          app = app,
+          credentials = my_token$credentials,
+          user_params = NULL
+        )
+      my_token$params$query_authorize_extra$grant_datetime <-
+        Sys.time()
+    }
 
     return(my_token)
   }
@@ -54,11 +65,13 @@ token_expired <-
     # Extract the grant time which is passed in when making the request
     grant_dttm <- my_token$params$query_authorize_extra$grant_datetime
     # and the expiry time which is in seconds
-    expiry_seconds <- jsonlite::fromJSON(my_token$credentials)$expires_in
+    expiry_seconds <- my_token$credentials$expires_in
     # calculate when the token expires and check whether this has occured yet
     expires_at <- lubridate::ymd_hms(grant_dttm) + lubridate::seconds(expiry_seconds)
 
-    expired <- Sys.time() > expires_at
+    # There is something weird going on with timezones so I added the call to
+    # ymd_hms, there is probably a better way of doing this to assert that the timezones are equal
+    expired <- lubridate::ymd_hms(Sys.time()) > expires_at
 
     return(expired)
   }
