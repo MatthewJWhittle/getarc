@@ -4,10 +4,12 @@
 \alias{get_token}
 \title{Get Access Token}
 \usage{
-get_token(use_cache = FALSE)
+get_token(use_cache = FALSE, auto_refresh = TRUE)
 }
 \arguments{
 \item{use_cache}{should the token be cached? Currently not working}
+
+\item{auto_refresh}{should the token automatically be refreshed if it has expired?}
 }
 \description{
 Get an access token for accessing a service

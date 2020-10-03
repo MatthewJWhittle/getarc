@@ -20,7 +20,16 @@ parse_datetimes <-
 
     # Detect date fields to filter the data frame
     date_fields <- field_names[field_types == "esriFieldTypeDate"]
-    if(is.null(date_fields)){
+
+    # When there is a restricted set of columns in data this function
+    # throws an error by looking for datefields that aren't present.
+    # The purpose of the code below is to drop any missing fields
+    # Then if none are left the function returns data un altered
+    date_fields <- date_fields[date_fields %in% colnames(data)]
+
+
+    # Don't run if no date fields to parse
+    if(is.null(date_fields) || length(date_fields) == 0){
       return(data)
     }
 

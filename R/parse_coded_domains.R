@@ -12,16 +12,25 @@
 parse_coded_domains <-
   function(data, domains) {
 
-    # If there are no domains then return the data without any alterations
-    if(nrow(domains) == 0){
-      return(data)
-    }
 
     # prefix column names with "." to avoid any conflicts with names in the data
     colnames(domains) <- paste0(".", colnames(domains))
 
     # Get the column names to ensure the data is outputted in the same format
     data_cols <- colnames(data)
+
+    # When there is a restricted set of columns in data this function
+    # throws an error by looking for domains that aren't present.
+    # The purpose of the code below is to drop any missing domains from the table
+    # Then if none are left the function returns data un altered
+    domains <- domains[domains$.field_name %in% data_cols, ]
+
+
+    # If there are no domains then return the data without any alterations
+    if(nrow(domains) == 0){
+      return(data)
+    }
+
     loop_data <- data
 
     for (field in unique(domains$.field_name)) {
