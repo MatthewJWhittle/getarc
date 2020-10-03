@@ -17,7 +17,12 @@ get_token <-
     app <-
       httr::oauth_app(appname = "getarc",
                 key = client_id,
-                secret = client_secret)
+                secret = client_secret,
+                # When other people try to run get token they get an eror saying
+                # incorrect redirect_uri. I wonder if this is because different users
+                # have a different default uri. It is possible to reproduce the error by setting
+                # the redirect uri below to one that doesn't match the app set up in arc
+                redirect_uri = "http://localhost:1410/")
 
     my_token <-
       httr::oauth2.0_token(endpoint = endpoint, app = app, cache = use_cache)
