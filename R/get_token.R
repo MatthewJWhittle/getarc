@@ -18,12 +18,13 @@ get_token <-
     app <-
       httr::oauth_app(appname = "getarc",
                 key = client_id,
-                secret = client_secret,
+                secret = client_secret)
                 # When other people try to run get token they get an eror saying
                 # incorrect redirect_uri. I wonder if this is because different users
                 # have a different default uri. It is possible to reproduce the error by setting
                 # the redirect uri below to one that doesn't match the app set up in arc
-                redirect_uri = "http://localhost:1410/")
+                # Doesn't work on RStudio Server
+                #redirect_uri = "http://localhost:1410/")
 
     # With the request send the datetime which is then automatically stored with the token
     # This is then checked against the expiry seconds and the token is refreshed if neccessary
