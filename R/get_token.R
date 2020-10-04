@@ -8,10 +8,10 @@
 #' @import httr
 get_token <-
   function(use_cache = FALSE, auto_refresh = TRUE) {
-    client_id <- "yKYDBnaubsMqB4qv"
+    client_id <- "LZ0Pbgq1wf3TPlmP"
     # Client secret embedded in source code as recomended by:
     # https://cran.r-project.org/web/packages/httr/vignettes/secrets.html
-    client_secret <-"2337a5f0d4ba4ff3a8f3229b26303cc4"
+    client_secret <-"8bdc7aba363747c2b2255c141a41d68b"
     endpoint <-
       httr::oauth_endpoint(access = "https://www.arcgis.com/sharing/rest/oauth2/token/",
                      authorize  = "https://www.arcgis.com/sharing/rest/oauth2/authorize/")
