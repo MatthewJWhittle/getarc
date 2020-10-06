@@ -15,7 +15,9 @@ Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.0
 Suggests: 
     testthat,
-    covr
+    covr,
+    knitr,
+    rmarkdown
 Imports: 
     dplyr,
     httr,
@@ -25,4 +27,8 @@ Imports:
     sf,
     stringr,
     tibble,
-    lubridate
+    lubridate,
+    httpuv
+VignetteBuilder: knitr
+Depends: 
+    R (>= 2.10)

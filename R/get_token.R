@@ -4,27 +4,39 @@
 #'
 #' @param use_cache should the token be cached? Currently not working
 #' @param auto_refresh should the token automatically be refreshed if it has expired?
+#' @param client_id app credential: client ID
+#' @param client_secret app credential: client secret
+#' @param app_name app credential: app name
 #' @export get_token
 #' @import httr
+#' @importFrom purrr map_lgl
 get_token <-
-  function(use_cache = FALSE, auto_refresh = TRUE) {
-    client_id <- "LZ0Pbgq1wf3TPlmP"
-    # Client secret embedded in source code as recomended by:
-    # https://cran.r-project.org/web/packages/httr/vignettes/secrets.html
-    client_secret <-"8bdc7aba363747c2b2255c141a41d68b"
+  function(client_id = NULL, client_secret = NULL, app_name = NULL,
+           use_cache = TRUE, auto_refresh = TRUE,
+           redirect_uri = httr::oauth_callback()
+           ) {
+
+    credentials <- list(client_id = client_id,
+                        client_secret = client_secret,
+                        app_name = app_name)
+
+    if(any(purrr::map_lgl(credentials, is.null))){
+      message("Getting credentials from environment variables")
+      credentials <- get_credentials()
+    }
     endpoint <-
       httr::oauth_endpoint(access = "https://www.arcgis.com/sharing/rest/oauth2/token/",
                      authorize  = "https://www.arcgis.com/sharing/rest/oauth2/authorize/")
     app <-
-      httr::oauth_app(appname = "getarc",
-                key = client_id,
-                secret = client_secret,
+      httr::oauth_app(appname = credentials$app_name,
+                key = credentials$client_id,
+                secret = credentials$client_secret,
                 # When other people try to run get token they get an eror saying
                 # incorrect redirect_uri. I wonder if this is because different users
                 # have a different default uri. It is possible to reproduce the error by setting
                 # the redirect uri below to one that doesn't match the app set up in arc
                 # Doesn't work on RStudio Server
-                redirect_uri = "http://localhost:1410/")
+                redirect_uri = redirect_uri)
 
     # With the request send the datetime which is then automatically stored with the token
     # This is then checked against the expiry seconds and the token is refreshed if neccessary
@@ -51,7 +63,6 @@ get_token <-
 
     return(my_token)
   }
-
 #' Token Expired
 #'
 #' Has the Oauth token expired
@@ -69,10 +80,39 @@ token_expired <-
     expiry_seconds <- my_token$credentials$expires_in
     # calculate when the token expires and check whether this has occured yet
     expires_at <- lubridate::ymd_hms(grant_dttm) + lubridate::seconds(expiry_seconds)
-
     # There is something weird going on with timezones so I added the call to
     # ymd_hms, there is probably a better way of doing this to assert that the timezones are equal
     expired <- lubridate::ymd_hms(Sys.time()) > expires_at
-
     return(expired)
+  }
+#' Get/Set Credentials
+#'
+#' Get or set app credentials
+#'
+#' set_credentials and get_credentials set and retrieve environment variables for the client id, client secret and app name.
+#' This then allows get_token to retrieve the variables.
+set_credentials <-
+  function(client_id,
+           client_secret,
+           app_name){
+    Sys.setenv("getarc_app_name" = app_name)
+    Sys.setenv("getarc_client_id" = client_id)
+    Sys.setenv("getarc_client_secret" = client_secret)
+  }
+get_credentials <-
+  function(){
+    credentials <-
+      list(app_name = Sys.getenv("getarc_app_name"),
+         client_id = Sys.getenv("getarc_client_id"),
+         client_secret = Sys.getenv("getarc_client_secret")
+    )
+    # Check all have been set
+    valid <- map_lgl(credentials, ~.x != "")
+    if(!all(valid)){
+      stop(paste0(
+        "Credentials not set: ", paste0(paste0("'", names(credentials)[!valid], "'"), collapse = ", "), "\n",
+        "Use getarc::set_credentials() to set app credentials as environment variables."
+      ))
+    }
+    return(credentials)
   }

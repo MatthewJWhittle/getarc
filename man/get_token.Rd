@@ -4,9 +4,22 @@
 \alias{get_token}
 \title{Get Access Token}
 \usage{
-get_token(use_cache = FALSE, auto_refresh = TRUE)
+get_token(
+  client_id = NULL,
+  client_secret = NULL,
+  app_name = NULL,
+  use_cache = TRUE,
+  auto_refresh = TRUE,
+  redirect_uri = httr::oauth_callback()
+)
 }
 \arguments{
+\item{client_id}{app credential: client ID}
+
+\item{client_secret}{app credential: client secret}
+
+\item{app_name}{app credential: app name}
+
 \item{use_cache}{should the token be cached? Currently not working}
 
 \item{auto_refresh}{should the token automatically be refreshed if it has expired?}
