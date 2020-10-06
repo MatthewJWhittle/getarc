@@ -3,3 +3,4 @@
 .Rproj.user
 development/private/*
 .httr-oauth
+inst/doc

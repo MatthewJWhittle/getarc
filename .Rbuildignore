@@ -7,3 +7,4 @@
 ^\.travis\.yml$
 ^codecov\.yml$
 ^README_*/*
+^data-raw$
