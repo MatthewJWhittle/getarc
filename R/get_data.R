@@ -32,3 +32,31 @@ get_geojson <- function(query_url) {
   return(data)
 
 }
+#' Get Tibble
+#'
+#' Get a Tibble from an endpoint
+#'
+#' This function accepts a query URL and extracts a tibble from the response.
+#' @param query_url  the query url which is passed to httr::GET()
+#' @return a tibble
+#' @importFrom httr GET
+#' @importFrom httr content
+#' @importFrom httr status_code
+#' @importFrom jsonlite fromJSON
+#' @importFrom tibble as_tibble
+get_tibble <-
+  function(query_url){
+    message(paste0("Requesting data:\n", query_url))
+    # Request the data using GET
+    response <- httr::GET(paste0(query_url))
+
+    # Fail on error
+    stopifnot(httr::status_code(response) == 200)
+    # Firs4t convert JSON to a list.
+    # This list contains multiple levels with information about the data
+    # The desired table is contained in data_list$features$attributes
+    # Extract and return it
+    data_list <- jsonlite::fromJSON(httr::content(response))
+    data <- tibble::as_tibble(data_list$features$attributes)
+    return(data)
+  }

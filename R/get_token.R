@@ -7,6 +7,7 @@
 #' @param client_id app credential: client ID
 #' @param client_secret app credential: client secret
 #' @param app_name app credential: app name
+#' @param redirect_uri te url to redirect to after authenticating. default is httr::oauth_callback(). This needs to be added into your web app on arc gis for developers.
 #' @export get_token
 #' @import httr
 #' @importFrom purrr map_lgl
@@ -91,6 +92,9 @@ token_expired <-
 #'
 #' set_credentials and get_credentials set and retrieve environment variables for the client id, client secret and app name.
 #' This then allows get_token to retrieve the variables.
+#' @param client_id The client ID. Taken from you app dashboard on arcgis for developers
+#' @param client_secret The client secret. Taken from you app dashboard on arcgis for developers
+#' @param app_name The name of your app. Taken from you app dashboard on arcgis for developers
 set_credentials <-
   function(client_id,
            client_secret,

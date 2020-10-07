@@ -17,3 +17,24 @@ knitr::opts_chunk$set(
 ```{r setup}
 library(getarc)
 ```
+
+```{r}
+# counties_table <- query_layer(endpoint = endpoints$english_counties,
+#                         query = c(returnGeometry = "false"))
+```
+
+```{r}
+# cumbria <- query_layer(
+#   endpoint = endpoints$english_counties,
+#   query = c(where = "cty19nm LIKE 'Cumbria'"), crs = 4326
+# )
+# 
+# 
+# cumbria_ancient_woodlands <- 
+#   query_layer(endpoint = endpoints$ancient_woodland_england,
+#             bounding_box = sf::st_bbox(cumbria))
+# 
+
+```
+
+

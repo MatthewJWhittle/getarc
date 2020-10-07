@@ -9,7 +9,8 @@ query_layer(
   query = NULL,
   bounding_box = NULL,
   crs = 4326,
-  my_token = NULL
+  my_token = NULL,
+  return_geometry = TRUE
 )
 }
 \arguments{
@@ -24,6 +25,8 @@ See https://developers.arcgis.com/rest/services-reference/get-started-with-the-s
 \item{crs}{the output crs, defaulting to 4326}
 
 \item{my_token}{an access token acquired via \code{get_token}}
+
+\item{return_geometry}{should the geom}
 }
 \value{
 an sf object

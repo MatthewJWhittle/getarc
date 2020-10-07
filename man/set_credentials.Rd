@@ -6,6 +6,13 @@
 \usage{
 set_credentials(client_id, client_secret, app_name)
 }
+\arguments{
+\item{client_id}{The client ID. Taken from you app dashboard on arcgis for developers}
+
+\item{client_secret}{The client secret. Taken from you app dashboard on arcgis for developers}
+
+\item{app_name}{The name of your app. Taken from you app dashboard on arcgis for developers}
+}
 \description{
 Get or set app credentials
 }
