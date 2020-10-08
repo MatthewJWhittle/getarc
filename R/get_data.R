@@ -46,7 +46,6 @@ get_geojson <- function(query_url) {
 #' @importFrom tibble as_tibble
 get_tibble <-
   function(query_url){
-    message(paste0("Requesting data:\n", query_url))
     # Request the data using GET
     response <- httr::GET(paste0(query_url))
 

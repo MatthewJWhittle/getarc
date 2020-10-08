@@ -5,7 +5,7 @@
 \alias{endpoints}
 \title{Endpoints}
 \format{
-An object of class \code{list} of length 2.
+An object of class \code{list} of length 6.
 }
 \usage{
 endpoints

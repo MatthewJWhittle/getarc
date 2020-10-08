@@ -33,6 +33,19 @@ spatial_query <-
   query_layer(endpoint = endpoint,
               bounding_box = bbox)
 
+ms_nogeom <-
+  query_layer(
+    endpoints$english_counties,
+    return_geometry = FALSE,
+    query = c(resultRecordCount = 1)
+  )
+fs_nogeom <-
+  query_layer(
+    endpoints$ancient_woodland_england,
+    return_geometry = FALSE,
+    query = c(resultRecordCount = 1)
+  )
+
 test_that("query layer works", {
   # Check that resultRecordCount = 1 works
   expect_equal(nrow(one_row),
@@ -52,5 +65,7 @@ test_that("query layer works", {
   expect_warning(query_layer(endpoint = endpoint, query = c(where = "1 = 2")))
   # Does the area query have the desired result
   expect_equal(small_feature$Shape__Area < 30, TRUE)
-
+  # return_geometry = FALSE returns a data.frame for both map servers and feature servers
+  expect_equal("data.frame" %in% class(ms_nogeom), TRUE)
+  expect_equal("data.frame" %in% class(fs_nogeom), TRUE)
 })

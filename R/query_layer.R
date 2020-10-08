@@ -61,7 +61,7 @@ query_layer <-
     # get_geojson wouldn't parse the data correctly and would return an empty tibble
     # A new function get_tibble has been added to use a different method for requesting and parsing data
     # when the geometry isn't returned.
-    if (return_geometry) {
+    if (return_geometry || map_server(endpoint)) {
       data <- get_geojson(query_url = query_url)
     } else{
       data <- get_tibble(query_url = query_url)

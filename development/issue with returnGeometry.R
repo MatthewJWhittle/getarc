@@ -20,8 +20,9 @@ cumbria <- query_layer(
 #                       GDAL Error 1: Invalid Feature object. Missing 'geometry' member.
 
 
-endpoint = endpoints$ancient_woodland_england
-bounding_box = sf::st_bbox(cumbria)
+endpoint = endpoints$english_counties
+#bounding_box = sf::st_bbox(cumbria)
+bounding_box = NULL
 # query = c(returnGeometry = "false")
 query = NULL
 crs = 4326
@@ -58,7 +59,7 @@ return_geometry = FALSE
     query_url <- paste0(endpoint, "/query", query_string)
 
 
-    if (return_geometry) {
+    if (return_geometry || map_server(endpoint)) {
       data <- get_geojson(query_url = query_url)
     } else{
       data <- get_tibble(query_url = query_url)
