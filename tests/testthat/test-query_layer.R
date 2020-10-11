@@ -40,8 +40,7 @@ ms_nogeom <-
     query = c(resultRecordCount = 1)
   )
 fs_nogeom <-
-  query_layer(
-    endpoints$ancient_woodland_england,
+  query_layer(endpoint = endpoints$ancient_woodland_england,
     return_geometry = FALSE,
     query = c(resultRecordCount = 1)
   )

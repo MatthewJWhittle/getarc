@@ -15,3 +15,6 @@ a list of spatial query elements
 \description{
 Generate a list of spatial query parameters from a bounding box
 }
+\details{
+Deprecated, please use spatial_query instead
+}

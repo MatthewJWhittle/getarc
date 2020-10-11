@@ -34,7 +34,9 @@ parse_datetimes <-
     }
 
     # Conditionally drop the geometry if it is an sf class
-    if(all(class(data) == c("sf", "data.frame"))){
+    # Changed to check for sf class. This could be wrapped into a 
+    # function as it is used multiple times
+    if(any(c("sf", "sfc") %in% class(data))){
     data[date_fields] <-
       lapply(sf::st_drop_geometry(data[date_fields]), parse_esri_datetime)
     }else{

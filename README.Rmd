@@ -41,11 +41,11 @@ Data on an arc gis server can be accessed via the `query_layer` function. This f
 
 # Getting data from a Feature Server - National Parks in England
 ```{r}
-# Define the endpoint URL
-parks_endpoint <- "https://services.arcgis.com//JJzESW51TqeY9uat/arcgis/rest/services/National_Parks_England/FeatureServer/0"
+# Use the endpoints list 
+
 # Get the data
 national_parks <- 
-  query_layer(endpoint = parks_endpoint)
+  query_layer(endpoint = endpoints$national_parks_england)
 
 head(national_parks)
 # Plot the first feature
@@ -60,7 +60,7 @@ The query parameter supports any query parameter supported by the API Please rev
 Returning only one feature.
 ```{r}
 one_park <- 
-  query_layer(endpoint = parks_endpoint,
+  query_layer(endpoint = endpoints$national_parks_england,
   # Return only one record
   query = c(resultRecordCount = 1)
 )
@@ -69,23 +69,22 @@ plot(one_park$geometry)
 
 # Including a sql where query to only return the yorkshire dales
 yorkshire_dales <- 
-  query_layer(endpoint = parks_endpoint,
+  query_layer(endpoint = endpoints$national_parks_england,
   # SQL query to return data for the yorkshire dales 
-  query = c("where" = "NAME='YORKSHIRE DALES'")
+  query = c("where" = "NAME LIKE 'YORKSHIRE DALES'")
 )
 ```
 
-Spatial querys can be perform either via the `query` argument or by passing a bounding box to the `bounding_box` argument. This will perform a spatial query and return only features intersecting with the bounding box. I intend to add support for more advanced query operations in the future.
+Spatial querys can be perform either using the `in_geometry` and `spatial_filter` arguments. These arguments define a geometry spatial filter (intersects, contains, etc.) to query the endpoint. It is possible to pass a bounding box or polygon to `in_geometry`. Complex polygons are simplified to reduce the number of characters being sent in the request.
 
 ```{r}
 dales_bbox <- st_bbox(yorkshire_dales)
 
 # Which Sites of Special Scientific Interest are in the yorkshire dales?
-sssi_endpoint <- "https://services.arcgis.com//JJzESW51TqeY9uat/arcgis/rest/services/SSSI_England/FeatureServer/0"
 dales_sssi <- 
-  query_layer(sssi_endpoint, 
-  # Supply a bounding box for a spatial intersects query
-  bounding_box = dales_bbox
+  query_layer(endpoints$sssi_england, 
+  # Supply a polygon for a spatial intersects query
+  in_geometry = yorkshire_dales
 )
 
 # Transform the data for plotting
@@ -98,39 +97,47 @@ plot(dales_sssi$geometry, add = TRUE, border = "red", col = "orange")
 ```
 
 # Endpoints 
-The endpoint url can be copied from Query URL box of th Arc GIS API explorer, or created using the `feature_server_endpoint` or `map_server_endpoint` functions.
-
-Both `feature_server_endpoint` and `map_server_endpoint`  work in the same way. The key difference is that resources on feature servers are defined using a `feature_server` parameter and map servers accept a `folder` and `layer_name` argument.
-
+The endpoint url can be copied from Query URL box of th Arc GIS API explorer. A number of endpoints are provided in `getarc::endpoints`.
 ```{r}
-national_parks_endpoint <- 
-  feature_server_endpoint(
-  host = "https://services.arcgis.com/",
-  instance = "JJzESW51TqeY9uat",
-  feature_server = "National_Parks_England",
-  layer_id = 0
-)
-postcodes_endpoint <- 
-  map_server_endpoint(
-  host = "https://ons-inspire.esriuk.com",
-  instance = "arcgis",
-  folder = "Postcodes",
-  service_name = "ONS_Postcode_Directory_Latest_Centroids",
-  layer_id = 0
-)
+head(endpoints)
+```
 
-query_layer(postcodes_endpoint, 
-            query = c(maxRecordCount = 1))
+# Don't Return Geometry
+Often it is desirable to avoid returning the geometry and download a table of results to investigate. This can then be used to build up queries to refine your results, improving download times. This is done using `return_geometry = FALSE`
+```{r}
+query_layer(endpoint = endpoints$national_parks_england, 
+            return_geometry = FALSE)
+```
+
+# Custom Queries
+A number of query options are supported by esri that I haven't yet built an R api for. You can take advantage of this by passing a named vector of query parameters and values to the `query` argument. 
+
+SQL WHERE queries are supported via this argument:
+```{r}
+query_layer(endpoints$gb_postcodes, 
+            query = c(resultRecordCount = 1))
+
+south_harrogate_postcodes <- 
+  query_layer(endpoints$gb_postcodes, 
+            query = c(where = "pcd LIKE 'HG2%'"))
+
+# Plot the postcodes
+south_harrogate_postcodes %>% 
+  # Extract the postcode sector (HG1 1)
+  mutate(postcode_sector = str_extract(pcd, "[A-Z]{1,2}[0-9]+ [0-9]+")) %>% 
+  select(postcode_sector) %>% plot()
 ```
 
 # Authentication
-Authentication is done via oauth2.0 and the `get_token` function. Sign in is done via a popup browser window and the token can be passed to the query functions via the `my_token` argument.
+Authentication is done via oauth2.0 and the `get_token` function. Sign in is done via a popup browser window and the token can be passed to the query functions via the `my_token` argument. To use authentication you need to [set up an arcgis developers account](https://developers.arcgis.com/sign-up/) (for free) and create an app. This takes about 5 minutes. Once complete you need to navigate to the app on your dashboard, copy the credentials and set them using `set_credentials`. These are saved securely as environment variables and now you can use `get_token` to access secured services where you have access. 
 ```{r, eval=FALSE}
+set_credentials(client_id = "xxxx", client_secret = "xxxx", app_name = "My App")
+
 my_token <- get_token()
 
 data <-
   query_layer(endpoint = private_endpoint,
-  # Pass in token for a private service
+  # Pass in token for a secured service
   my_token = my_token
 )
 ```
