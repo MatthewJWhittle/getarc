@@ -4,7 +4,7 @@
 \alias{spatial_query}
 \title{Spatial Query}
 \usage{
-spatial_query(x, spatial_filter = "esriSpatialRelIntersects", max_char)
+spatial_query(x, spatial_filter = "esriSpatialRelIntersects", max_char = 1000)
 }
 \arguments{
 \item{x}{an sf or sfc object}

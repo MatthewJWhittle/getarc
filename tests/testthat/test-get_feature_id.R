@@ -7,7 +7,8 @@ fid_query <-
     query = c(resultRecordCount = 1, where = "Shape__Area < 100")
   )
 small_feature <-
-  query_layer(endpoint, query = c("where" = paste0("OBJECTID = '", fid_query$objectIds, "'"),
+  query_layer(endpoint,
+              query = c("where" = paste0("OBJECTID = '", fid_query$objectIds, "'"),
                                   resultRecordCount = 1))
 
 

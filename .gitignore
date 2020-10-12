@@ -4,3 +4,4 @@
 development/private/*
 .httr-oauth
 inst/doc
+.Renviron

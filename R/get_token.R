@@ -22,7 +22,7 @@ get_token <-
                         app_name = app_name)
 
     if(any(purrr::map_lgl(credentials, is.null))){
-      message("Getting credentials from environment variables")
+      # message("Getting credentials from environment variables")
       credentials <- get_credentials()
     }
     endpoint <-

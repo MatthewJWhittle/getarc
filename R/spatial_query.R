@@ -129,3 +129,32 @@ simplify_sf_to_nchar <-
     return(sf::st_transform(x, crs = in_crs))
   }
 
+#' Esri Spatial Filter
+#'
+#' Filter Name to Esri
+#'
+#' This function converts the shortened version of an esri filter to it's esri filter name
+#' @param spatial_filter the short name for the spatial filter. Should be one of intersects, contains, crosses, envelope_intersects, index_intersects, overlaps, touches or within
+#' @return the full name of the esri filter
+esri_spatial_filter <-
+  function(spatial_filter) {
+    lookup <-
+      c(
+        "intersects" = "esriSpatialRelIntersects",
+        "contains" = "esriSpatialRelContains",
+        "crosses" = "esriSpatialRelCrosses",
+        "envelope_intersects" = "esriSpatialRelEnvelopeIntersects",
+        "index_intersects" = "esriSpatialRelIndexIntersects",
+        "overlaps" = "esriSpatialRelOverlaps",
+        "touches" = "esriSpatialRelTouches",
+        "within" = "esriSpatialRelWithin"
+      )
+    # Return the filter if it already matches an esri type
+    if(spatial_filter %in% lookup){
+      return(spatial_filter)
+    }
+    if(!(spatial_filter %in% names(lookup))){
+      stop(paste0("spatial_filter did not match any of: ", paste0(names(lookup), collapse = ", ")))
+    }
+    unname(lookup[spatial_filter])
+  }

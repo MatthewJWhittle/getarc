@@ -44,6 +44,8 @@ get_geojson <- function(query_url) {
 #' @importFrom httr status_code
 #' @importFrom jsonlite fromJSON
 #' @importFrom tibble as_tibble
+#' @importFrom purrr map
+#' @importFrom dplyr bind_rows
 get_tibble <-
   function(query_url){
     # Request the data using GET
@@ -55,7 +57,16 @@ get_tibble <-
     # This list contains multiple levels with information about the data
     # The desired table is contained in data_list$features$attributes
     # Extract and return it
-    data_list <- jsonlite::fromJSON(httr::content(response))
+    content <- httr::content(response)
+    # I've added some control flow in here to modulate the behaviour if it is a map server
+    if(map_server(query_url)){
+    # Map servers return data in a different format which needs a different method of parsing
+      data <-
+        dplyr::bind_rows(purrr::map(content$features,
+                           "attributes"))
+    }else{
+    data_list <- jsonlite::fromJSON(content)
     data <- tibble::as_tibble(data_list$features$attributes)
+    }
     return(data)
   }

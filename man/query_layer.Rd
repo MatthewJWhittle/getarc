@@ -7,7 +7,7 @@
 query_layer(
   endpoint,
   in_geometry = NULL,
-  spatial_filter = "esriSpatialRelIntersects",
+  spatial_filter = "intersects",
   return_geometry = TRUE,
   query = NULL,
   crs = 4326,
@@ -22,9 +22,8 @@ See https://developers.arcgis.com/rest/services-reference/get-started-with-the-s
 
 \item{in_geometry}{the geometry to use when applying a spatial filter to the layer. This should be an sf object (bounding boxes are accepted and are the fastest).}
 
-\item{spatial_filter}{The type of spatial filter. Defaults to intersection (esriSpatialRelIntersects).
-Options are: esriSpatialRelIntersects, esriSpatialRelContains, esriSpatialRelCrosses, esriSpatialRelEnvelopeIntersects,
-esriSpatialRelIndexIntersects, esriSpatialRelOverlaps, esriSpatialRelTouches or esriSpatialRelWithin}
+\item{spatial_filter}{The type of spatial filter. Defaults to intersection (intersects).
+Options are: intersects, contains, crosses, envelope_intersects, index_intersects, overlaps, touches, within}
 
 \item{return_geometry}{should the geometry be returned or just a table?}
 

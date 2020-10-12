@@ -34,5 +34,5 @@ modify_named_vector <-
 map_server <-
   function(endpoint){
     stopifnot(is.character(endpoint) && length(endpoint) == 1)
-    stringr::str_detect(endpoint, "MapServer/[0-9]+$")
+    stringr::str_detect(endpoint, "/MapServer/")
   }
