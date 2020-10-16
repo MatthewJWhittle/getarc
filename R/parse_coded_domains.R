@@ -9,7 +9,7 @@
 #' @importFrom dplyr filter
 #' @importFrom dplyr select
 #' @importFrom readr parse_guess
-#' @import purrr map_df
+#' @importFrom purrr map_df
 
 parse_coded_domains <-
   function(data, domains) {
