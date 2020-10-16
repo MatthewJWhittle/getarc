@@ -30,7 +30,8 @@ Imports:
     lubridate,
     httpuv,
     geojsonsf,
-    lifecycle
+    lifecycle,
+    readr
 VignetteBuilder: knitr
 Depends: 
     R (>= 2.10)

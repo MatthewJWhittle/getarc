@@ -20,7 +20,7 @@ domain_lookup <-
     coded_fields <- layer_fields$domain$type == "codedValue"
     coded_fields[is.na(coded_fields)] <- FALSE
 
-    layer_fields$domain$codedValues[coded_fields]
+    #layer_fields$domain$codedValues[coded_fields]
     field_name <- layer_fields$name[coded_fields]
 
 
@@ -28,7 +28,9 @@ domain_lookup <-
       purrr::map2(
         .x = layer_fields$name[coded_fields],
         .y = layer_fields$domain$codedValues[coded_fields],
-        ~ dplyr::bind_cols(tibble(field_name = .x), .y)
+        ~ dplyr::bind_cols(tibble(field_name = .x),
+                           # Sometimes the code is a character and this stops the df from binding
+                           map_df(.y, as.character))
       )
     )
   }
