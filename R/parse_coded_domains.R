@@ -8,7 +8,6 @@
 #' @importFrom dplyr left_join
 #' @importFrom dplyr filter
 #' @importFrom dplyr select
-#' @importFrom readr parse_guess
 #' @importFrom purrr map_df
 
 parse_coded_domains <-
@@ -41,6 +40,8 @@ parse_coded_domains <-
       # each field name as c(field = ".code") won't work
       key <- c(".code")
       names(key) <- field
+      # Get the variable type for 'parsing'
+      type <- typeof(unlist(loop_data[names(key)]))
 
       loop_data <-
         loop_data %>%
@@ -51,7 +52,8 @@ parse_coded_domains <-
             # domain table is character type because domains codes can be
             # integar or character. but type must match that of df column
             # Parse the domain codes to the right type so that left_join works
-            purrr::map_df(readr::parse_guess),
+            dplyr::mutate(.code = as_type(.data$.code, type = type)
+                          ),
           by = key
         ) %>% dplyr::select(-field)
 

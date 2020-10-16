@@ -95,6 +95,8 @@ token_expired <-
 #' @param client_id The client ID. Taken from you app dashboard on arcgis for developers
 #' @param client_secret The client secret. Taken from you app dashboard on arcgis for developers
 #' @param app_name The name of your app. Taken from you app dashboard on arcgis for developers
+#' @export set_credentials
+
 set_credentials <-
   function(client_id,
            client_secret,

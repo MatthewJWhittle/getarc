@@ -36,3 +36,30 @@ map_server <-
     stopifnot(is.character(endpoint) && length(endpoint) == 1)
     stringr::str_detect(endpoint, "/MapServer/")
   }
+#' As Type
+#'
+#' Convert a vector to a specific type
+#'
+#' This function is used to convert a vector to a specific type, for instance where variables need to match types in joins.
+#' @param x a vector
+#' @param type the type to convert the vector to
+#' @return a vector of with the values of `x` and the same type as `type`
+# type <- "integer"
+# x <- as.character(c(1:10))
+as_type <-
+  function(x, type) {
+    # Make a list of parsing functions to index
+    parse <-
+      list(
+        double = as.double,
+        character = as.character,
+        logical = as.logical,
+        integer = as.integer
+      )
+
+    stopifnot(type %in% names(parse))
+
+    parse[[type]](x)
+  }
+
+
