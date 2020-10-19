@@ -96,24 +96,26 @@ token_expired <-
 #' @param client_secret The client secret. Taken from you app dashboard on arcgis for developers
 #' @param app_name The name of your app. Taken from you app dashboard on arcgis for developers
 #' @export set_credentials
-
+#' @importFrom keyring key_set
+#' @importFrom keyring key_get
 set_credentials <-
   function(client_id,
            client_secret,
            app_name){
-    Sys.setenv("getarc_app_name" = app_name)
-    Sys.setenv("getarc_client_id" = client_id)
-    Sys.setenv("getarc_client_secret" = client_secret)
+    keyring::key_set(service = "getarc", username = "client_id", password = client_id)
+    keyring::key_set(service = "getarc", username = "client_secret", password = client_secret)
+    keyring::key_set(service = "getarc", username = "app_name", password = app_name)
   }
 get_credentials <-
   function(){
     credentials <-
-      list(app_name = Sys.getenv("getarc_app_name"),
-         client_id = Sys.getenv("getarc_client_id"),
-         client_secret = Sys.getenv("getarc_client_secret")
-    )
+      list(
+        client_id = keyring::key_get(service = "getarc", username = "client_id"),
+        client_secret = keyring::key_get(service = "getarc", username = "client_secret"),
+        app_name = keyring::key_get(service = "getarc", username = "app_name")
+      )
     # Check all have been set
-    valid <- map_lgl(credentials, ~.x != "")
+    valid <- purrr::map_lgl(credentials, ~.x != "")
     if(!all(valid)){
       stop(paste0(
         "Credentials not set: ", paste0(paste0("'", names(credentials)[!valid], "'"), collapse = ", "), "\n",

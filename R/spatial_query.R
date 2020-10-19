@@ -91,7 +91,7 @@ esri_geometry_type <-
     # Requires some testing to figure out. Probably everything else would fit into olygon
     stopifnot(x_type %in% esri_sf_type_lookup$sf)
     # Return the corresponding esri type
-    dplyr::filter(esri_sf_type_lookup, sf == x_type)$esri
+    dplyr::filter(esri_sf_type_lookup, .data$sf == x_type)$esri
   }
 #' Simplify sf to length
 #'
