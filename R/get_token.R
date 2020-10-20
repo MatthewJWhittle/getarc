@@ -102,9 +102,9 @@ set_credentials <-
   function(client_id,
            client_secret,
            app_name){
-    keyring::key_set(service = "getarc", username = "client_id", password = client_id)
-    keyring::key_set(service = "getarc", username = "client_secret", password = client_secret)
-    keyring::key_set(service = "getarc", username = "app_name", password = app_name)
+    keyring::key_set_with_value(service = "getarc", username = "client_id", password = client_id)
+    keyring::key_set_with_value(service = "getarc", username = "client_secret", password = client_secret)
+    keyring::key_set_with_value(service = "getarc", username = "app_name", password = app_name)
   }
 get_credentials <-
   function(){
