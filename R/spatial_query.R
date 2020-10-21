@@ -15,6 +15,7 @@ spatial_query <-
   function(x, spatial_filter = "esriSpatialRelIntersects", max_char = 1000) {
     x_class <- class(x)
     stopifnot(any(c("bbox", "sf", "sfc") %in% x_class))
+    stopifnot(is.character(spatial_filter))
     if("bbox" %in% x_class){
       # If x is a bounding box, then use this method as it is less characters and will speed up request
       list(
