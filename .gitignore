@@ -6,3 +6,4 @@ development/private/*
 inst/doc
 .Renviron
 .patoken
+.httr-oauth
