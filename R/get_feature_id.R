@@ -12,34 +12,35 @@
 #' @export get_feature_ids
 get_feature_ids <-
   function(endpoint, query = NULL, my_token = NULL){
+    token <- parse_access_token(my_token)
 
-    # Check that returnsIdsOnly is not set to false in the query
-    query["returnIdsOnly"] <- "true"
+    query <- modify_named_vector(default_query_parameters(),
+                                 c(query, token = token, returnIdsOnly = "true"))
 
-    # Check that a where clause was passed to query, if not add where 1=1 to return all features
-    parameters <- names(query)
-    if(!("where" %in% parameters)){
-      query <- c("where" = "1=1", query)
-    }
+    query_url <- paste0(endpoint, "/query")
 
-    # Generate a query string including the access token if not null
-    query_string <- query_string(query = query,  my_token = my_token)
+    # Download the data using a post query
+    response <- httr::POST(query_url, body = as.list(query))
 
-    query_url <- paste0(endpoint, "/query", query_string)
+    # Fail if the response is not 200
+    # Print an error message if the status code isn't 200
+    assert_that(response$status_code == 200,
+                message = httr::content(response, as = "text")
+    )
 
-    # Make the request and throw error if it failed
-    response <- GET(query_url)
-    stopifnot(response$status_code == 200)
 
-    # Parse the content and return a vecotr of featureIds
-    content <- content(response)
+    # Parse and return the content
+    content <- httr::content(response, as = "text")
+    object_ids <- jsonlite::fromJSON(content)
+    return(object_ids$objectIds)
+    # The below code might be required but unsure if it will error (above) or not
     # Map servers and Feature servers return data in a slightly different format
     # Need to parse the content, then check if it is a list, if not use fromJSON to extract a list
-    if(is.list(content)){
-      return(content)
-    }else{
-      return(jsonlite::fromJSON(content))
-    }
+    # if(is.list(content)){
+    #   return(content)
+    # }else{
+    #   return(jsonlite::fromJSON(content))
+    # }
   }
 
 #' Get Count
@@ -54,33 +55,34 @@ get_feature_ids <-
 #' @export get_count
 get_count <-
   function(endpoint, query = NULL, my_token = NULL){
+    token <- parse_access_token(my_token)
 
-    # Check that returnsIdsOnly is not set to false in the query
-    query["returnCountOnly"] <- "true"
+    query <- modify_named_vector(default_query_parameters(),
+                                 c(query, token = token,
+                                   returnCountOnly = "true"))
 
-    # Check that a where clause was passed to query, if not add where 1=1 to return all features
-    parameters <- names(query)
-    if(!("where" %in% parameters)){
-      query <- c("where" = "1=1", query)
-    }
+    query_url <- paste0(endpoint, "/query")
 
-    # Generate a query string including the access token if not null
-    query_string <- query_string(query = query,  my_token = my_token)
+    # Download the data using a post query
+    response <- httr::POST(query_url, body = as.list(query))
 
-    query_url <- paste0(endpoint, "/query", query_string)
+    # Fail if the response is not 200
+    # Print an error message if the status code isn't 200
+    assert_that(response$status_code == 200,
+                message = httr::content(response, as = "text")
+    )
 
-    # Make the request and throw error if it failed
-    response <- GET(query_url)
-    stopifnot(response$status_code == 200)
 
-    # Parse the content and return a vecotr of featureIds
-    content <- content(response)
+    # Parse and return the content
+    content <- httr::content(response, as = "text")
+    count <- jsonlite::fromJSON(content)
+    return(count$count)
+    # The below code might be required but unsure if it will error (above) or not
     # Map servers and Feature servers return data in a slightly different format
     # Need to parse the content, then check if it is a list, if not use fromJSON to extract a list
-    if(is.list(content)){
-    return(content$count)
-    }else{
-      content <- jsonlite::fromJSON(content)
-      return(content$count)
-    }
+    # if(is.list(content)){
+    #   return(content)
+    # }else{
+    #   return(jsonlite::fromJSON(content))
+    # }
   }

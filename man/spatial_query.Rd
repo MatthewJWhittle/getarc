@@ -4,7 +4,7 @@
 \alias{spatial_query}
 \title{Spatial Query}
 \usage{
-spatial_query(x, spatial_filter = "esriSpatialRelIntersects", max_char = 1000)
+spatial_query(x, spatial_filter = "esriSpatialRelIntersects")
 }
 \arguments{
 \item{x}{an sf or sfc object}
@@ -12,8 +12,6 @@ spatial_query(x, spatial_filter = "esriSpatialRelIntersects", max_char = 1000)
 \item{spatial_filter}{the spatial relationship of the filter to specify in the query. Default is esriSpatialRelIntersects.
 Options are: esriSpatialRelIntersects, esriSpatialRelContains, esriSpatialRelCrosses, esriSpatialRelEnvelopeIntersects,
 esriSpatialRelIndexIntersects, esriSpatialRelOverlaps, esriSpatialRelTouches or esriSpatialRelWithin.}
-
-\item{max_char}{the number of characters to simplify the sf object to}
 }
 \value{
 a list with geometry, geometryType, SpatialRel and inSR

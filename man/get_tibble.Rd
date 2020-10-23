@@ -4,10 +4,12 @@
 \alias{get_tibble}
 \title{Get Tibble}
 \usage{
-get_tibble(query_url)
+get_tibble(query_url, query)
 }
 \arguments{
-\item{query_url}{the query url which is passed to httr::GET()}
+\item{query_url}{the query url which is passed to httr::POST()}
+
+\item{query}{the query to POST}
 }
 \value{
 a tibble

@@ -8,7 +8,7 @@ fid_query <-
   )
 small_feature <-
   query_layer(endpoint,
-              query = c("where" = paste0("OBJECTID = '", fid_query$objectIds, "'"),
+              query = c("where" = paste0("OBJECTID = '", fid_query, "'"),
                                   resultRecordCount = 1))
 
 
@@ -16,7 +16,7 @@ test_that("get feature ids works", {
   expect_equal(is.vector(fids),
                TRUE)
   expect_equal(length(fids) > 1, TRUE)
-  expect_equal(length(fid_query$objectIds), 1)
+  expect_equal(length(fid_query), 1)
   expect_equal(small_feature$Shape__Area < 100, TRUE)
   expect_equal(nrow(small_feature), 1)
 })

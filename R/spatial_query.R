@@ -7,12 +7,11 @@
 #' @param spatial_filter the spatial relationship of the filter to specify in the query. Default is esriSpatialRelIntersects.
 #' Options are: esriSpatialRelIntersects, esriSpatialRelContains, esriSpatialRelCrosses, esriSpatialRelEnvelopeIntersects,
 #' esriSpatialRelIndexIntersects, esriSpatialRelOverlaps, esriSpatialRelTouches or esriSpatialRelWithin.
-#' @param max_char the number of characters to simplify the sf object to
 #' @return a list with geometry, geometryType, SpatialRel and inSR
 #' @importFrom sf st_geometry
 #' @importFrom sf st_crs
 spatial_query <-
-  function(x, spatial_filter = "esriSpatialRelIntersects", max_char = 1000) {
+  function(x, spatial_filter = "esriSpatialRelIntersects") {
     x_class <- class(x)
     stopifnot(any(c("bbox", "sf", "sfc") %in% x_class))
     stopifnot(is.character(spatial_filter))
@@ -28,13 +27,13 @@ spatial_query <-
       # Otherwise, convert the object to sfc, then to json and specify the type
       x <- sf::st_geometry(x)
       stopifnot(length(x) == 1)
-      x_simple <- simplify_sf_to_nchar(x, char = max_char)
+      #x_simple <- simplify_sf_to_nchar(x, char = max_char)
       list(
-        geometry = sf_to_json(x_simple),
+        geometry = sf_to_json(x),
         # Only certain types accepted by this function
-        geometryType = esri_geometry_type(x_simple),
+        geometryType = esri_geometry_type(x),
         spatialRel = spatial_filter,
-        inSR = sf::st_crs(x_simple)$epsg
+        inSR = sf::st_crs(x)$epsg
       )
     }
   }

@@ -4,10 +4,12 @@
 \alias{get_geojson}
 \title{Get GeoJSON}
 \usage{
-get_geojson(query_url)
+get_geojson(query_url, query)
 }
 \arguments{
-\item{query_url}{the query url which is passed to httr::GET()}
+\item{query_url}{the query url which is passed to httr::POST()}
+
+\item{query}{the query to POST}
 }
 \value{
 an sf object

@@ -10,17 +10,17 @@ dates_endpoint <-
 dates_details <-
   get_layer_details(dates_endpoint)
 dates <-
-  get_geojson(paste0(dates_endpoint, "/query", query_string(
+  get_geojson(paste0(dates_endpoint, "/query"),
     query = c(resultRecordCount = 10, default_query_parameters())
-  )))
+  )
 
 # Contains no dates
 no_dates_details <-
   get_layer_details(no_dates_endpoint)
 no_dates <-
-  get_geojson(paste0(no_dates_endpoint, "/query", query_string(
+  get_geojson(paste0(no_dates_endpoint, "/query"),
     query = c(resultRecordCount = 10, default_query_parameters())
-  )))
+  )
 
 
 test_that("datetimes parse", {
