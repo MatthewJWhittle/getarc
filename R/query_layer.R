@@ -55,9 +55,8 @@ query_layer <-
 
     # If an in_geometry has been specified then generate the spatial query and combine with the query parameters
     if (!is.null(in_geometry)) {
-      query <- modify_named_vector(query, spatial_query(in_geometry,
-                                                        spatial_filter = esri_spatial_filter(spatial_filter),
-                                                        max_char = 1000))
+      query <- modify_named_vector(query, spatial_query(x = in_geometry,
+                                                        spatial_filter = esri_spatial_filter(spatial_filter)))
     }
 
     argument_parameters <- c(returnGeometry = lower_logical(return_geometry))
@@ -77,11 +76,12 @@ query_layer <-
       return(tibble::tibble())
     }
 
-
+    # Add the token into the query
+    query <- modify_named_vector(query, c(token = parse_access_token(my_token)))
     # Generate the query string
-    query_string <- query_string(query = query, my_token = my_token)
+    # query_string <- query_string(query = query, my_token = my_token)
 
-    query_url <- paste0(endpoint, "/query", query_string)
+    query_url <- paste0(endpoint, "/query")
     # This behaviour is undesirable when queries become more complex.
     # Need to find a way of making the query string available to users
     message(paste0("Requesting data..."))
@@ -91,9 +91,9 @@ query_layer <-
     # A new function get_tibble has been added to use a different method for requesting and parsing data
     # when the geometry isn't returned.
     if (return_geometry) {
-      data <- get_geojson(query_url = query_url)
+      data <- get_geojson(query_url = query_url, query = query)
     } else{
-      data <- get_tibble(query_url = query_url)
+      data <- get_tibble(query_url = query_url, query = query)
     }
 
     # Parse the variables -----
