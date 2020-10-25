@@ -32,6 +32,7 @@ Imports:
     geojsonsf,
     lifecycle,
     readr,
+    keyring,
     rlang
 VignetteBuilder: knitr
 Depends: 
