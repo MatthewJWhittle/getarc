@@ -17,6 +17,6 @@ set_credentials(client_id, client_secret, app_name)
 Get or set app credentials
 }
 \details{
-set_credentials and get_credentials set and retrieve environment variables for the client id, client secret and app name.
+set_credentials and get_credentials set and retrieve option variables for the client id, client secret and app name.
 This then allows get_token to retrieve the variables.
 }

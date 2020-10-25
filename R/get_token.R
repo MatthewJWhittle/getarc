@@ -90,29 +90,27 @@ token_expired <-
 #'
 #' Get or set app credentials
 #'
-#' set_credentials and get_credentials set and retrieve environment variables for the client id, client secret and app name.
+#' set_credentials and get_credentials set and retrieve option variables for the client id, client secret and app name.
 #' This then allows get_token to retrieve the variables.
 #' @param client_id The client ID. Taken from you app dashboard on arcgis for developers
 #' @param client_secret The client secret. Taken from you app dashboard on arcgis for developers
 #' @param app_name The name of your app. Taken from you app dashboard on arcgis for developers
 #' @export set_credentials
-#' @importFrom keyring key_set
-#' @importFrom keyring key_get
 set_credentials <-
   function(client_id,
            client_secret,
            app_name){
-    keyring::key_set_with_value(service = "getarc", username = "client_id", password = client_id)
-    keyring::key_set_with_value(service = "getarc", username = "client_secret", password = client_secret)
-    keyring::key_set_with_value(service = "getarc", username = "app_name", password = app_name)
+    options("getarc.client_id" = client_id)
+    options("getarc.slient_secret" = client_secret)
+    options("getarc.app_name" = app_name)
   }
 get_credentials <-
   function(){
     credentials <-
       list(
-        client_id = keyring::key_get(service = "getarc", username = "client_id"),
-        client_secret = keyring::key_get(service = "getarc", username = "client_secret"),
-        app_name = keyring::key_get(service = "getarc", username = "app_name")
+        client_id = options("getarc.client_id" = client_id),
+        client_secret = options("getarc.slient_secret" = client_secret),
+        app_name = options("getarc.app_name" = app_name)
       )
     # Check all have been set
     valid <- purrr::map_lgl(credentials, ~.x != "")
