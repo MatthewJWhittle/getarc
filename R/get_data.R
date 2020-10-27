@@ -15,19 +15,21 @@
 #' @importFrom httr content
 #' @import purrr
 get_geojson <- function(query_url, query) {
-  # Create a temporary file for caching the spatial data
-  temp_file <- tempfile(fileext = ".geojson")
-  # Request the spatial data and write it to a temporary file as JSON
+
   # Request the data using POST
-  response <- httr::POST(url = query_url, body = as.list(query),
-                         httr::write_disk(temp_file, overwrite = T))
+  response <- httr::POST(url = query_url, body = as.list(query))
 
   # Fail on error
   stopifnot(httr::status_code(response) == 200)
-  # Read the data from the temporary file
-  possible_read <- purrr::possibly(sf::st_read, otherwise = NULL)
-  data <- possible_read(temp_file, stringsAsFactors = FALSE)
 
+  content <- httr::content(response, as = "text")
+  # Check for an error if it doesn't return api fail
+  check_esri_error(content = content)
+  # Read the data from the json text
+  data <- sf::st_read(dsn = content,
+                      quiet = TRUE, stringsAsFactors = FALSE)
+
+  # Possibly return the data or an error
   if (is.null(data)) {
 
     stop(paste0("Error: ",
@@ -65,6 +67,8 @@ get_tibble <-
     # The desired table is contained in data_list$features$attributes
     # Extract and return it
     content <- httr::content(response)
+    # Check for an error if it doesn't return api fail
+    check_esri_error(content = content)
     # I've added some control flow in here to modulate the behaviour if it is a map server
     if(map_server(query_url)){
     # Map servers return data in a different format which needs a different method of parsing
