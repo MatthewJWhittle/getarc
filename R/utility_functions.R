@@ -81,3 +81,15 @@ assert_that <-
            call. = FALSE)
     }
   }
+#' Check ESRI error
+#'
+#' Checks for an esri error and returns it
+#' @param content the content of a response
+#' @return null
+check_esri_error <-
+  function(content){
+    is_error <- all(grepl("^\\{\"error", content))
+    if(is_error){
+      stop(content)
+    }
+  }
