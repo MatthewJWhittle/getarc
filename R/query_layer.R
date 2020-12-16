@@ -24,6 +24,9 @@
   #' @import tibble
   #' @importFrom lifecycle deprecated
   #' @importFrom lifecycle is_present
+  #' @importFrom progress progress_bar
+  #' @importFrom purrr map
+  #' @importFrom dplyr bind_rows
 query_layer <-
   function(endpoint,
            in_geometry = NULL,
@@ -76,6 +79,7 @@ query_layer <-
       return(tibble::tibble())
     }
 
+
     # Add the token into the query
     query <- modify_named_vector(query, c(token = parse_access_token(my_token)))
     # Generate the query string
@@ -84,17 +88,41 @@ query_layer <-
     query_url <- paste0(endpoint, "/query")
     # This behaviour is undesirable when queries become more complex.
     # Need to find a way of making the query string available to users
-    message(paste0("Requesting data..."))
+    #message(paste0("Requesting data..."))
 
-    # When a returnGeometry = "false" query was used previously
-    # get_geojson wouldn't parse the data correctly and would return an empty tibble
-    # A new function get_tibble has been added to use a different method for requesting and parsing data
-    # when the geometry isn't returned.
-    if (return_geometry) {
-      data <- get_geojson(query_url = query_url, query = query)
-    } else{
-      data <- get_tibble(query_url = query_url, query = query)
-    }
+    # This ultimately needs moving into its own function
+    # Get by FIDs
+    # If the returned count exceeds the max record count, then the get data function should be
+    # mapped.
+
+    # First get the FIDs use in querying the endpoint
+    fids <-
+      get_feature_ids(endpoint = endpoint,
+                      query = query,
+                      my_token = my_token)
+    # Then split the vector so it doesn't exceed the max record count
+    fids_split <-
+      split_vector(x = fids, max_length = layer_details$maxRecordCount)
+
+    querys <-
+      purrr::map(fids_split,
+                 ~ modify_named_vector(query, where_in_query(layer_details$objectIdField, .x)))
+
+    # Define a progress bar
+    pb <- progress::progress_bar$new(total = length(querys),
+                                     clear = FALSE,
+                                     width = 60,
+                                     format = "  Downloading data [:bar] :percent in :elapsed eta: :eta")
+
+    # Download the data for each query
+    data_list <- purrr::map(querys,
+                            ~ get_data(
+                              query_url = query_url,
+                              query = .x,
+                              return_geometry = return_geometry
+                            ))
+
+    data <- dplyr::bind_rows(data_list)
 
     # Parse the variables -----
     # This should probably be wrapped up into one parsing function at some point
@@ -124,3 +152,4 @@ query_layer <-
     }
     return(data)
   }
+

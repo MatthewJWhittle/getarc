@@ -12,7 +12,7 @@ License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.1.0
+RoxygenNote: 7.1.1
 Suggests: 
     testthat,
     covr,
@@ -33,7 +33,8 @@ Imports:
     lifecycle,
     readr,
     keyring,
-    rlang
+    rlang,
+    progress
 VignetteBuilder: knitr
 Depends: 
     R (>= 2.10)
