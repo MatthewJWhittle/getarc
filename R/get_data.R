@@ -94,11 +94,12 @@ get_tibble <-
 #' @param query_url  the query url which is passed to httr::POST()
 #' @param query the query to POST
 #' @param return_geometry should the geometry be returned, this is passed in to query_layer & must also from part of the query
+#' @param pb progress bar - default is NULL for no progress bar
 #' @return either a tibble or sf object depending on return_geometry
 get_data <-
-  function(query_url, query, return_geometry) {
+  function(query_url, query, return_geometry, pb = NULL) {
     # only tick if it exists
-    if(exists("pb")) {
+    if(!is.null(pb)) {
       pb$tick()
     }
     if (return_geometry) {

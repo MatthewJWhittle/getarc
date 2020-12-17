@@ -9,7 +9,7 @@ where_in_query(field, matching)
 \arguments{
 \item{field}{which field should match \code{matching}}
 
-\item{which}{elements of \code{field} should be returned}
+\item{matching}{which elements of \code{field} should be returned}
 }
 \value{
 a named character vector of length 1 to be included in query

@@ -119,7 +119,8 @@ query_layer <-
                             ~ get_data(
                               query_url = query_url,
                               query = .x,
-                              return_geometry = return_geometry
+                              return_geometry = return_geometry,
+                              pb = pb
                             ))
 
     data <- dplyr::bind_rows(data_list)

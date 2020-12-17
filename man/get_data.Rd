@@ -4,7 +4,7 @@
 \alias{get_data}
 \title{Get Data}
 \usage{
-get_data(query_url, query, return_geometry)
+get_data(query_url, query, return_geometry, pb = NULL)
 }
 \arguments{
 \item{query_url}{the query url which is passed to httr::POST()}
@@ -12,6 +12,8 @@ get_data(query_url, query, return_geometry)
 \item{query}{the query to POST}
 
 \item{return_geometry}{should the geometry be returned, this is passed in to query_layer & must also from part of the query}
+
+\item{pb}{progress bar}
 }
 \value{
 either a tibble or sf object depending on return_geometry
