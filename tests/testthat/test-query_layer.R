@@ -45,6 +45,18 @@ fs_nogeom <-
     query = c(resultRecordCount = 1)
   )
 
+
+tibble(OBJECTID = character(0),
+       NAME = character(0)
+)
+
+no_awi <-
+query_layer(endpoint = endpoints$ancient_woodland_england,
+            query = c(where = "1=2"),
+            out_fields = c("NAME", "OBJECTID"),
+            return_geometry = FALSE
+)
+
 test_that("query layer works", {
   # Check that resultRecordCount = 1 works
   expect_equal(nrow(one_row),
@@ -67,4 +79,10 @@ test_that("query layer works", {
   # return_geometry = FALSE returns a data.frame for both map servers and feature servers
   expect_equal("data.frame" %in% class(ms_nogeom), TRUE)
   expect_equal("data.frame" %in% class(fs_nogeom), TRUE)
+
+  expect_equal(no_awi, tibble(OBJECTID = character(0),
+                              NAME = character(0)
+  ))
+
+
 })

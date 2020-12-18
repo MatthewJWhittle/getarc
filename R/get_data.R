@@ -59,7 +59,6 @@ get_tibble <-
     # Request the data using POST
     response <- httr::POST(url = query_url, body = as.list(query))
 
-
     # Fail on error
     stopifnot(httr::status_code(response) == 200)
     # First convert JSON to a list.
