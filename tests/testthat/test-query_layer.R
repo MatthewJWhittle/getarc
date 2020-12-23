@@ -31,7 +31,7 @@ bbox <-
 
 spatial_query <-
   query_layer(endpoint = endpoint,
-              bounding_box = bbox)
+              in_geometry = bbox)
 
 ms_nogeom <-
   query_layer(
@@ -46,7 +46,7 @@ fs_nogeom <-
   )
 
 
-awi_10000 <-
+awi_2510 <-
   query_layer(endpoint = endpoints$ancient_woodland_england,
             query = c(resultRecordCount = 2510,
                       outFields = "objectid"),
