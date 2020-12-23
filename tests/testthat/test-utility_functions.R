@@ -9,6 +9,7 @@ test_that("modifying vectors works", {
   expect_error(assert_that(1 == 1), regexp = NA)
 })
 
+
 v_to_split <- sample(c(1:100), replace = TRUE, size = 100)
 max_length <- 9
 test_that("splitting a vector works",
@@ -25,3 +26,18 @@ test_that("splitting a vector works",
             expect_type(split_vector(v_to_split, max_length = max_length), "list")
 
           })
+
+test_that("making empty tibbles works",
+          {
+            expect_equal(
+              tibble(A = character(0), B = character(0)),
+              make_empty_tibble(field_names = c("A", "B"), out_fields = "*")
+            )
+
+            expect_equal(
+              tibble(A = character(0)),
+              make_empty_tibble(field_names = c("A", "B"), out_fields = "A")
+            )
+          }
+          )
+
