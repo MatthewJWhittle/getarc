@@ -8,6 +8,10 @@ before_install:
   - sudo add-apt-repository ppa:ubuntugis/ubuntugis-unstable --yes
   - sudo apt-get --yes --force-yes update -qq
   - sudo apt-get install --yes libudunits2-dev libproj-dev libgeos-dev libgdal-dev
+  - sudo apt-get install -y libsodium-dev
+
+install:
+  - printf "\n" | pecl install libsodium
 
 r_packages:
   - sf
