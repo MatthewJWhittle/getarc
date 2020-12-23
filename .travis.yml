@@ -10,9 +10,6 @@ before_install:
   - sudo apt-get install --yes libudunits2-dev libproj-dev libgeos-dev libgdal-dev
   - sudo apt-get install -y libsodium-dev
 
-install:
-  - printf "\n" | pecl install libsodium
-
 r_packages:
   - sf
 
