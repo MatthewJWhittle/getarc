@@ -13,7 +13,7 @@ get_data(query_url, query, return_geometry, pb = NULL)
 
 \item{return_geometry}{should the geometry be returned, this is passed in to query_layer & must also from part of the query}
 
-\item{pb}{progress bar}
+\item{pb}{progress bar - default is NULL for no progress bar}
 }
 \value{
 either a tibble or sf object depending on return_geometry

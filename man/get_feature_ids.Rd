@@ -14,7 +14,7 @@ get_feature_ids(endpoint, query = NULL, my_token = NULL)
 \item{my_token}{an access token to be included when required}
 }
 \value{
-a vector of feature IDs
+a list of feature IDs & the feature ID field
 }
 \description{
 Get the feature IDs of a layer

@@ -45,6 +45,13 @@ fs_nogeom <-
     query = c(resultRecordCount = 1)
   )
 
+awi_10000 <-
+  query_layer(endpoint = endpoints$ancient_woodland_england,
+            query = c(resultRecordCount = 2510,
+                      outFields = "objectid"),
+            return_geometry = FALSE)
+
+
 test_that("query layer works", {
   # Check that resultRecordCount = 1 works
   expect_equal(nrow(one_row),
@@ -67,4 +74,6 @@ test_that("query layer works", {
   # return_geometry = FALSE returns a data.frame for both map servers and feature servers
   expect_equal("data.frame" %in% class(ms_nogeom), TRUE)
   expect_equal("data.frame" %in% class(fs_nogeom), TRUE)
+  # the return record count param works properly with get by fids method
+  expect_equal(nrow(awi_2510), 2510)
 })
