@@ -159,7 +159,7 @@ where_in_query <-
   function(field, matching) {
     c(where = paste0(field, " IN ('",
                      paste0(matching, collapse = "', '"), "')"))
-
+}
 
 #' Make Empty Tibble
 #'
