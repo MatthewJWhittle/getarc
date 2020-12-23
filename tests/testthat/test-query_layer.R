@@ -1,21 +1,20 @@
 require(sf)
-endpoint <-
-  "https://services.arcgis.com/JJzESW51TqeY9uat/arcgis/rest/services/Wood_Pasture_and_Parkland/FeatureServer/0"
-one_row <- query_layer(endpoint = endpoint,
+
+one_row <- query_layer(endpoint = endpoints$gb_wood_pasture_parkland,
                        query = c(resultRecordCount = 1))
 one_row_bng <- query_layer(
-  endpoint = endpoint,
+  endpoint = endpoints$gb_wood_pasture_parkland,
   crs = 27700,
   query = c(resultRecordCount = 1)
 )
 
 small_feature <-
-  query_layer(endpoint,
+  query_layer(endpoints$gb_wood_pasture_parkland,
               query = c("where" = "Shape__Area < 30", resultRecordCount = 1))
 
 
 sql_query <- query_layer(
-  endpoint = endpoint,
+  endpoint = endpoints$gb_wood_pasture_parkland,
   query = c(resultRecordCount = 1,
             where = "SUBTYPE = 'Parkland' AND INTERPQUAL = 'Medium'")
 )
@@ -29,9 +28,22 @@ bbox <-
   ),
   crs = 4326)
 
-spatial_query <-
-  query_layer(endpoint = endpoint,
+spatial_query_bbox <-
+  query_layer(endpoint = endpoints$gb_wood_pasture_parkland,
               in_geometry = bbox)
+
+point <- st_as_sf(data.frame(x = 448171, y = 163733), coords = c("x", "y"), crs = 27700)
+
+
+spatial_query_point <-
+  query_layer(endpoint = endpoints$gb_wood_pasture_parkland,
+              in_geometry = point)
+
+buffer <- st_buffer(point, 1000)
+
+spatial_query_buffer <-
+  query_layer(endpoint = endpoints$gb_wood_pasture_parkland,
+              in_geometry = buffer)
 
 ms_nogeom <-
   query_layer(
@@ -80,9 +92,15 @@ test_that("query layer works", {
   expect_equal(sql_query$SUBTYPE, "Parkland")
   expect_equal(sql_query$INTERPQUAL, "Medium")
   # Did the spatial query only return one result?
-  expect_equal(nrow(spatial_query),
+  expect_equal(nrow(spatial_query_bbox),
                1)
-  expect_warning(query_layer(endpoint = endpoint, query = c(where = "1 = 2")))
+
+  expect_equal(nrow(spatial_query_buffer) >= 1,
+               TRUE)
+  expect_equal(nrow(spatial_query_point) >= 1,
+               TRUE)
+
+  expect_warning(query_layer(endpoint = endpoints$gb_wood_pasture_parkland, query = c(where = "1 = 2")))
   # Does the area query have the desired result
   expect_equal(small_feature$Shape__Area < 30, TRUE)
   # return_geometry = FALSE returns a data.frame for both map servers and feature servers

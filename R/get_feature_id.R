@@ -95,6 +95,7 @@ get_count <-
     # Parse and return the content
     content <- httr::content(response, as = "text")
     count <- jsonlite::fromJSON(content)
+
     return(count$count)
     # The below code might be required but unsure if it will error (above) or not
     # Map servers and Feature servers return data in a slightly different format

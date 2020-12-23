@@ -48,26 +48,50 @@ spatial_query <-
 #' @importFrom geojsonsf sfc_geojson
 #' @importFrom sf st_crs
 #' @importFrom stringr str_remove_all
+#' @importFrom glue glue
+#' @importFrom dplyr filter
+#' @importFrom sf st_coordinates
+#' @importFrom sf st_zm
+#' @importFrom sf st_geometry_type
 sf_to_json <-
   function(x) {
+    # Drop the z & m dimensions as I don't know how to tell if they are present
+    x <- sf::st_zm(x, drop = TRUE)
+    # Check the geom type  to conver to its json spec (rings, points , paths)
+    x_geom_type <- sf::st_geometry_type(x)
+    # Don't query if the geom type isn't supported
+    stopifnot(x_geom_type %in% esri_sf_type_lookup$sf)
+    json_type <- dplyr::filter(esri_sf_type_lookup, sf == x_geom_type)$json
+
     # Convert the boundary to an sfc objet
     x_sfc <- sf::st_geometry(x)
     stopifnot(length(x_sfc) == 1)
 
+    # Extract the EPSG code
+    crs <- sf::st_crs(x_sfc)$epsg
+    # If the geometry type is a point, the function needs to return the json in a different way
+    if(json_type == "point"){
+      xy <- sf::st_coordinates(x)
+      return(
+        glue::glue('{"x" : (xy[,1]), "y" : (xy[,2]), "spatialReference" : {"wkid" : (crs)}}',
+                   .open = "(",
+                   .close = ")"
+        )
+      )
+    }
+
+
     # First convert the boundary to geojson as this is closer to the required format
     x_geojson <- geojsonsf::sfc_geojson(x_sfc)
 
-    # Extract the EPSG code
-    crs <- sf::st_crs(x_sfc)$epsg
     # Strip out everything outside the rings
     rings <- stringr::str_remove_all(x_geojson, "\\{.+:|\\}")
     # Format the json and return
-    paste0('{"rings" : ',
-           rings,
-           ",",
-           '"spatialReference" : {"wkid" : ',
-           crs,
-           "}}")
+    glue::glue('{"hasZ" : false, "hasM" : false,
+           "(json_type)" : (rings), "spatialReference" : {"wkid" : (crs)}}',
+               .open = "(",
+               .close = ")")
+
   }
 #' ESRI Geometry Type
 #'
