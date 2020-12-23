@@ -94,6 +94,73 @@ check_esri_error <-
     }
   }
 
+#' Split a Vector
+#'
+#' Split a Vector
+#'
+#' This function splits a vector so that it doesn't exceed a maximum length
+#'
+#' @param x a vector
+#' @param max_length the maximum length of the returned vectors
+#' @return a list of split x where each element does not exceed the length of max_length
+split_vector <-
+  function(x, max_length){
+
+    # Get the length of x and determine how many parts it should be split into
+    # based upon the maximum allowed length. a ceiling is applied as parts must be
+    # an integar and should always be rounded up
+    x_length <- length(x)
+
+    # Return the vector as a list if it doesn't exceed the maximum length
+    # This will avoid any errors down the line
+    if(x_length <= max_length){
+      return(list(x))
+    }
+
+    parts <- ceiling(x_length / max_length)
+
+    # create a sequence of the start of each vector
+    starts <- seq(from = 1, to = x_length, by = max_length)
+
+    # If the last element of the vector is the final element then it should be dropped
+    if(tail(starts, 1) == x_length){
+      starts <- starts[c(1:(length(starts) - 1))]
+      # If the start vector ends on the length then parts needs to be one less
+      parts <- parts - 1
+      }
+
+    # Construct the ends of each part so that the parts don't overlap
+    # The sequence should end on the length of x so it doesn't exceed the vector length
+    # when indexing
+    ends <- starts + (max_length - 1)
+    ends[length(ends)] <- x_length
+
+    # Make an empty list to fill with the indexed pars of x
+    # This is more efficient & faster than incrementally increasing the
+    # size of the vector
+    x_split <- vector("list", length = parts)
+    for(i in 1:parts){
+      x_split[[i]] <- x[c(starts[i]:ends[i])]
+    }
+
+    return(x_split)
+  }
+
+#' Where In Query
+#'
+#' Construct a where in query
+#'
+#' Construct a where in query to se for getting FIDs
+#'
+#' @param field which field should match `matching`
+#' @param matching which elements of `field` should be returned
+#' @return a named character vector of length 1 to be included in query
+where_in_query <-
+  function(field, matching) {
+    c(where = paste0(field, " IN ('",
+                     paste0(matching, collapse = "', '"), "')"))
+
+
 #' Make Empty Tibble
 #'
 #' Make an empty tibble with specified column names
@@ -116,4 +183,5 @@ make_empty_tibble <-
       empty_df[field] <- character(0)
     }
     return(empty_df)
+
   }

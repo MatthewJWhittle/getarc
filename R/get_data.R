@@ -81,3 +81,30 @@ get_tibble <-
     return(data)
   }
 
+#' Get Data
+#'
+#' Get data from an endpoint
+#'
+#' This function accepts a query URL and extracts a tibble from the response.
+#' When a returnGeometry = "false" query was used previously
+#' get_geojson wouldn't parse the data correctly and would return an empty tibble
+#' A new function get_tibble has been added to use a different method for requesting and parsing data
+#' when the geometry isn't returned.
+#' @param query_url  the query url which is passed to httr::POST()
+#' @param query the query to POST
+#' @param return_geometry should the geometry be returned, this is passed in to query_layer & must also from part of the query
+#' @param pb progress bar - default is NULL for no progress bar
+#' @return either a tibble or sf object depending on return_geometry
+get_data <-
+  function(query_url, query, return_geometry, pb = NULL) {
+    # only tick if it exists
+    if(!is.null(pb)) {
+      pb$tick()
+    }
+    if (return_geometry) {
+      data <- get_geojson(query_url = query_url, query = query)
+    } else{
+      data <- get_tibble(query_url = query_url, query = query)
+    }
+    return(data)
+  }
