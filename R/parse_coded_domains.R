@@ -8,6 +8,8 @@
 #' @importFrom dplyr left_join
 #' @importFrom dplyr filter
 #' @importFrom dplyr select
+#' @importFrom dplyr mutate
+#' @importFrom dplyr if_else
 #' @importFrom purrr map_df
 
 parse_coded_domains <-
@@ -34,12 +36,12 @@ parse_coded_domains <-
 
     loop_data <- data
 
-    for (field in unique(domains$.field_name)) {
+    for (.field in unique(domains$.field_name)) {
       # Construct a named vector to use in left_join
       # This enables the vector name to be generated for
       # each field name as c(field = ".code") won't work
       key <- c(".code")
-      names(key) <- field
+      names(key) <- .field
       # Get the variable type for 'parsing'
       type <- typeof(unlist(loop_data[names(key)]))
 
@@ -47,7 +49,7 @@ parse_coded_domains <-
         loop_data %>%
         dplyr::left_join(
           domains %>%
-            dplyr::filter(.data$.field_name == field) %>%
+            dplyr::filter(.data$.field_name == .field) %>%
             dplyr::select(.data$.name, .data$.code) %>%
             # domain table is character type because domains codes can be
             # integar or character. but type must match that of df column
@@ -55,9 +57,20 @@ parse_coded_domains <-
             dplyr::mutate(.code = as_type(.data$.code, type = type)
                           ),
           by = key
-        ) %>% dplyr::select(-field)
+        ) %>%
+        # If a domain hasn't been coded up correctly, then entries that don't fit the domain will be dropped
+        # This is is not desirable because we always want the entered value, even if it doesn't match the domain
+        # This code checks for missing values after joining the domain values & replaces them with their
+        # original values
+        dplyr::mutate(.name = dplyr::if_else(is.na(.name),
+                                             # The !! evaluates .field (because it is only a string, not a column in the data)
+                                             # Need to assert that the type of 'true' is the same as false
+                                             true = as_type(get(.field), typeof(.name)),
+                                             false = .name)) %>%
+        dplyr::select(-.field)
 
-      colnames(loop_data)[colnames(loop_data) == ".name"] <- field
+      # Finally rename the field to its original value
+      colnames(loop_data)[colnames(loop_data) == ".name"] <- .field
 
     }
 

@@ -55,19 +55,19 @@ source <- new_points %>% st_transform(crs = 4326) %>%
 
 details$objectIdField
 
-query <- c(
+query <- list(
   f = "json",
   appendUploadFormat = "geojson",
   uploadID = details$serviceItemId,
   upsert = "true",
-  fieldMappings='[{"name": "ObjectId", "sourceName": "ObjectId"}, {"name": "id", "sourceName": "id"}]'
-
+  fieldMappings = '[{"name": "ObjectId", "sourceName": "ObjectId"}, {"name": "id", "sourceName": "id"}]',
+  token = parse_access_token(my_token)
 )
-query_string <- query_string(query = query, my_token = my_token)
+# query_string <- query_string(query = query, my_token = my_token)
 
-query_url <- paste0(endpoint, "/append", query_string)
+query_url <- paste0(points_endpoint, "/append")
 
-response <- POST(query_url, body = list(source = source))
+response <- POST(query_url, body = c(list(source = source), query))
 
 content <- response %>% content() %>% fromJSON()
 
@@ -75,5 +75,6 @@ GET(
   paste0(content$statusUrl, query_string(query = NULL, my_token = my_token))
 ) %>% content(as = "parsed") %>% fromJSON()
 
+# Error: "Object reference not set to an instance of an object."
 
 query_layer(endpoint = points_endpoint, my_token = my_token)
