@@ -47,9 +47,6 @@ query_layer <-
       in_geometry <- bounding_box
     }
 
-    # Check that a valid token has been passed in
-    stopifnot(is.null(my_token) || c("Token") %in% class(my_token))
-
     #https://developers.arcgis.com/rest/services-reference/layer-feature-service-.htm
 
 
