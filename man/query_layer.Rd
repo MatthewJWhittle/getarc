@@ -9,7 +9,9 @@ query_layer(
   in_geometry = NULL,
   spatial_filter = "intersects",
   return_geometry = TRUE,
-  out_fields = "*",
+  out_fields = c("*"),
+  return_n = NULL,
+  geometry_precision = NULL,
   query = NULL,
   crs = 4326,
   my_token = NULL,
@@ -29,6 +31,10 @@ Options are: intersects, contains, crosses, envelope_intersects, index_intersect
 \item{return_geometry}{should the geometry be returned or just a table?}
 
 \item{out_fields}{the fields of the layer to return (character vector)}
+
+\item{return_n}{how many features (maximum) should be returned by the query?}
+
+\item{geometry_precision}{The number of decimal places in the response geometries returned by the query operation}
 
 \item{query}{a named vector of parameters to include in the query}
 

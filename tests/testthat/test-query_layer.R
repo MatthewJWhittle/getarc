@@ -1,21 +1,35 @@
+#'  Testing for query layer
+#'
+#'   The following arguments are added to speed up tests by reducing the
+#'   number of features returned & the precision of the geometry
+#'   return_n = 1,
+#'   geometry_precision = 1,
+
 require(sf)
 
 one_row <- query_layer(endpoint = endpoints$gb_wood_pasture_parkland,
-                       query = c(resultRecordCount = 1))
+                       return_n = 1,
+                       geometry_precision = 1)
+
 one_row_bng <- query_layer(
   endpoint = endpoints$gb_wood_pasture_parkland,
   crs = 27700,
-  query = c(resultRecordCount = 1)
+  return_n = 1,
+  geometry_precision = 1
 )
 
 small_feature <-
   query_layer(endpoints$gb_wood_pasture_parkland,
-              query = c("where" = "Shape__Area < 30", resultRecordCount = 1))
+              query = c("where" = "Shape__Area < 30"),
+              return_n = 1,
+              geometry_precision = 1)
 
 
 sql_query <- query_layer(
   endpoint = endpoints$gb_wood_pasture_parkland,
-  query = c(resultRecordCount = 1,
+  return_n = 1,
+  geometry_precision = 1,
+  query = c(
             where = "SUBTYPE = 'Parkland' AND INTERPQUAL = 'Medium'")
 )
 # Perform a spatial query
@@ -30,38 +44,55 @@ bbox <-
 
 spatial_query_bbox <-
   query_layer(endpoint = endpoints$gb_wood_pasture_parkland,
-              in_geometry = bbox)
+              in_geometry = bbox,
+              return_n = 1,
+              geometry_precision = 1)
 
-point <- st_as_sf(data.frame(x = 448171, y = 163733), coords = c("x", "y"), crs = 27700)
+point1 <- st_as_sf(data.frame(x = 448171, y = 163733), coords = c("x", "y"), crs = 27700)
+point2 <- st_as_sf(data.frame(x = 448121, y = 163800), coords = c("x", "y"), crs = 27700)
 
 
 spatial_query_point <-
   query_layer(endpoint = endpoints$gb_wood_pasture_parkland,
-              in_geometry = point)
+              in_geometry = point1,
+              return_n = 2,
+              geometry_precision = 1)
 
-buffer <- st_buffer(point, 1000)
+buffer <- st_buffer(point1, 1000)
 
 spatial_query_buffer <-
   query_layer(endpoint = endpoints$gb_wood_pasture_parkland,
-              in_geometry = buffer)
+              in_geometry = buffer,
+              return_n = 2,
+              geometry_precision = 1)
 
+mp <- st_union(
+  st_buffer(point1, 10),
+  st_buffer(point2, 10)
+)
+spatial_query_mp <-
+  query_layer(endpoint = endpoints$gb_wood_pasture_parkland,
+              in_geometry = mp,
+              return_n = 2,
+              geometry_precision = 1)
 ms_nogeom <-
   query_layer(
     endpoints$english_counties,
     return_geometry = FALSE,
-    query = c(resultRecordCount = 1)
+    return_n = 2,
+    geometry_precision = 1
   )
 fs_nogeom <-
   query_layer(endpoint = endpoints$ancient_woodland_england,
     return_geometry = FALSE,
-    query = c(resultRecordCount = 1)
+    return_n = 1
   )
 
 
 awi_2510 <-
   query_layer(endpoint = endpoints$ancient_woodland_england,
-            query = c(resultRecordCount = 2510,
-                      outFields = "objectid"),
+            out_fields = "objectid",
+            return_n = 2510,
             return_geometry = FALSE)
 
 

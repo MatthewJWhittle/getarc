@@ -86,12 +86,22 @@ sf_to_json <-
 
     # Strip out everything outside the rings
     rings <- stringr::str_remove_all(x_geojson, "\\{.+:|\\}")
-    # Format the json and return
-    glue::glue('{"hasZ" : false, "hasM" : false,
-           "(json_type)" : (rings), "spatialReference" : {"wkid" : (crs)}}',
-               .open = "(",
-               .close = ")")
 
+    # sfc_geojson adds one too many pairs of enclosing brackets
+    # Its neccessary to remove one layer. This works for simple text
+    # case with two adjecent boxes. Need to test more widely
+    # Could make this conditional on geometry being a multipolygon
+    rings <-
+      rings %>%
+      stringr::str_replace_all("\\[\\[\\[\\[", "[[[") %>%
+      stringr::str_replace_all("\\]\\]\\]\\]", "]]]") %>%
+      stringr::str_replace_all("\\]\\]\\],\\[\\[\\[", "]],[[")
+
+    # Format the json and return
+      glue::glue('{"hasZ" : false, "hasM" : false,
+           "(json_type)" : (rings), "spatialReference" : {"wkid" : (crs)}}',
+                 .open = "(",
+                 .close = ")")
   }
 #' ESRI Geometry Type
 #'

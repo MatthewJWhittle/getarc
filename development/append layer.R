@@ -6,6 +6,7 @@ require(tidyverse)
 require(devtools)
 require(sf)
 require(spatialutils)
+devtools::load_all()
 
 # https://developers.arcgis.com/rest/services-reference/append-feature-service-layer-.htm
 
@@ -24,7 +25,7 @@ points <-
   points %>%
   mutate(id = c(1:10))
 
-points %>% st_write(dsn = "development/points1.geojson")
+points %>% st_write(dsn = "development/points1.geojson", delete_dsn = TRUE )
 
 # I've manually uploaded this to esri
 
