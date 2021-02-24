@@ -41,12 +41,22 @@ get_token <-
 
     # With the request send the datetime which is then automatically stored with the token
     # This is then checked against the expiry seconds and the token is refreshed if neccessary
+    # Is the grant_datetime list name an arbitrary choice?
+    # Added a new dttm in the query_authorize_extra
+    # grant datetime should be updated whenever the token is refreshed
+    # access grant datetime will only be updated when the less perishable
+    # access token is acquired
     my_token <-
       httr::oauth2.0_token(endpoint = endpoint, app = app, cache = use_cache,
-                           query_authorize_extra = list(grant_datetime = Sys.time()))
+                           query_authorize_extra = list(grant_datetime = Sys.time(),
+                                                        access_grant_datetime = Sys.time()
+                                                        ))
 
     # httr doesn't parse the credentials correctly into a list
     my_token$credentials <- jsonlite::fromJSON(my_token$credentials)
+
+
+
 
     # Check expiry and refresh if neccessary
     # The refresh token is an alteration to httr:::refresh_oauth2.0
@@ -62,6 +72,20 @@ get_token <-
         Sys.time()
     }
 
+    # The refresh token can also expire and needs to be refreshed. This is indicated in an
+    # error message. Need to check this then if it is expired:
+    # - delete the token from the cache_path
+    # - request a new token recursively calling the function
+    # - return that token
+    refresh_expired <- my_token$credentials$error$message == "refresh_token expired"
+    # The message is empty if the token hasn't expired
+    # Only check for the message if it there (length > 0)
+    if((length(refresh_expired) > 0) && refresh_expired){
+      file.remove(my_token$cache_path)
+      my_token <- get_token(client_id, client_secret, app_name,
+                            use_cache, auto_refresh,
+                            redirect_uri)
+    }
     return(my_token)
   }
 #' Token Expired
@@ -125,3 +149,45 @@ get_credentials <-
     }
     return(credentials)
   }
+#' Generate a token
+#'
+#' Generate ArcGIS Access tokens with credentials
+#'
+#' This functino enables a user to generate a token for accessing
+#' ArcGIS services where Oauth2.0 isn't possible. The documentation is here:
+#' https://developers.arcgis.com/rest/services-reference/generate-token.htm
+#' You should make an effort to protect your username in password so that it isn't saved in the source code.
+#' Some good options are here:
+#' https://cran.r-project.org/web/packages/httr/vignettes/secrets.html
+#'
+#' You could write a wrapper function around this function which gets your credentials from an
+#' environment variable, calls the function and returns a token. getarc may provide this functionality eventually.
+#' @param endpoint the endpoint against which to request the token. this is generally in the format of:
+#' https://<host>:<port>/<site>/tokens/generateToken
+#' e.g: https://sampleserver6.arcgisonline.com/arcgis/tokens/generateToken
+#' @param  username your ArcGIS online username. You should make an effort to protect this by accessing it from an
+#' environment variable so that it isn't saved in your source code or .Rhistory file.
+#' @param  password your ArcGIS online password. You should make an effort to protect this by accessing it from an
+#' environment variable so that it isn't saved in your source code or .Rhistory file.
+#' @param expiration The token expiration time in minutes (defaults to 60)
+#' @importFrom httr POST
+#' @importFrom httr content
+#' @importFrom jsonlite fromJSON
+generate_token <-
+  function(endpoint, username, password, expiration = 60) {
+    token <-
+      httr::POST(
+        url = endpoint,
+        encode = "form",
+        body = list(
+          username = username,
+          password = password,
+          f = "json",
+          client = "requestip",
+          expiration = expiration
+        )
+      )
+
+    jsonlite::fromJSON(httr::content(token))
+  }
+
