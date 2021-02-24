@@ -9,6 +9,7 @@ query_layer(
   in_geometry = NULL,
   spatial_filter = "intersects",
   return_geometry = TRUE,
+  where = NULL,
   out_fields = c("*"),
   return_n = NULL,
   geometry_precision = NULL,
@@ -29,6 +30,8 @@ See https://developers.arcgis.com/rest/services-reference/get-started-with-the-s
 Options are: intersects, contains, crosses, envelope_intersects, index_intersects, overlaps, touches, within}
 
 \item{return_geometry}{should the geometry be returned or just a table?}
+
+\item{where}{an optional SQL where query formatted as a single string. See the documentation for what is accepted}
 
 \item{out_fields}{the fields of the layer to return (character vector)}
 
