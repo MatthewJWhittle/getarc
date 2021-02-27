@@ -174,7 +174,7 @@ where_in_query <-
 make_empty_tibble <-
   function(field_names, out_fields){
     # If the user wants to only return certain fields, then filter the field names data
-    if(out_fields != "*"){
+    if(all(out_fields != "*")){
       field_names <- field_names[field_names %in% out_fields]
     }
     # then make an empty tibble and fill it with empty columns which match the data
