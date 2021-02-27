@@ -4,7 +4,12 @@
 \alias{set_credentials}
 \title{Get/Set Credentials}
 \usage{
-set_credentials(client_id, client_secret, app_name)
+set_credentials(
+  client_id,
+  client_secret,
+  app_name,
+  path = "~/secrets/getarc-credentials.json"
+)
 }
 \arguments{
 \item{client_id}{The client ID. Taken from you app dashboard on arcgis for developers}
@@ -12,6 +17,8 @@ set_credentials(client_id, client_secret, app_name)
 \item{client_secret}{The client secret. Taken from you app dashboard on arcgis for developers}
 
 \item{app_name}{The name of your app. Taken from you app dashboard on arcgis for developers}
+
+\item{path}{The path where the credentials should be saved}
 }
 \description{
 Get or set app credentials

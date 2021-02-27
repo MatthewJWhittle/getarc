@@ -32,8 +32,8 @@ Returning only one feature.
 
 ```{r}
 devtools::load_all()
-require(sf)
-require(tidyverse)
+library(sf)
+library(tidyverse)
 
 one_park <- 
   query_layer(endpoint = endpoints$national_parks_england,

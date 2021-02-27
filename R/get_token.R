@@ -119,36 +119,46 @@ token_expired <-
 #' @param client_id The client ID. Taken from you app dashboard on arcgis for developers
 #' @param client_secret The client secret. Taken from you app dashboard on arcgis for developers
 #' @param app_name The name of your app. Taken from you app dashboard on arcgis for developers
-#' @importFrom keyring key_set
-#' @importFrom keyring key_get
+#' @param path The path where the credentials should be saved
+#' @importFrom jsonlite toJSON
+#' @importFrom jsonlite fromJSON
+#' @importFrom jsonlite  write_json
+#' @importFrom jsonlite  read_json
 #' @export set_credentials
 set_credentials <-
   function(client_id,
            client_secret,
-           app_name){
-    keyring::key_set_with_value(service = "getarc", username = "client_id", password = client_id)
-    keyring::key_set_with_value(service = "getarc", username = "client_secret", password = client_secret)
-    keyring::key_set_with_value(service = "getarc", username = "app_name", password = app_name)
+           app_name,
+           path = "~/secrets/getarc-credentials.json") {
 
-  }
-get_credentials <-
-  function(){
     credentials <-
-      list(
-        client_id = keyring::key_get(service = "getarc", username = "client_id"),
-        client_secret = keyring::key_get(service = "getarc", username = "client_secret"),
-        app_name = keyring::key_get(service = "getarc", username = "app_name")
-      )
-    # Check all have been set
-    valid <- purrr::map_lgl(credentials, ~.x != "")
-    if(!all(valid)){
-      stop(paste0(
-        "Credentials not set: ", paste0(paste0("'", names(credentials)[!valid], "'"), collapse = ", "), "\n",
-        "Use getarc::set_credentials() to set app credentials for use in get_token. \nVisit https://developers.arcgis.com/dashboard to get your app credentials."
-      ))
+      list(client_id = client_id,
+           client_secret = client_secret,
+           app_name = app_name)
+
+    # Check the path exists & create it if not
+    if (!dir.exists(dirname(path))) {
+      dir.create(dirname(path))
     }
-    return(credentials)
+    jsonlite::write_json(jsonlite::toJSON(credentials), path = path)
   }
+
+get_credentials <-
+  function(path  = "~/secrets/getarc-credentials.json") {
+    # Check whether the credentials exist and use a path
+    if (!file.exists(path)) {
+      stop(
+        paste0(
+          "Credentials not set: \n",
+          "Use getarc::set_credentials() to set app credentials for use in get_token. \nVisit https://developers.arcgis.com/dashboard to get your app credentials."
+        )
+      )
+    }
+    # Get the credentials from the path and return them in a list
+    credentials <- jsonlite::read_json(path)
+    jsonlite::fromJSON(credentials[[1]])
+  }
+
 #' Generate a token
 #'
 #' Generate ArcGIS Access tokens with credentials
