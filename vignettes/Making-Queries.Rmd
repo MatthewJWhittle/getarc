@@ -16,6 +16,11 @@ knitr::opts_chunk$set(
 
 ```{r setup}
 library(getarc)
+library(devtools)
+load_all()
+library(sf)
+library(tidyverse)
+
 ```
 
 Data on an arc gis server can be accessed via the `query_layer` function. This function also supports any query operation supported by the ArcGIS Rest API.
@@ -31,9 +36,6 @@ The query parameter supports any query parameter supported by the API Please rev
 Returning only one feature.
 
 ```{r}
-devtools::load_all()
-library(sf)
-library(tidyverse)
 
 one_park <- 
   query_layer(endpoint = endpoints$national_parks_england,

@@ -9,3 +9,4 @@
 ^README_*/*
 ^data-raw$
 ^\.patoken$
+^images/*

@@ -102,6 +102,7 @@ check_esri_error <-
 #' @param x a vector
 #' @param max_length the maximum length of the returned vectors
 #' @return a list of split x where each element does not exceed the length of max_length
+#' @importFrom utils tail
 split_vector <-
   function(x, max_length){
 
@@ -122,7 +123,7 @@ split_vector <-
     starts <- seq(from = 1, to = x_length, by = max_length)
 
     # If the last element of the vector is the final element then it should be dropped
-    if(tail(starts, 1) == x_length){
+    if(utils::tail(starts, 1) == x_length){
       starts <- starts[c(1:(length(starts) - 1))]
       # If the start vector ends on the length then parts needs to be one less
       parts <- parts - 1
