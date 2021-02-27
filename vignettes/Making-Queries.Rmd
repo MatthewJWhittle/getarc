@@ -15,11 +15,11 @@ knitr::opts_chunk$set(
 ```
 
 ```{r setup}
-library(getarc)
-library(devtools)
-load_all()
-library(sf)
-library(tidyverse)
+# library(getarc)
+# library(devtools)
+# load_all()
+# library(sf)
+# library(tidyverse)
 
 ```
 
@@ -37,41 +37,41 @@ Returning only one feature.
 
 ```{r}
 
-one_park <- 
-  query_layer(endpoint = endpoints$national_parks_england,
-  # Return only one record
-  query = c(resultRecordCount = 1)
-)
-print(one_park)
-plot(one_park$geometry)
-
-# Including a sql where query to only return the yorkshire dales
-yorkshire_dales <- 
-  query_layer(endpoint = endpoints$national_parks_england,
-  # SQL query to return data for the yorkshire dales 
-  query = c("where" = "NAME LIKE 'YORKSHIRE DALES'")
-)
+# one_park <- 
+#   query_layer(endpoint = endpoints$national_parks_england,
+#   # Return only one record
+#   query = c(resultRecordCount = 1)
+# )
+# print(one_park)
+# plot(one_park$geometry)
+# 
+# # Including a sql where query to only return the yorkshire dales
+# yorkshire_dales <- 
+#   query_layer(endpoint = endpoints$national_parks_england,
+#   # SQL query to return data for the yorkshire dales 
+#   query = c("where" = "NAME LIKE 'YORKSHIRE DALES'")
+# )
 ```
 
 Spatial querys can be perform either using the `in_geometry` and `spatial_filter` arguments. These arguments define a geometry spatial filter (intersects, contains, etc.) to query the endpoint. It is possible to pass a bounding box or polygon to `in_geometry`. Complex polygons are simplified to reduce the number of characters being sent in the request.
 
 ```{r}
-dales_bbox <- st_bbox(yorkshire_dales)
-
-# Which Sites of Special Scientific Interest are in the yorkshire dales?
-dales_sssi <- 
-  query_layer(endpoints$sssi_england, 
-  # Supply a polygon for a spatial intersects query
-  in_geometry = yorkshire_dales
-)
-
-# Transform the data for plotting
-yorkshire_dales <- yorkshire_dales %>% st_transform(crs = 27700)
-dales_sssi <- dales_sssi %>% st_transform(crs = 27700)
-
-# Plot the yorkshire dales and it's SSSIs
-plot(yorkshire_dales$geometry)
-plot(dales_sssi$geometry, add = TRUE, border = "red", col = "orange")
+# dales_bbox <- st_bbox(yorkshire_dales)
+# 
+# # Which Sites of Special Scientific Interest are in the yorkshire dales?
+# dales_sssi <- 
+#   query_layer(endpoints$sssi_england, 
+#   # Supply a polygon for a spatial intersects query
+#   in_geometry = yorkshire_dales
+# )
+# 
+# # Transform the data for plotting
+# yorkshire_dales <- yorkshire_dales %>% st_transform(crs = 27700)
+# dales_sssi <- dales_sssi %>% st_transform(crs = 27700)
+# 
+# # Plot the yorkshire dales and it's SSSIs
+# plot(yorkshire_dales$geometry)
+# plot(dales_sssi$geometry, add = TRUE, border = "red", col = "orange")
 ```
 
 # Endpoints
@@ -79,7 +79,7 @@ plot(dales_sssi$geometry, add = TRUE, border = "red", col = "orange")
 The endpoint url can be copied from Query URL box of th Arc GIS API explorer. A number of endpoints are provided in `getarc::endpoints`.
 
 ```{r}
-head(endpoints)
+# head(endpoints)
 ```
 
 # Don't Return Geometry
@@ -87,8 +87,8 @@ head(endpoints)
 Often it is desirable to avoid returning the geometry and download a table of results to investigate. This can then be used to build up queries to refine your results, improving download times. This is done using `return_geometry = FALSE`
 
 ```{r}
-query_layer(endpoint = endpoints$national_parks_england, 
-            return_geometry = FALSE)
+# query_layer(endpoint = endpoints$national_parks_england, 
+#             return_geometry = FALSE)
 ```
 
 # Custom Queries
@@ -98,18 +98,18 @@ A number of query options are supported by esri that I haven't yet built an R ap
 SQL WHERE queries are supported via this argument:
 
 ```{r}
-query_layer(endpoints$gb_postcodes, 
-            query = c(resultRecordCount = 1))
-
-south_harrogate_postcodes <- 
-  query_layer(endpoints$gb_postcodes, 
-            query = c(where = "pcd LIKE 'HG2%'"))
-
-# Plot the postcodes
-south_harrogate_postcodes %>% 
-  # Extract the postcode sector (HG1 1)
-  mutate(postcode_sector = str_extract(pcd, "[A-Z]{1,2}[0-9]+ [0-9]+")) %>% 
-  select(postcode_sector) %>% plot()
+# query_layer(endpoints$gb_postcodes, 
+#             query = c(resultRecordCount = 1))
+# 
+# south_harrogate_postcodes <- 
+#   query_layer(endpoints$gb_postcodes, 
+#             query = c(where = "pcd LIKE 'HG2%'"))
+# 
+# # Plot the postcodes
+# south_harrogate_postcodes %>% 
+#   # Extract the postcode sector (HG1 1)
+#   mutate(postcode_sector = str_extract(pcd, "[A-Z]{1,2}[0-9]+ [0-9]+")) %>% 
+#   select(postcode_sector) %>% plot()
 ```
 
 # 
