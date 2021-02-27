@@ -9,6 +9,10 @@ before_install:
   - sudo apt-get --yes --force-yes update -qq
   - sudo apt-get install --yes libudunits2-dev libproj-dev libgeos-dev libgdal-dev
   - sudo apt-get install -y libsodium-dev
+  - echo "options(repos = c(CRAN = 'https://packagemanager.rstudio.com/all/__linux__/xenial/latest'))" >> ~/.Rprofile.site
+  - echo "options(HTTPUserAgent = paste0('R/', getRversion(), ' R (',
+       paste(getRversion(), R.version['platform'], R.version['arch'], R.version['os']),
+       ')'))" >> ~/.Rprofile.site
 
 r_packages:
   - sf
