@@ -8,8 +8,8 @@
 #' @param my_token An access token to be included in the string if specified
 #' @param ... additional query parameters passed as named pairs. Names are the parameter names and the values are the parameter values. For example: list(outFields = "*")
 #' @return a string, beginning with "query?" to concatenate with the end point
-#' @import purrr
-#' @import utils
+#' @importFrom purrr flatten
+#' @importFrom utils URLencode
 query_string <-
   function(f = "json",
            my_token = NULL,

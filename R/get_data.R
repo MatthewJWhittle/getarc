@@ -13,9 +13,7 @@
 #' @importFrom httr write_disk
 #' @importFrom httr status_code
 #' @importFrom httr content
-#' @import purrr
 get_geojson <- function(query_url, query) {
-
   # Request the data using POST
   response <- httr::POST(url = query_url, body = as.list(query))
 

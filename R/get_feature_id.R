@@ -7,7 +7,8 @@
 #' @param query an optional query to include in the request
 #' @param my_token an access token to be included when required
 #' @return a list of feature IDs & the feature ID field
-#' @import httr
+#' @importFrom httr POST
+#' @importFrom httr content
 #' @importFrom jsonlite fromJSON
 #' @export get_feature_ids
 get_feature_ids <-
@@ -69,7 +70,8 @@ get_feature_ids <-
 #' @param query an optional query to include in the request
 #' @param my_token an access token to be included when required
 #' @return the count of features mathing the query
-#' @import httr
+#' @importFrom httr POST
+#' @importFrom httr content
 #' @importFrom jsonlite fromJSON
 #' @export get_count
 get_count <-

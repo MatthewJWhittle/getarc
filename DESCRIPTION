@@ -28,12 +28,8 @@ Imports:
     stringr,
     tibble,
     lubridate,
-    httpuv,
     geojsonsf,
     lifecycle,
-    readr,
-    keyring,
-    rlang,
     progress,
     glue
 VignetteBuilder: knitr

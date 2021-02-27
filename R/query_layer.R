@@ -21,10 +21,7 @@
   #' @return an sf object
   #' @export query_layer
   #'
-  #' @import httr
   #' @importFrom sf st_transform
-  #' @importFrom magrittr %>%
-  #' @import tibble
   #' @importFrom lifecycle deprecated
   #' @importFrom lifecycle is_present
   #' @importFrom progress progress_bar
@@ -52,10 +49,7 @@ query_layer <-
       # Deal with the deprecated argument for compatibility
       in_geometry <- bounding_box
     }
-
     #https://developers.arcgis.com/rest/services-reference/layer-feature-service-.htm
-
-
     # It would be useful to add a line of code in here to check and auto refresh the token
     # Get the details of the layer to
     layer_details <- get_layer_details(endpoint = endpoint, my_token = my_token)
@@ -98,13 +92,12 @@ query_layer <-
     query_url <- paste0(endpoint, "/query")
     # This behaviour is undesirable when queries become more complex.
     # Need to find a way of making the query string available to users
-    #message(paste0("Requesting data..."))
 
     # This ultimately needs moving into its own function
+    ####
     # Get by FIDs
     # If the returned count exceeds the max record count, then the get data function should be
     # mapped.
-
     # First get the FIDs use in querying the endpoint
     object_ids <-
       get_feature_ids(endpoint = endpoint,
@@ -134,7 +127,7 @@ query_layer <-
                             ))
 
     data <- dplyr::bind_rows(data_list)
-
+    ####
     # Parse the variables -----
     # This should probably be wrapped up into one parsing function at some point
     data <-
@@ -146,18 +139,11 @@ query_layer <-
 
     # If the specified crs is not 4326 (the current crs) then transform the data
     # This might be redundant as we can specify the outcrs when requesting the data
-    if (crs != 4326 & return_geometry) {
+    if (crs != 4326 & return_geometry & any(c("sf", "sfc") %in% class(data))) {
       data <- data %>% sf::st_transform(crs = crs)
     }
 
-    # It would be possible to expand the code here to actually request all features in a layer
-    # exceeding the maximum limit. This can be done by knowing the maxRecordCount and the count of
-    # features then running a series of where objectid less than & objectid more than queries
-    # to retrieve all the data. Could even add in a progress bar
-    # Warn if the number of rows in the data is
-    # if(nrow(data) == layer_details$maxRecordCount){
-    #   warning("May have reached maxRecordCount.")
-    # }
+    # Print a warning if the query didn't return any data
     if(nrow(data) == 0){
       warning("No data returned by query.")
     }

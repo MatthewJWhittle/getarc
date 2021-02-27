@@ -9,7 +9,9 @@
 #' @param app_name app credential: app name
 #' @param redirect_uri te url to redirect to after authenticating. default is httr::oauth_callback(). This needs to be added into your web app on arc gis for developers.
 #' @export get_token
-#' @import httr
+#' @importFrom httr oauth_endpoint
+#' @importFrom httr oauth_app
+#' @importFrom httr oauth2.0_token
 #' @importFrom purrr map_lgl
 get_token <-
   function(client_id = NULL, client_secret = NULL, app_name = NULL,

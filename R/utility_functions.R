@@ -68,14 +68,13 @@ as_type <-
 #'
 #' @param expr an R expression
 #' @param message the message to print if `expr` evaluates to `FALSE`. If NULL, the expression is printed like in stopifnot
-#' @importFrom rlang expr_text
 #' @return NULL
 assert_that <-
   function(expr, message = NULL) {
     if (!expr) {
       if (is.null(message)) {
         message <-
-          paste0(rlang::expr_text(substitute(expr)), " is not TRUE")
+          paste0(deparse(substitute(expr)), " is not TRUE")
       }
       stop(message,
            call. = FALSE)
