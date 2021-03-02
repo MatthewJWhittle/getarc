@@ -96,9 +96,9 @@ awi_2510 <-
 
 
 
-tibble(OBJECTID = character(0),
-       NAME = character(0)
-)
+# tibble(OBJECTID = character(0),
+#        NAME = character(0)
+# )
 
 no_awi <-
 query_layer(endpoint = endpoints$ancient_woodland_england,

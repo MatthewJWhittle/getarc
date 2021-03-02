@@ -87,7 +87,7 @@ assert_that <-
 #' @return null
 check_esri_error <-
   function(content){
-    is_error <- all(grepl("^\\{\"error", content))
+    is_error <- !is.null(names(content)) && names(content)[1] == "error"
     if(is_error){
       stop(content)
     }
@@ -185,3 +185,16 @@ make_empty_tibble <-
     return(empty_df)
 
   }
+
+#' Parse R JSON
+#'
+#' Parse a httr response using rjson
+#'
+#' This function implements faster json parsing the jsonlite and httr
+#' @param response a response object returned by a GET or POST request
+#' @return an R object of parsed json
+#' @importFrom httr content
+#' @importFrom rjson fromJSON
+parse_rjson <- function(response){
+  rjson::fromJSON(httr::content(response, as = "text"))
+}
