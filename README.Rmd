@@ -1,139 +1,113 @@
-  
 ---
 output: github_document
 ---
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
+
 # getarc
-  <!-- badges: start -->
-  [![Codecov test coverage](https://codecov.io/gh/MatthewJWhittle/getarc/branch/master/graph/badge.svg)](https://codecov.io/gh/MatthewJWhittle/getarc?branch=master)
-  
-  <!-- badges: end -->
+
+<!-- badges: start -->
+
+[![Codecov test coverage](https://codecov.io/gh/MatthewJWhittle/getarc/branch/master/graph/badge.svg)](https://codecov.io/gh/MatthewJWhittle/getarc?branch=master)
+
+<!-- badges: end -->
 
 # Overview
-`getarc` is an R wrapper for the [ArcGIS Rest API](https://developers.arcgis.com/rest/services-reference/). It provides access to the extensive open data available from [Arc GIS](https://hub.arcgis.com/search).
-It currently only supports functionality for querying data. 
 
-* `query_layer` gets data from an arc gis server and supports query operations
-* `get_layer_details` gets metadata about a layer such as the field names and maxRecordCount
-* `get_token` gets an access token via a web browser login to access private services
+`getarc` is an R wrapper for the [ArcGIS Rest API](https://developers.arcgis.com/rest/services-reference/). It provides access to any data hosted on an ArcGIS Feature or Map Server, including exstensive open datasets ([Arc GIS](https://hub.arcgis.com/search)). It currently only supports functionality for querying data.
+
+-   `query_layer` gets data from an arc gis server and supports query operations
+-   `get_layer_details` gets metadata about a layer such as the field names and maxRecordCount
+-   `get_token` gets an access token via a web browser login to access private services
 
 # Installation
+
 The package can currently be installed from github:
+
 ```{r eval=FALSE}
 # Install the development version from GitHub:
 install.packages("devtools")
 devtools::install_github("matthewjwhittle/getarc")
 ```
+
 ```{r include=FALSE}
 devtools::load_all()
 ```
 
-# Examples
 ```{r warning=FALSE, message=FALSE}
 library(getarc)
 library(sf)
 library(tidyverse)
 ```
 
-# Getting data
-Data on an arc gis server can be accessed via the `query_layer` function. This function also supports any query operation supported by the ArcGIS Rest API.
+# Getting Started
 
-# Getting data from a Feature Server - National Parks in England
-```{r}
-# Use the endpoints list 
+## Downloading Data
 
-# Get the data
-national_parks <- 
-  query_layer(endpoint = endpoints$national_parks_england)
+The `query_layer` function is used to query and download a layer from an Arc GIS server. The layer is identified by the endpoint url. This can be found by visting the service reference, clicking the API explorer tab and copying the query url (up to "/query?...").
 
-head(national_parks)
-# Plot the first feature
-plot(national_parks$geometry[1])
+<img src="images/Screenshot 2021-02-24 at 18.36.59.png" width="499"/>
+
+A few endpoint urls are provided with the package for testing in the getarc::endpoints object.
+
+```{r cache = TRUE}
+national_parks <- query_layer(endpoint = endpoints$national_parks_england)
+glimpse(national_parks)
 ```
 
-## Querys
-A query can be included in the request by either supplying a named list to the `query` parameter, or passing a bounding box to `bounding_box` to return intersecting features.
+Spatial data is returned as an sf object. It is also possible to query tables on an ArcGIS server or return data without a geometry and this will return a tibble.
 
-The query parameter supports any query parameter supported by the API Please review the [API documentation](https://developers.arcgis.com/rest/services-reference/query-feature-service-layer-.htm) on querying Feature Server layers for detail on how to query data. I intend to provide more R-friendly support for query operations in the future.
+```{r}
+# Plot the first geometry in the object and add the national park's name as the title
+plot(national_parks$geometry[1], main = national_parks$NAME[1])
+```
 
-Returning only one feature.
+## Performing Queries
+
+The ArcGIS Rest API supports a number of query operations to return only the features you need. All query operations are supported via `query_layer` either as a named argument or via the query argument which accepts a named vector of query parameters and arguments. You can also request a maximum number of features, only certain columns, no geometry or less precise geometry. These options all reduce the amount of data transferred and therefore improve the download speed.
+
 ```{r}
 one_park <- 
   query_layer(endpoint = endpoints$national_parks_england,
-  # Return only one record
-  query = c(resultRecordCount = 1)
+  return_n = 1
 )
-print(one_park)
-plot(one_park$geometry)
+glimpse(one_park)
+```
 
-# Including a sql where query to only return the yorkshire dales
-yorkshire_dales <- 
+SQL where queries are supported vie the `where` argument. Here I am requesting only the Yorkshire Dales National Park.
+
+```{r}
+yorkshire_dales <-
   query_layer(endpoint = endpoints$national_parks_england,
-  # SQL query to return data for the yorkshire dales 
-  query = c("where" = "NAME LIKE 'YORKSHIRE DALES'")
-)
+              where = "NAME LIKE 'YORKSHIRE DALES'")
+
+plot(yorkshire_dales$geometry, main = yorkshire_dales$NAME)
 ```
 
-Spatial querys can be perform either using the `in_geometry` and `spatial_filter` arguments. These arguments define a geometry spatial filter (intersects, contains, etc.) to query the endpoint. It is possible to pass a bounding box or polygon to `in_geometry`. Complex polygons are simplified to reduce the number of characters being sent in the request.
+You can also pass in a geometry to perform a spatial query (defaulting to intersects).
 
 ```{r}
-dales_bbox <- st_bbox(yorkshire_dales)
-
-# Which Sites of Special Scientific Interest are in the yorkshire dales?
-dales_sssi <- 
-  query_layer(endpoints$sssi_england, 
-  # Supply a polygon for a spatial intersects query
-  in_geometry = yorkshire_dales
-)
-
-# Transform the data for plotting
-yorkshire_dales <- yorkshire_dales %>% st_transform(crs = 27700)
-dales_sssi <- dales_sssi %>% st_transform(crs = 27700)
-
-# Plot the yorkshire dales and it's SSSIs
-plot(yorkshire_dales$geometry)
-plot(dales_sssi$geometry, add = TRUE, border = "red", col = "orange")
+dales_sssi <- query_layer(endpoints$sssi_england, in_geometry = yorkshire_dales$geometry)
+# Plot:
+plot(yorkshire_dales$geometry, main = "SSSIs in the Yorkshire Dales National Park")
+plot(dales_sssi$geometry, col = "green", add = TRUE)
 ```
 
-# Endpoints 
-The endpoint url can be copied from Query URL box of th Arc GIS API explorer. A number of endpoints are provided in `getarc::endpoints`.
-```{r}
-head(endpoints)
-```
-
-# Don't Return Geometry
-Often it is desirable to avoid returning the geometry and download a table of results to investigate. This can then be used to build up queries to refine your results, improving download times. This is done using `return_geometry = FALSE`
-```{r}
-query_layer(endpoint = endpoints$national_parks_england, 
-            return_geometry = FALSE)
-```
-
-# Custom Queries
-A number of query options are supported by esri that I haven't yet built an R api for. You can take advantage of this by passing a named vector of query parameters and values to the `query` argument. 
-
-SQL WHERE queries are supported via this argument:
-```{r}
-query_layer(endpoints$gb_postcodes, 
-            query = c(resultRecordCount = 1))
-
-south_harrogate_postcodes <- 
-  query_layer(endpoints$gb_postcodes, 
-            query = c(where = "pcd LIKE 'HG2%'"))
-
-# Plot the postcodes
-south_harrogate_postcodes %>% 
-  # Extract the postcode sector (HG1 1)
-  mutate(postcode_sector = str_extract(pcd, "[A-Z]{1,2}[0-9]+ [0-9]+")) %>% 
-  select(postcode_sector) %>% plot()
-```
+The Making Queries vignette (in development) provides much more detail on how to perform queries with `query_layer`. You can also read the [API documentation](https://developers.arcgis.com/rest/services-reference/query-feature-service-layer-.htm) for further detail on performing queries.
 
 # Authentication
-Authentication is done via oauth2.0 and the `get_token` function. Sign in is done via a popup browser window and the token can be passed to the query functions via the `my_token` argument. To use authentication you need to [set up an arcgis developers account](https://developers.arcgis.com/sign-up/) (for free) and create an app. This takes about 5 minutes. Once complete you need to navigate to the app on your dashboard, copy the credentials and set them using `set_credentials`. These are saved securely as environment variables and now you can use `get_token` to access secured services where you have access. 
-```{r, eval=FALSE}
-set_credentials(client_id = "xxxx", client_secret = "xxxx", app_name = "My App")
 
+The package supports authentication for private servers. This is either done via `get_token` OAuth 2.0 in a popup web browser or via the `generate_token` where OAuth 2.0 isn't supported. Tokens generated by either function should be passed to the `my_token` argument of `query_layer` to authenticate requests.
+
+To use authentication (with `get_token` only) you need to [set up an ArcGIS developers account](https://developers.arcgis.com/sign-up/) (for free) and create an app. This takes about 5 minutes. Once complete you need to navigate to the app on your dashboard, copy the credentials and set them using `set_credentials`. These are saved securely using the keyring package and now you can use `get_token` to access secured services where you have access.
+
+```{r, eval=FALSE}
+# Set Credentials (once)
+set_credentials(client_id = "xxxx", client_secret = "xxxx", app_name = "My App")
 my_token <- get_token()
+
+## Or:
+my_token <- get_token(client_id = "xxxx", client_secret = "xxxx", app_name = "My App")
 
 data <-
   query_layer(endpoint = private_endpoint,
@@ -142,5 +116,16 @@ data <-
 )
 ```
 
+# Future Development
 
+Things I am working on supporting at the moment:
 
+-   Adding new features to a feature layer via addFeatures
+
+-   Appending data to a feature layer via append
+
+Things I would like to do in the future:
+
+-   Caching the results of `query_layer`
+
+-   Only requesting data that has changed from the cache

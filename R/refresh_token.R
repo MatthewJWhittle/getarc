@@ -11,6 +11,10 @@
 #' @param user_params user parameters to send with request
 #' @return a list of refreshed credentials
 #' @importFrom utils modifyList
+#' @importFrom httr authenticate
+#' @importFrom httr POST
+#' @importFrom httr content
+#' @importFrom httr stop_for_status
 #' @source https://rdrr.io/cran/httr/src/R/oauth-refresh.R https://cran.r-project.org/package=httr
 refresh_token <-
   function(endpoint,
@@ -34,16 +38,16 @@ refresh_token <-
     }
 
     if (isTRUE(use_basic_auth)) {
-      response <- POST(
+      response <- httr::POST(
         refresh_url,
         body = req_params,
         encode = "form",
-        authenticate(app$key, app$secret, type = "basic")
+        httr::authenticate(app$key, app$secret, type = "basic")
       )
     } else {
       req_params$client_secret <- app$secret
       response <-
-        POST(refresh_url, body = req_params, encode = "form")
+        httr::POST(refresh_url, body = req_params, encode = "form")
     }
 
     err <- find_oauth2.0_error(response)
@@ -57,8 +61,8 @@ refresh_token <-
       return(NULL)
     }
 
-    stop_for_status(response)
-    refresh_data <- content(response)
+    httr::stop_for_status(response)
+    refresh_data <- httr::content(response)
     utils::modifyList(credentials,
                       # The arc gis server returns a format that httr doesn't auto parse
                       # This line is added in to parse it and add the new credentials in

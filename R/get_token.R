@@ -9,7 +9,9 @@
 #' @param app_name app credential: app name
 #' @param redirect_uri te url to redirect to after authenticating. default is httr::oauth_callback(). This needs to be added into your web app on arc gis for developers.
 #' @export get_token
-#' @import httr
+#' @importFrom httr oauth_endpoint
+#' @importFrom httr oauth_app
+#' @importFrom httr oauth2.0_token
 #' @importFrom purrr map_lgl
 get_token <-
   function(client_id = NULL, client_secret = NULL, app_name = NULL,
@@ -41,12 +43,22 @@ get_token <-
 
     # With the request send the datetime which is then automatically stored with the token
     # This is then checked against the expiry seconds and the token is refreshed if neccessary
+    # Is the grant_datetime list name an arbitrary choice?
+    # Added a new dttm in the query_authorize_extra
+    # grant datetime should be updated whenever the token is refreshed
+    # access grant datetime will only be updated when the less perishable
+    # access token is acquired
     my_token <-
       httr::oauth2.0_token(endpoint = endpoint, app = app, cache = use_cache,
-                           query_authorize_extra = list(grant_datetime = Sys.time()))
+                           query_authorize_extra = list(grant_datetime = Sys.time(),
+                                                        access_grant_datetime = Sys.time()
+                                                        ))
 
     # httr doesn't parse the credentials correctly into a list
     my_token$credentials <- jsonlite::fromJSON(my_token$credentials)
+
+
+
 
     # Check expiry and refresh if neccessary
     # The refresh token is an alteration to httr:::refresh_oauth2.0
@@ -62,6 +74,20 @@ get_token <-
         Sys.time()
     }
 
+    # The refresh token can also expire and needs to be refreshed. This is indicated in an
+    # error message. Need to check this then if it is expired:
+    # - delete the token from the cache_path
+    # - request a new token recursively calling the function
+    # - return that token
+    refresh_expired <- my_token$credentials$error$message == "refresh_token expired"
+    # The message is empty if the token hasn't expired
+    # Only check for the message if it there (length > 0)
+    if((length(refresh_expired) > 0) && refresh_expired){
+      file.remove(my_token$cache_path)
+      my_token <- get_token(client_id, client_secret, app_name,
+                            use_cache, auto_refresh,
+                            redirect_uri)
+    }
     return(my_token)
   }
 #' Token Expired
@@ -95,33 +121,85 @@ token_expired <-
 #' @param client_id The client ID. Taken from you app dashboard on arcgis for developers
 #' @param client_secret The client secret. Taken from you app dashboard on arcgis for developers
 #' @param app_name The name of your app. Taken from you app dashboard on arcgis for developers
-#' @importFrom keyring key_set
-#' @importFrom keyring key_get
+#' @param path The path where the credentials should be saved
+#' @importFrom jsonlite toJSON
+#' @importFrom jsonlite fromJSON
+#' @importFrom jsonlite  write_json
+#' @importFrom jsonlite  read_json
 #' @export set_credentials
 set_credentials <-
   function(client_id,
            client_secret,
-           app_name){
-    keyring::key_set_with_value(service = "getarc", username = "client_id", password = client_id)
-    keyring::key_set_with_value(service = "getarc", username = "client_secret", password = client_secret)
-    keyring::key_set_with_value(service = "getarc", username = "app_name", password = app_name)
+           app_name,
+           path = "~/secrets/getarc-credentials.json") {
 
-  }
-get_credentials <-
-  function(){
     credentials <-
-      list(
-        client_id = keyring::key_get(service = "getarc", username = "client_id"),
-        client_secret = keyring::key_get(service = "getarc", username = "client_secret"),
-        app_name = keyring::key_get(service = "getarc", username = "app_name")
-      )
-    # Check all have been set
-    valid <- purrr::map_lgl(credentials, ~.x != "")
-    if(!all(valid)){
-      stop(paste0(
-        "Credentials not set: ", paste0(paste0("'", names(credentials)[!valid], "'"), collapse = ", "), "\n",
-        "Use getarc::set_credentials() to set app credentials for use in get_token. \nVisit https://developers.arcgis.com/dashboard to get your app credentials."
-      ))
+      list(client_id = client_id,
+           client_secret = client_secret,
+           app_name = app_name)
+
+    # Check the path exists & create it if not
+    if (!dir.exists(dirname(path))) {
+      dir.create(dirname(path))
     }
-    return(credentials)
+    jsonlite::write_json(jsonlite::toJSON(credentials), path = path)
   }
+
+get_credentials <-
+  function(path  = "~/secrets/getarc-credentials.json") {
+    # Check whether the credentials exist and use a path
+    if (!file.exists(path)) {
+      stop(
+        paste0(
+          "Credentials not set: \n",
+          "Use getarc::set_credentials() to set app credentials for use in get_token. \nVisit https://developers.arcgis.com/dashboard to get your app credentials."
+        )
+      )
+    }
+    # Get the credentials from the path and return them in a list
+    credentials <- jsonlite::read_json(path)
+    jsonlite::fromJSON(credentials[[1]])
+  }
+
+#' Generate a token
+#'
+#' Generate ArcGIS Access tokens with credentials
+#'
+#' This functino enables a user to generate a token for accessing
+#' ArcGIS services where Oauth2.0 isn't possible. The documentation is here:
+#' https://developers.arcgis.com/rest/services-reference/generate-token.htm
+#' You should make an effort to protect your username in password so that it isn't saved in the source code.
+#' Some good options are here:
+#' https://cran.r-project.org/web/packages/httr/vignettes/secrets.html
+#'
+#' You could write a wrapper function around this function which gets your credentials from an
+#' environment variable, calls the function and returns a token. getarc may provide this functionality eventually.
+#' @param endpoint the endpoint against which to request the token. this is generally in the format of:
+#' https://<host>:<port>/<site>/tokens/generateToken
+#' e.g: https://sampleserver6.arcgisonline.com/arcgis/tokens/generateToken
+#' @param  username your ArcGIS online username. You should make an effort to protect this by accessing it from an
+#' environment variable so that it isn't saved in your source code or .Rhistory file.
+#' @param  password your ArcGIS online password. You should make an effort to protect this by accessing it from an
+#' environment variable so that it isn't saved in your source code or .Rhistory file.
+#' @param expiration The token expiration time in minutes (defaults to 60)
+#' @importFrom httr POST
+#' @importFrom httr content
+#' @importFrom jsonlite fromJSON
+generate_token <-
+  function(endpoint, username, password, expiration = 60) {
+    token <-
+      httr::POST(
+        url = endpoint,
+        encode = "form",
+        body = list(
+          username = username,
+          password = password,
+          f = "json",
+          client = "requestip",
+          expiration = expiration
+        )
+      )
+
+    jsonlite::fromJSON(httr::content(token))
+  }
+

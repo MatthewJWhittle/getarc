@@ -20,7 +20,7 @@ one_row_bng <- query_layer(
 
 small_feature <-
   query_layer(endpoints$gb_wood_pasture_parkland,
-              query = c("where" = "Shape__Area < 30"),
+              "where" = "Shape__Area < 30",
               return_n = 1,
               geometry_precision = 1)
 
@@ -29,8 +29,7 @@ sql_query <- query_layer(
   endpoint = endpoints$gb_wood_pasture_parkland,
   return_n = 1,
   geometry_precision = 1,
-  query = c(
-            where = "SUBTYPE = 'Parkland' AND INTERPQUAL = 'Medium'")
+  where = "SUBTYPE = 'Parkland' AND INTERPQUAL = 'Medium'"
 )
 # Perform a spatial query
 bbox <-
@@ -97,13 +96,13 @@ awi_2510 <-
 
 
 
-tibble(OBJECTID = character(0),
-       NAME = character(0)
-)
+# tibble(OBJECTID = character(0),
+#        NAME = character(0)
+# )
 
 no_awi <-
 query_layer(endpoint = endpoints$ancient_woodland_england,
-            query = c(where = "1=2"),
+            where = "1=2",
             out_fields = c("NAME", "OBJECTID"),
             return_geometry = FALSE
 )
@@ -131,7 +130,7 @@ test_that("query layer works", {
   expect_equal(nrow(spatial_query_point) >= 1,
                TRUE)
 
-  expect_warning(query_layer(endpoint = endpoints$gb_wood_pasture_parkland, query = c(where = "1 = 2")))
+  expect_warning(query_layer(endpoint = endpoints$gb_wood_pasture_parkland, where = "1 = 2"))
   # Does the area query have the desired result
   expect_equal(small_feature$Shape__Area < 30, TRUE)
   # return_geometry = FALSE returns a data.frame for both map servers and feature servers

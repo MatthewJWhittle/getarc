@@ -62,11 +62,11 @@ parse_coded_domains <-
         # This is is not desirable because we always want the entered value, even if it doesn't match the domain
         # This code checks for missing values after joining the domain values & replaces them with their
         # original values
-        dplyr::mutate(.name = dplyr::if_else(is.na(.name),
+        dplyr::mutate(.name = dplyr::if_else(is.na(.data$.name),
                                              # The !! evaluates .field (because it is only a string, not a column in the data)
                                              # Need to assert that the type of 'true' is the same as false
-                                             true = as_type(get(.field), typeof(.name)),
-                                             false = .name)) %>%
+                                             true = as_type(get(.field), typeof(.data$.name)),
+                                             false = .data$.name)) %>%
         dplyr::select(-.field)
 
       # Finally rename the field to its original value
