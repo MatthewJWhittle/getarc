@@ -14,13 +14,111 @@ knitr::opts_chunk$set(
 )
 ```
 
-```{r setup}
-# library(getarc)
-# library(devtools)
-# load_all()
-# library(sf)
-# library(tidyverse)
+# Making Queries with `query_layer`
 
+```{r setup, message = FALSE, warning = FALSE}
+library(getarc)
+library(sf)
+library(tidyverse)
+```
+
+The Arc GIS Rest API supports a number of query options and many of these are supported as named arguments in `query_layer`. If the query option isn't supported, you can pass it to the `query` argument as a named vector where the name is the name of the parameter and the value is the query, e.g. `where = "Height > 1"`.
+
+The following queries allow you to filter the features returned by `query_layer`:
+
+-   **Spatial Queries**: pass a geometry to `in_geometry` and a string defining the spatial relationship to `spatial_filter` (defaults to "intersects").
+
+-   **Where Queries**: the `where` argument accepts an SQL-92 where clause as a string to be used in filtering the data on the server. See the [API documentation](https://developers.arcgis.com/rest/services-reference/query-feature-service-layer-.htm) for more detail on what is accepted. e.g.
+
+    -   `where = "POP2000 > 350000"`
+
+    -   `where = "CITY_NAME = 'Barrington'"`
+
+-   **Limit Results** using the `return_n` argument. This is useful for testing or where you need to know what the data looks like before performing a more advanced query.
+
+The following queries allow you to alter the returned object in other ways:
+
+-   **Don't return the geometry** with `return_geometry = FALSE`. This speeds up processing & download time when you don't need the geometry.
+
+-   **Return specific columns** with the `out_fields` argument. This defaults to `"*"` which returns all columns.
+
+-   **Return a less precise geometry** with `geometry_precision`. Less precise geometries are faster to download. You don't always need the detailed geometry for some operations. Setting this argument to a lower number will speed up you download time.
+
+# Example Usage:
+
+Using the `return_geometry = FALSE` option allows us to return the data from the English Countiesendpoint without the geometry. This allows us to see which counties are in the dataset without downloading all the geometries which are large.
+
+```{r}
+counties <- query_layer(endpoint = endpoints$english_counties, return_geometry = FALSE)
+counties
+```
+
+We can then get the geometry for one of the counties using an SQL where clause. We'll also return a lower geometry precision to speed up the download. This should be an integer specifying the number of decimal places of the x & y geometry values returned by the API.
+
+```{r plotting-colours}
+colours <- c("#1b998b","#2d3047","#fffd82","#ff9b71","#e84855")
+```
+
+```{r}
+derbyshire <- query_layer(endpoint = endpoints$english_counties, 
+                          where = "cty19nm = 'Derbyshire'",
+                          geometry_precision = 2)
+
+ggplot() +
+  geom_sf(data = derbyshire, aes(geometry = geometry),
+          fill = colours[1], 
+          ) + 
+  theme_minimal() +
+  ggtitle("Derbyshire to 2 DPs")
+```
+
+## Which Local Planning Authorities are in Derbyshire?
+
+Now we have the boundary of Derbyshire we can use this in further querying operations. Lets find out which Local Planning Authorities (LPA) are within Derbyshire.
+
+First I'm defining a new endpoint for the server hosting the LPA data. Then I'll query this endpoint using the Derbyshire boundary and the 'intersects' spatial filter. The `in_geometry` argument only accepts a single geometry. In this case we only have one geometry, where you have multiple you should use `sf::st_union` to combine them.
+
+```{r}
+uk_lpas <- 
+  "https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Local_Planning_Authorities_April_2020_UK_BFE/FeatureServer/0"
+
+derbyshire_lpas <- 
+  query_layer(endpoint = uk_lpas, 
+              in_geometry = derbyshire$geometry, 
+              spatial_filter = "intersects")
+
+# Visualise the data:
+ggplot() +
+  geom_sf(data = derbyshire, aes(geometry = geometry),
+          fill = colours[1], 
+          ) +
+  geom_sf(data = derbyshire_lpas, aes(geometry = geometry), 
+          alpha = 0.2, fill = colours[4]) +
+  theme_minimal() +
+  ggtitle("Local Planning Authorities (orange) in Derbyshire (green)")
+```
+
+# UK Temperatures (1970 - 2019)
+
+Where were sub 0C January temperatures recorded in 1970?
+
+```{r}
+uk_temp_1970_2019 <- "https://services.arcgis.com/XSeYKQzfXnEgju9o/arcgis/rest/services/Monthly_Temperature_1970_2019/FeatureServer/0"
+
+cold_winters_1970 <- 
+  query_layer(endpoint = uk_temp_1970_2019,
+            where = "F1970_01 < 0")
+
+ggplot(cold_winters_1970) +
+  geom_sf(aes(fill = F1970_01), colour = "grey20") +
+  geom_sf(data = cold_winters_1970 %>% filter(F1970_01 == min(F1970_01)),
+          fill = colours[4]
+          ) + 
+    geom_sf_label(data = cold_winters_1970 %>% filter(F1970_01 == min(F1970_01)),
+          aes(label = F1970_01), nudge_x = 1.1
+          ) + 
+  theme_minimal() +
+  scale_fill_gradient(low = colours[1], high = colours[3])
 ```
 
 Data on an arc gis server can be accessed via the `query_layer` function. This function also supports any query operation supported by the ArcGIS Rest API.
