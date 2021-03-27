@@ -60,8 +60,8 @@ sf_to_json <-
     # Check the geom type  to conver to its json spec (rings, points , paths)
     x_geom_type <- sf::st_geometry_type(x)
     # Don't query if the geom type isn't supported
-    stopifnot(x_geom_type %in% esri_sf_type_lookup$sf)
-    json_type <- dplyr::filter(esri_sf_type_lookup, sf == x_geom_type)$json
+    stopifnot(x_geom_type %in% getarc::esri_sf_type_lookup$sf)
+    json_type <- dplyr::filter(getarc::esri_sf_type_lookup, sf == x_geom_type)$json
 
     # Convert the boundary to an sfc objet
     x_sfc <- sf::st_geometry(x)
@@ -123,9 +123,9 @@ esri_geometry_type <-
     # Only certain types are accepted at the moment. This is because I don't know
     # how types like 'triangle' should fit into the esri types which are less details.
     # Requires some testing to figure out. Probably everything else would fit into olygon
-    stopifnot(x_type %in% esri_sf_type_lookup$sf)
+    stopifnot(x_type %in% getarc::esri_sf_type_lookup$sf)
     # Return the corresponding esri type
-    dplyr::filter(esri_sf_type_lookup, .data$sf == x_type)$esri
+    dplyr::filter(getarc::esri_sf_type_lookup, .data$sf == x_type)$esri
   }
 #' Simplify sf to length
 #'
