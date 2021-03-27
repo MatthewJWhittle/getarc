@@ -7,8 +7,9 @@
 #' @param query an optional query to include in the request
 #' @param my_token an access token to be included when required
 #' @return a list of feature IDs & the feature ID field
-#' @import httr
-#' @importFrom jsonlite fromJSON
+#' @importFrom httr POST
+#' @importFrom httr content
+#' @importFrom rjson fromJSON
 #' @export get_feature_ids
 get_feature_ids <-
   function(endpoint, query = NULL, my_token = NULL){
@@ -38,9 +39,7 @@ get_feature_ids <-
 
 
     # Parse and return the content
-    content <- httr::content(response, as = "text")
-    object_ids <- jsonlite::fromJSON(content)
-
+    object_ids <- parse_rjson(response)
     # cut down the object ids vector if a returnRecordCount has been sent & the
     # return count is less than the object_ids vector length
     # This enables us to work around the issue with the feature service not returning
@@ -69,8 +68,9 @@ get_feature_ids <-
 #' @param query an optional query to include in the request
 #' @param my_token an access token to be included when required
 #' @return the count of features mathing the query
-#' @import httr
-#' @importFrom jsonlite fromJSON
+#' @importFrom httr POST
+#' @importFrom httr content
+#' @importFrom rjson fromJSON
 #' @export get_count
 get_count <-
   function(endpoint, query = NULL, my_token = NULL){
@@ -94,7 +94,7 @@ get_count <-
 
     # Parse and return the content
     content <- httr::content(response, as = "text")
-    count <- jsonlite::fromJSON(content)
+    count <- rjson::fromJSON(content)
 
     return(count$count)
     # The below code might be required but unsure if it will error (above) or not

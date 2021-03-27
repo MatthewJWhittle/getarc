@@ -60,8 +60,13 @@ sf_to_json <-
     # Check the geom type  to conver to its json spec (rings, points , paths)
     x_geom_type <- sf::st_geometry_type(x)
     # Don't query if the geom type isn't supported
+<<<<<<< HEAD
     stopifnot(x_geom_type %in% getarc::esri_sf_type_lookup$sf)
     json_type <- dplyr::filter(getarc::esri_sf_type_lookup, sf == x_geom_type)$json
+=======
+    stopifnot(x_geom_type %in% esri_sf_type_lookup$sf)
+    json_type <- dplyr::filter(esri_sf_type_lookup, .data$sf == x_geom_type)$json
+>>>>>>> b56e8b5c4b434ffd9ffb8c44fe5bb32bcf4c0842
 
     # Convert the boundary to an sfc objet
     x_sfc <- sf::st_geometry(x)
@@ -114,7 +119,7 @@ sf_to_json <-
 #' @importFrom dplyr filter
 esri_geometry_type <-
   function(x) {
-    # Asseert that it is class sf or sfc
+    # Assert that it is class sf or sfc
     stopifnot(any(c("sf", "sfc") %in% class(x)))
     # Determine the SF type of the object and convert this to a character string
     x_type <- as.character(sf::st_geometry_type(x))

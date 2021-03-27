@@ -28,14 +28,11 @@ Imports:
     stringr,
     tibble,
     lubridate,
-    httpuv,
     geojsonsf,
     lifecycle,
-    readr,
-    keyring,
-    rlang,
     progress,
-    glue
+    glue,
+    rjson
 VignetteBuilder: knitr
 Depends: 
     R (>= 2.10)

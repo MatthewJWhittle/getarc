@@ -2,7 +2,7 @@
 #'
 #' Helper function to collapse parameters into a typical url query
 #'
-#' @import purrr
+#' @importFrom purrr map2
 #' @importFrom magrittr %>%
 #' @param  x a named list of query parameters
 #' @param drop_null logical value should null list elements be dropped

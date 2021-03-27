@@ -7,7 +7,9 @@
 #' @return a list
 #' @importFrom stringr str_detect
 #' @importFrom jsonlite fromJSON
-#' @import httr
+#' @importFrom httr GET
+#' @importFrom httr content
+#' @importFrom httr status_code
 #' @importFrom stringr str_remove_all
 #' @export get_feature_server_details
 get_feature_server_details <-

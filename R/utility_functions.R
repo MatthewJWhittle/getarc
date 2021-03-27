@@ -68,14 +68,13 @@ as_type <-
 #'
 #' @param expr an R expression
 #' @param message the message to print if `expr` evaluates to `FALSE`. If NULL, the expression is printed like in stopifnot
-#' @importFrom rlang expr_text
 #' @return NULL
 assert_that <-
   function(expr, message = NULL) {
     if (!expr) {
       if (is.null(message)) {
         message <-
-          paste0(rlang::expr_text(substitute(expr)), " is not TRUE")
+          paste0(deparse(substitute(expr)), " is not TRUE")
       }
       stop(message,
            call. = FALSE)
@@ -88,7 +87,7 @@ assert_that <-
 #' @return null
 check_esri_error <-
   function(content){
-    is_error <- all(grepl("^\\{\"error", content))
+    is_error <- !is.null(names(content)) && names(content)[1] == "error"
     if(is_error){
       stop(content)
     }
@@ -103,6 +102,7 @@ check_esri_error <-
 #' @param x a vector
 #' @param max_length the maximum length of the returned vectors
 #' @return a list of split x where each element does not exceed the length of max_length
+#' @importFrom utils tail
 split_vector <-
   function(x, max_length){
 
@@ -123,7 +123,7 @@ split_vector <-
     starts <- seq(from = 1, to = x_length, by = max_length)
 
     # If the last element of the vector is the final element then it should be dropped
-    if(tail(starts, 1) == x_length){
+    if(utils::tail(starts, 1) == x_length){
       starts <- starts[c(1:(length(starts) - 1))]
       # If the start vector ends on the length then parts needs to be one less
       parts <- parts - 1
@@ -174,7 +174,7 @@ where_in_query <-
 make_empty_tibble <-
   function(field_names, out_fields){
     # If the user wants to only return certain fields, then filter the field names data
-    if(out_fields != "*"){
+    if(all(out_fields != "*")){
       field_names <- field_names[field_names %in% out_fields]
     }
     # then make an empty tibble and fill it with empty columns which match the data
@@ -185,3 +185,16 @@ make_empty_tibble <-
     return(empty_df)
 
   }
+
+#' Parse R JSON
+#'
+#' Parse a httr response using rjson
+#'
+#' This function implements faster json parsing the jsonlite and httr
+#' @param response a response object returned by a GET or POST request
+#' @return an R object of parsed json
+#' @importFrom httr content
+#' @importFrom rjson fromJSON
+parse_rjson <- function(response){
+  rjson::fromJSON(httr::content(response, as = "text"))
+}

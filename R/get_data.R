@@ -13,9 +13,7 @@
 #' @importFrom httr write_disk
 #' @importFrom httr status_code
 #' @importFrom httr content
-#' @import purrr
 get_geojson <- function(query_url, query) {
-
   # Request the data using POST
   response <- httr::POST(url = query_url, body = as.list(query))
 
@@ -65,19 +63,20 @@ get_tibble <-
     # This list contains multiple levels with information about the data
     # The desired table is contained in data_list$features$attributes
     # Extract and return it
-    content <- httr::content(response)
+    content <- parse_rjson(response)
     # Check for an error if it doesn't return api fail
     check_esri_error(content = content)
     # I've added some control flow in here to modulate the behaviour if it is a map server
-    if(map_server(query_url)){
+    # if(map_server(query_url)){
     # Map servers return data in a different format which needs a different method of parsing
       data <-
         dplyr::bind_rows(purrr::map(content$features,
                            "attributes"))
-    }else{
-    data_list <- jsonlite::fromJSON(content)
-    data <- tibble::as_tibble(data_list$features$attributes)
-    }
+    # }else{
+    #   # This line is causing issues due to the use of rjson should be an easy fix but something to do with rjson
+    # data_list <- jsonlite::fromJSON(content)
+    # data <- tibble::as_tibble(data_list$features$attributes)
+    # }
     return(data)
   }
 
