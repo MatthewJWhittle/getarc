@@ -1,6 +1,6 @@
 Package: getarc
 Title: An R Wrapper for the ArcGIS Rest API
-Version: 0.0.0.9500
+Version: 0.0.0.9600
 Authors@R: 
     person(given = "Matthew",
            family = "Whittle",
