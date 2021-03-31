@@ -198,3 +198,50 @@ make_empty_tibble <-
 parse_rjson <- function(response){
   rjson::fromJSON(httr::content(response, as = "text"))
 }
+
+#' Add a point to EP
+#'
+#' Add a test point to the points endpoint
+#'
+#' This function is used for testing layer caching & demonstrates how to add features to an arc gis layer
+#' @param endpoint the points endpoint to test against
+#' @param x the x coordinate of the point (EPSG:4326)
+#' @param y the y coordinate of the point (EPSG:4326)
+#' @param id an integar to give the point an ID (not unique)
+#' @return the status code of the response (integar)
+add_point_to_test_ep <-
+  function(endpoint =  "https://services6.arcgis.com/k3kybwIccWQ0A7BB/arcgis/rest/services/Points/FeatureServer/0",
+           x = rnorm(mean = 53.317749,
+                     sd = 1,
+                     n = 1),
+           y = rnorm(mean = -1.0546875, sd = 1, n = 1),
+           id = sample(c(1:1000), 1)) {
+
+    features <-
+      glue::glue(
+        '[
+  {
+    "geometry" : {"x" : (x), "y" : (y)},
+    "attributes" : {
+      "id" : (id)
+    }
+  }
+  ]',
+        .open = "(",
+        .close = ")"
+      )
+
+
+
+    response <-
+      httr::POST(
+        url = glue::glue("{endpoint}/addFeatures"),
+        body = list(f = "json",
+                    features = features)
+      )
+
+    return(response$status_code)
+
+  }
+
+

@@ -17,7 +17,8 @@ knitr::opts_chunk$set(
 # Making Queries with `query_layer`
 
 ```{r setup, message = FALSE, warning = FALSE}
-library(getarc)
+# library(getarc)
+devtools::load_all()
 library(sf)
 library(tidyverse)
 ```

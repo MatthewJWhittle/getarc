@@ -61,10 +61,6 @@ epsg = st_crs(new_features_sf)$epsg
 # new_features_sf$geometry %>% sf_to_json()
 
 
-new_features_sf %>%
-  mutate(geom_json = geometry_to_json(geometry[1]))
-purrr::transpose(new_features_sf) %>%
-  map()
 
 
 geojsonsf::sf_geojson(new_features_sf) %>%
