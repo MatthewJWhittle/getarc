@@ -107,6 +107,18 @@ query_layer(endpoint = endpoints$ancient_woodland_england,
             return_geometry = FALSE
 )
 
+# The API returns NULL values and these were not being converted to NA properly
+# This tests against an endpoint where there are known null values
+# The number of rows in the tibble should match the count
+ep_null_values <- "https://services6.arcgis.com/k3kybwIccWQ0A7BB/arcgis/rest/services/NULL_Values_Test/FeatureServer/0"
+
+null_expected <- get_count(endpoint = ep_null_values)
+
+null_column <- query_layer(ep_null_values,
+            return_geometry = FALSE,
+            out_fields = "null_values")
+
+
 
 test_that("query layer works", {
   # Check that resultRecordCount = 1 works
@@ -143,6 +155,8 @@ test_that("query layer works", {
   expect_equal(no_awi, tibble(OBJECTID = character(0),
                               NAME = character(0)
   ))
+  # Expect that null values are parsed correctly and returned as a tibble
+  expect_equal(nrow(null_column), null_expected)
 
 
 })

@@ -156,9 +156,17 @@ split_vector <-
 #' @param matching which elements of `field` should be returned
 #' @return a named character vector of length 1 to be included in query
 where_in_query <-
-  function(field, matching) {
-    c(where = paste0(field, " IN ('",
-                     paste0(matching, collapse = "', '"), "')"))
+  function(field, matching, named = FALSE) {
+    # Avoid scientific notation
+    if(is.numeric(matching)){matching <- as.character(format(matching, scientific = FALSE))}
+
+    query <-
+      paste0(field, " IN ('",
+                     paste0(matching, collapse = "', '"), "')")
+
+    if(named){names(query) <- "where"}
+
+    return(query)
 }
 
 #' Make Empty Tibble
@@ -245,3 +253,18 @@ add_point_to_test_ep <-
   }
 
 
+#' Replace NULLS
+#'
+#' Replace NULL values with a supplied value
+#'
+#' This function is a helper to replace null values returned by the API with a specified values. This is NA by default.
+#' @param x a vector possibly containing nulls
+#' @param with what to replace the nulls with, default is NA
+#' @return a vector of equal length to x which will not contain null values but the value of with instead
+replace_null<-
+  function(x, with = NA){
+    null_values <- is.null(x)
+    if(all(!null_values)){return(x)}
+    x[null_values] <- NA
+    return(x)
+  }
