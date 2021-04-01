@@ -4,7 +4,7 @@
 \alias{where_in_query}
 \title{Where In Query}
 \usage{
-where_in_query(field, matching)
+where_in_query(field, matching, named = FALSE)
 }
 \arguments{
 \item{field}{which field should match \code{matching}}

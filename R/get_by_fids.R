@@ -81,7 +81,7 @@ get_by_fids <-
 
     querys <-
       purrr::map(object_ids_split,
-                 ~ modify_named_vector(query, where_in_query(object_ids$objectIdFieldName, .x)))
+                 ~ modify_named_vector(query, where_in_query(object_ids$objectIdFieldName, .x, named = TRUE)))
 
     # Define a progress bar
     pb <- progress::progress_bar$new(

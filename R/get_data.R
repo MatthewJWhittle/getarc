@@ -69,9 +69,20 @@ get_tibble <-
     # I've added some control flow in here to modulate the behaviour if it is a map server
     # if(map_server(query_url)){
     # Map servers return data in a different format which needs a different method of parsing
-      data <-
-        dplyr::bind_rows(purrr::map(content$features,
-                           "attributes"))
+    feature_list <-
+      purrr::map(content$features,
+               "attributes")
+    # If NULLs are returned by the API, then these are automatically dropped
+    # When the api only returns NULL values, bind_rows fails
+    feature_list <-
+      purrr::map_depth(feature_list,
+                       .depth = 2,
+                       replace_null
+      )
+
+    # Then bind the data to a tibble
+    data <-
+        dplyr::bind_rows(feature_list)
     # }else{
     #   # This line is causing issues due to the use of rjson should be an easy fix but something to do with rjson
     # data_list <- jsonlite::fromJSON(content)
