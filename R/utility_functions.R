@@ -217,6 +217,7 @@ parse_rjson <- function(response){
 #' @param y the y coordinate of the point (EPSG:4326)
 #' @param id an integar to give the point an ID (not unique)
 #' @return the status code of the response (integar)
+#' @importFrom stats rnorm
 add_point_to_test_ep <-
   function(endpoint =  "https://services6.arcgis.com/k3kybwIccWQ0A7BB/arcgis/rest/services/Points/FeatureServer/0",
            x = rnorm(mean = 53.317749,
