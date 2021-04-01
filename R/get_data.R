@@ -23,6 +23,10 @@ get_geojson <- function(query_url, query) {
   content <- httr::content(response, as = "text")
   # Check for an error if it doesn't return api fail
   check_esri_error(content = content)
+
+  # Check if no features have been returned and return an empty sf object
+  # This avoids st_read hitting an error where no features are returned
+  if(grepl('"features":\\[\\]', content)){return(sf::st_sf(sf::st_sfc()))}
   # Read the data from the json text
   data <- sf::st_read(dsn = content,
                       quiet = TRUE, stringsAsFactors = FALSE)

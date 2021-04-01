@@ -143,6 +143,8 @@ test_that("query layer works", {
                TRUE)
 
   expect_warning(query_layer(endpoint = endpoints$gb_wood_pasture_parkland, where = "1 = 2"))
+  expect_error(query_layer(endpoint = endpoints$gb_wood_pasture_parkland, where = "1 = 2", return_n = 1), NA)
+  expect_error(query_layer(endpoint = endpoints$gb_wood_pasture_parkland, where = "1 = 2", return_n = 1, return_geometry = FALSE), NA)
   # Does the area query have the desired result
   expect_equal(small_feature$Shape__Area < 30, TRUE)
   # return_geometry = FALSE returns a data.frame for both map servers and feature servers
