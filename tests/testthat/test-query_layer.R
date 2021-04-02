@@ -160,5 +160,43 @@ test_that("query layer works", {
   # Expect that null values are parsed correctly and returned as a tibble
   expect_equal(nrow(null_column), null_expected)
 
+  # Some layers don't support edit tracking. This tests that a warning is returned.
+  expect_warning(query_layer(endpoint = endpoints$gb_postcodes,
+                             cache = "development/data-cache/test-warning.geojson",
+                             return_n = 1, return_geometry = FALSE))
 
 })
+
+
+# Test Caching behaviour
+# First clear the old cache
+file.remove("development/data-cache/test-points.geojson")
+# define the layer to cache and where to cache it
+ep_test_points <- "https://services6.arcgis.com/k3kybwIccWQ0A7BB/arcgis/rest/services/Points/FeatureServer/0"
+cache_file <- "development/data-cache/test-points.geojson"
+# Download the points layer and cache it
+points_dl <- query_layer(endpoint = ep_test_points,
+                         cache = cache_file)
+# read the cached data
+cached_data <- sf::st_read(cache_file, stringsAsFactors = FALSE)
+# Add a new point to the layer to the retreive when updating the cache
+add_point_to_test_ep()
+# Retrieve the updated layer without caching so the results can be compared
+updated_layer <- query_layer(endpoint = ep_test_points)
+updated_cache <- query_layer(endpoint = ep_test_points,
+                         cache = cache_file)
+# Check the file on disk
+updated_cache_file <- sf::st_read(cache_file, stringsAsFactors = FALSE)
+
+
+test_that("Caching Works",
+          {
+            # The cache has been created
+            expect_true(file.exists(cache_file))
+            # The updated cache should be equivalent to the updated layer
+            expect_equivalent(updated_cache, updated_layer)
+            # The updated file on disk should be equivalent to the updated layer
+            expect_equivalent(updated_cache_file, updated_layer)
+            # The updated cache returned by query layer should have one additional row from adding a point
+            expect_equal(nrow(updated_cache) - nrow(points_dl), 1)
+          })
