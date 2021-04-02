@@ -34,7 +34,7 @@ modify_named_vector <-
 map_server <-
   function(endpoint){
     stopifnot(is.character(endpoint) && length(endpoint) == 1)
-    stringr::str_detect(endpoint, "/MapServer/")
+    grepl("/MapServer/", endpoint)
   }
 #' As Type
 #'
@@ -268,4 +268,41 @@ replace_null<-
     if(all(!null_values)){return(x)}
     x[null_values] <- NA
     return(x)
+  }
+#' Get ID field
+#'
+#' Get the unique ID field from the layer details
+#'
+#' MapServers and Feature Servers encode the unique id field differently. This function uses two methods to retrieve the ID field from the layer details. Unique IDs are used for caching.
+#' @param endpoint the layer endpoint
+#' @param layer_details the layer details object returned by get_layer_details.
+#' @return a string defining the field that encodes the unique IDs
+get_unique_id_field <-
+  function(endpoint, layer_details) {
+    # MapServers and Feature Servers encode the unique id field differently
+    # This function uses two methods to retieve the ID field from the layer details
+    # If the endpoint is a map server then the unique ID field should be retrieved from
+    # the layer details.
+    if (map_server(endpoint)) {
+      id_field <-
+        purrr::map_lgl(layer_details$fields,
+                       ~ .x[["type"]] == "esriFieldTypeOID")
+      return(layer_details$fields[id_field][[1]]$name)
+    }
+    # Otherwise, return the id field
+    return(layer_details$uniqueIdField$name)
+  }
+#' Supports Edit Tracking?
+#'
+#' Does the layer support edit tracking
+#'
+#' Some layers don't support edit tracing and can't be cached. This function checks whether it is supported.
+#' @param layer_details the layer details object returned be get_layer_details.
+#' @return TRUE/FALSE. TRUE if the layer supports edit tracking
+supports_edit_tracking <-
+  function(layer_details) {
+    !(
+      is.null(layer_details$editingInfo$lastEditDate) ||
+        is.null(layer_details$editFieldsInfo$editDateField)
+    )
   }

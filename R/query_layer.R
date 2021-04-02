@@ -47,11 +47,20 @@ query_layer <-
     # Get the details of the layer to
     layer_details <-
       get_layer_details(endpoint = endpoint, my_token = my_token)
+
+    # Get the unique ID field from the layer details.
+    id_field <- get_unique_id_field(endpoint = endpoint, layer_details = layer_details)
     # Caching ------
-    # Should a cache be used?
-    use_cache <- !is.null(cache)
+    # Should a cache be used? A cache should be used if the user has supplied a path, and the layer supports
+    # edit tracking
+    edit_tracking <- supports_edit_tracking(layer_details)
+      if(!edit_tracking & !is.null(cache)){
+        warning("This layer doesn't support edit tracking so cannot be cached")
+      }
+    use_cache <- (!is.null(cache) & edit_tracking)
     # Does the cache exist?
     if (use_cache) {
+
       cache_exists <- file.exists(cache)
       # Fail quickly if the cache directory doesn't exist
       stopifnot(dir.exists(dirname(cache)))
@@ -150,8 +159,8 @@ query_layer <-
         sf::st_write(data, cache, delete_dsn = TRUE, quiet = TRUE)
         return(data)
       }
-      new_data_ids <- dplyr::pull(data, layer_details$uniqueIdField$name)
-      cache_data_ids <- dplyr::pull(data_cache, layer_details$uniqueIdField$name)
+      new_data_ids <- dplyr::pull(data, id_field)
+      cache_data_ids <- dplyr::pull(data_cache, id_field)
 
 
       data_refreshed <-
