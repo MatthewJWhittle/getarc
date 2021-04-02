@@ -154,6 +154,7 @@ split_vector <-
 #'
 #' @param field which field should match `matching`
 #' @param matching which elements of `field` should be returned
+#' @param named should a named vector e.g. c(where = "...") be returned or just the query string
 #' @return a named character vector of length 1 to be included in query
 where_in_query <-
   function(field, matching, named = FALSE) {

@@ -50,7 +50,7 @@ refresh_token <-
         httr::POST(refresh_url, body = req_params, encode = "form")
     }
 
-    err <- find_oauth2.0_error(response)
+    err <- httr:::find_oauth2.0_error(response)
     if (!is.null(err)) {
       lines <- c(
         paste0("Unable to refresh token: ", err$error),
