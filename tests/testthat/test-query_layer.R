@@ -170,10 +170,11 @@ test_that("query layer works", {
 
 # Test Caching behaviour
 # First clear the old cache
-file.remove("development/data-cache/test-points.geojson")
+cache_file <- "development/data-cache/test-points.geojson"
+if(file.exists(cache_file)) {file.remove(cache_file)}
+if(!dir.exists(dirname(cache_file))) {dir.create(dirname(cache_file), recursive = TRUE)}
 # define the layer to cache and where to cache it
 ep_test_points <- "https://services6.arcgis.com/k3kybwIccWQ0A7BB/arcgis/rest/services/Points/FeatureServer/0"
-cache_file <- "development/data-cache/test-points.geojson"
 # Download the points layer and cache it
 points_dl <- query_layer(endpoint = ep_test_points,
                          cache = cache_file)
