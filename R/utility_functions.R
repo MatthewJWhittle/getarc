@@ -300,10 +300,19 @@ get_unique_id_field <-
 #' Some layers don't support edit tracing and can't be cached. This function checks whether it is supported.
 #' @param layer_details the layer details object returned be get_layer_details.
 #' @return TRUE/FALSE. TRUE if the layer supports edit tracking
-supports_edit_tracking <-
-  function(layer_details) {
-    !(
-      is.null(layer_details$editingInfo$lastEditDate) ||
-        is.null(layer_details$editFieldsInfo$editDateField)
-    )
+# supports_edit_tracking <-
+#   function(layer_details) {
+#     list(last_edit = !is.null(layer_details$editingInfo$lastEditDate),
+#          feature_edit_tracking = !is.null(layer_details$editFieldsInfo$editDateField)
+#          )
+#   }
+cache_method <-
+  function(layer_details){
+    last_edit = !is.null(layer_details$editingInfo$lastEditDate)
+    feature_edit_tracking = !is.null(layer_details$editFieldsInfo$editDateField)
+
+    # Return the method of caching to use
+    if(feature_edit_tracking){return("feature_edit")}
+    if(last_edit){return("layer_edit")}
+    return(NULL)
   }

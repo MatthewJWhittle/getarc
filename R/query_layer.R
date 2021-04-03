@@ -54,10 +54,11 @@ query_layer <-
     # Should a cache be used? A cache should be used if the user has supplied a path, and the layer supports
     # edit tracking
     edit_tracking <- supports_edit_tracking(layer_details)
-      if(!edit_tracking & !is.null(cache)){
+      if(!all(unlist(edit_tracking)) & !is.null(cache)){
         warning("This layer doesn't support edit tracking so cannot be cached")
       }
-    use_cache <- (!is.null(cache) & edit_tracking)
+
+    use_cache <- (!is.null(cache) & any(unlist(edit_tracking)))
     # Does the cache exist?
     if (use_cache) {
 
