@@ -4,7 +4,7 @@
 \alias{get_count}
 \title{Get Count}
 \usage{
-get_count(endpoint, query = NULL, my_token = NULL)
+get_count(endpoint, query = list(), my_token = NULL)
 }
 \arguments{
 \item{endpoint}{the url endpoint of the service. See feature_server_endpoint and map_server_endpoint}

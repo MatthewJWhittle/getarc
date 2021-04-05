@@ -13,15 +13,16 @@
 #' @export get_feature_ids
 #' @importFrom utils modifyList
 get_feature_ids <-
-  function(endpoint, query = NULL, my_token = NULL){
-    token <- parse_access_token(my_token)
+  function(endpoint, query = list(), my_token = NULL){
 
-    query <- utils::modifyList(default_query_parameters(),
-                                 c(query, list(token = token, returnIdsOnly = "true")), keep.null = FALSE)
+    query <- query_object(default = default_query_parameters(),
+                          user_query = query,
+                          token = my_token,
+                          mandatory = list(returnIdsOnly = "true")
+                          )
 
-    # there is a known limitation in arc gis api where the result record parameter doesn't work with
-    # the return count or return ids only parameter
-    # This is a workaround
+    # Get the request number of records to return and drop the param from the query
+    # This can then be used to limit the number of FIDs returned by the function
     return_count <-  as.numeric(query[names(query) == "resultRecordCount"])
     query <- query[names(query) != "resultRecordCount"]
 
@@ -72,12 +73,14 @@ get_feature_ids <-
 #' @importFrom rjson fromJSON
 #' @export get_count
 get_count <-
-  function(endpoint, query = NULL, my_token = NULL){
-    token <- parse_access_token(my_token)
+  function(endpoint, query = list(), my_token = NULL){
 
-    query <- utils::modifyList(default_query_parameters(),
-                                 c(query, list(token = token,
-                                   returnCountOnly = "true")), keep.null = FALSE)
+    query <- query_object(default = default_query_parameters(),
+                          user_query = query,
+                          token = my_token,
+                          mandatory = list(returnCountOnly = "true")
+    )
+
 
     query_url <- paste0(endpoint, "/query")
 

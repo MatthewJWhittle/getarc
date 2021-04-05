@@ -20,7 +20,7 @@ one_row_bng <- query_layer(
 
 small_feature <-
   query_layer(endpoints$gb_wood_pasture_parkland,
-              "where" = "Shape__Area < 30",
+              where = "Shape__Area < 30",
               return_n = 1,
               geometry_precision = 1)
 
@@ -87,12 +87,12 @@ fs_nogeom <-
   )
 
 
+# debugonce(query_layer)
 awi_2510 <-
   query_layer(endpoint = endpoints$ancient_woodland_england,
             out_fields = "objectid",
             return_n = 2510,
             return_geometry = FALSE)
-
 
 
 # tibble(OBJECTID = character(0),

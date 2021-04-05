@@ -203,19 +203,18 @@ query_layer <-
         where = where
       )
     argument_parameters <- drop_null(argument_parameters)
+
+    user_query <- utils::modifyList(query, argument_parameters, keep.null = FALSE)
+
+
     # If an in_geometry has been specified then generate the spatial query and combine with the query parameters
     if (!is.null(in_geometry)) {
-      query <- utils::modifyList(query,
-                                   spatial_query(x = in_geometry,
-                                                 spatial_filter = esri_spatial_filter(spatial_filter)), keep.null = FALSE)
+      spatial_query <- spatial_query(x = in_geometry,
+                                     spatial_filter = esri_spatial_filter(spatial_filter))
+      user_query <- utils::modifyList(user_query, spatial_query, keep.null = FALSE)
     }
 
-    # Add query parameters which have been set as arguments in the function
-    query <- utils::modifyList(query, argument_parameters, keep.null = FALSE)
-
-    # Add in the default parameters but only where they are not present in query
-    query <- utils::modifyList(default_query_parameters(), query, keep.null = FALSE)
-
+    query <- query_object(default = default_query_parameters(), user_query = user_query, token = my_token)
 
     layer_details <-
       get_layer_details(endpoint = endpoint, my_token = my_token)
@@ -236,7 +235,7 @@ query_layer <-
 
     # Drop parts of the query that are NULL which was automatically done for vectors
     # But isn't now it is a list object
-    cache_object$query <- purrr::discard(cache_object$query, ~is.null(.x))
+    cache_object$query <- drop_null(cache_object$query)
 
     # Get the data by feature IDs allowing us to exceed the max record count
     data <-

@@ -6,7 +6,7 @@
 #' @param x logical vector
 #' @return charactor vector
 lower_logical <-
-  function(x){
+  function(x) {
     stopifnot(is.logical(x))
     tolower(as.character(x))
   }
@@ -34,7 +34,7 @@ lower_logical <-
 #' @return TRUE or FALSE
 #' @importFrom stringr str_detect
 map_server <-
-  function(endpoint){
+  function(endpoint) {
     stopifnot(is.character(endpoint) && length(endpoint) == 1)
     grepl("/MapServer/", endpoint)
   }
@@ -88,9 +88,9 @@ assert_that <-
 #' @param content the content of a response
 #' @return null
 check_esri_error <-
-  function(content){
+  function(content) {
     is_error <- !is.null(names(content)) && names(content)[1] == "error"
-    if(is_error){
+    if (is_error) {
       stop(content)
     }
   }
@@ -106,8 +106,7 @@ check_esri_error <-
 #' @return a list of split x where each element does not exceed the length of max_length
 #' @importFrom utils tail
 split_vector <-
-  function(x, max_length){
-
+  function(x, max_length) {
     # Get the length of x and determine how many parts it should be split into
     # based upon the maximum allowed length. a ceiling is applied as parts must be
     # an integar and should always be rounded up
@@ -115,7 +114,7 @@ split_vector <-
 
     # Return the vector as a list if it doesn't exceed the maximum length
     # This will avoid any errors down the line
-    if(x_length <= max_length){
+    if (x_length <= max_length) {
       return(list(x))
     }
 
@@ -125,11 +124,11 @@ split_vector <-
     starts <- seq(from = 1, to = x_length, by = max_length)
 
     # If the last element of the vector is the final element then it should be dropped
-    if(utils::tail(starts, 1) == x_length){
+    if (utils::tail(starts, 1) == x_length) {
       starts <- starts[c(1:(length(starts) - 1))]
       # If the start vector ends on the length then parts needs to be one less
       parts <- parts - 1
-      }
+    }
 
     # Construct the ends of each part so that the parts don't overlap
     # The sequence should end on the length of x so it doesn't exceed the vector length
@@ -141,7 +140,7 @@ split_vector <-
     # This is more efficient & faster than incrementally increasing the
     # size of the vector
     x_split <- vector("list", length = parts)
-    for(i in 1:parts){
+    for (i in 1:parts) {
       x_split[[i]] <- x[c(starts[i]:ends[i])]
     }
 
@@ -161,16 +160,20 @@ split_vector <-
 where_in_query <-
   function(field, matching, named = FALSE) {
     # Avoid scientific notation
-    if(is.numeric(matching)){matching <- as.character(format(matching, scientific = FALSE))}
+    if (is.numeric(matching)) {
+      matching <- as.character(format(matching, scientific = FALSE))
+    }
 
     query <-
       paste0(field, " IN ('",
-                     paste0(matching, collapse = "', '"), "')")
+             paste0(matching, collapse = "', '"), "')")
 
-    if(named){names(query) <- "where"}
+    if (named) {
+      return(list(where = query))
+    }
 
     return(query)
-}
+  }
 
 #' Make Empty Tibble
 #'
@@ -183,14 +186,14 @@ where_in_query <-
 #' @importFrom tibble tibble
 #' @return an emtpy tibble with the names in out_fields
 make_empty_tibble <-
-  function(field_names, out_fields){
+  function(field_names, out_fields) {
     # If the user wants to only return certain fields, then filter the field names data
-    if(all(out_fields != "*")){
+    if (all(out_fields != "*")) {
       field_names <- field_names[field_names %in% out_fields]
     }
     # then make an empty tibble and fill it with empty columns which match the data
     empty_df <- tibble::tibble()
-    for(field in field_names){
+    for (field in field_names) {
       empty_df[field] <- character(0)
     }
     return(empty_df)
@@ -206,7 +209,7 @@ make_empty_tibble <-
 #' @return an R object of parsed json
 #' @importFrom httr content
 #' @importFrom rjson fromJSON
-parse_rjson <- function(response){
+parse_rjson <- function(response) {
   rjson::fromJSON(httr::content(response, as = "text"))
 }
 
@@ -226,9 +229,10 @@ add_point_to_test_ep <-
            x = rnorm(mean = 53.317749,
                      sd = 1,
                      n = 1),
-           y = rnorm(mean = -1.0546875, sd = 1, n = 1),
+           y = rnorm(mean = -1.0546875,
+                     sd = 1,
+                     n = 1),
            id = sample(c(1:1000), 1)) {
-
     features <-
       glue::glue(
         '[
@@ -265,10 +269,12 @@ add_point_to_test_ep <-
 #' @param x a vector possibly containing nulls
 #' @param with what to replace the nulls with, default is NA
 #' @return a vector of equal length to x which will not contain null values but the value of with instead
-replace_null<-
-  function(x, with = NA){
+replace_null <-
+  function(x, with = NA) {
     null_values <- is.null(x)
-    if(all(!null_values)){return(x)}
+    if (all(!null_values)) {
+      return(x)
+    }
     x[null_values] <- NA
     return(x)
   }
@@ -295,31 +301,72 @@ get_unique_id_field <-
     # Otherwise, return the id field
     return(layer_details$uniqueIdField$name)
   }
-#' Supports Edit Tracking?
+#' Caching Method
 #'
-#' Does the layer support edit tracking
+#' Which caching method should be used based on how edits are tracked
 #'
 #' Some layers don't support edit tracing and can't be cached. This function checks whether it is supported.
 #' @param layer_details the layer details object returned be get_layer_details.
-#' @return TRUE/FALSE. TRUE if the layer supports edit tracking
-# supports_edit_tracking <-
-#   function(layer_details) {
-#     list(last_edit = !is.null(layer_details$editingInfo$lastEditDate),
-#          feature_edit_tracking = !is.null(layer_details$editFieldsInfo$editDateField)
-#          )
-#   }
+#' @return either "layer_edit" for tracking edits to the layer as a whole, "feature_edits" for tracking edits to individual features or NULL for no caching due to lack of edit tracking
 cache_method <-
-  function(layer_details){
+  function(layer_details) {
     last_edit = !is.null(layer_details$editingInfo$lastEditDate)
     feature_edit_tracking = !is.null(layer_details$editFieldsInfo$editDateField)
 
     # Return the method of caching to use
-    if(feature_edit_tracking){return("feature_edit")}
-    if(last_edit){return("layer_edit")}
+    if (feature_edit_tracking) {
+      return("feature_edit")
+    }
+    if (last_edit) {
+      return("layer_edit")
+    }
     return(NULL)
   }
 
+#' Drop NULL
+#'
+#' Drop NULL values from a list
+#'
+#' @param x a list
+#' @return a list without any null values
 drop_null <-
-  function(x){
+  function(x) {
     x[!unlist(lapply(x, is.null))]
+  }
+#' Query Object
+#'
+#' Compose a Query Object
+#'
+#' This function composes a query object from a set of query parameters that are either default, mandatory or user specified.
+#' @param default the default query parameters such as return format and crs (list).
+#' @param user_query the user query passed into the query argument or as argument params (list).
+#' @param mandatory the mandatory query parameters (list).
+#' @param token the access token if required.
+#' @return a list of query parameters to pass as the post body in a request
+query_object <-
+  function(default = default_query_parameters(),
+           user_query = list(),
+           mandatory = list(),
+           token = NULL) {
+    # Check Arguments
+    stopifnot(is.list(default))
+    stopifnot(is.list(user_query))
+    stopifnot(is.list(mandatory))
+
+    # Parse the access token
+    token <- parse_access_token(token)
+
+    # Combine the query sequentially, favouring user specified arguments over
+    # the default params, but ensuring mandatory ones are included
+    # Only keep default if they haven't already been specified
+    query <-
+      utils::modifyList(default, user_query, keep.null = FALSE)
+    # Always keep user params & defaults unless they should be overridden by the default
+    query <- utils::modifyList(query, mandatory, keep.null = FALSE)
+    # Add in the token
+    query <-
+      utils::modifyList(query, list(token = token), keep.null = FALSE)
+
+    return(query)
+
   }

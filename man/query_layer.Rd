@@ -13,7 +13,7 @@ query_layer(
   out_fields = c("*"),
   return_n = NULL,
   geometry_precision = NULL,
-  query = NULL,
+  query = list(),
   crs = 4326,
   my_token = NULL,
   cache = NULL
