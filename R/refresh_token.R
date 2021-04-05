@@ -34,7 +34,7 @@ refresh_token <-
     )
 
     if (!is.null(user_params)) {
-      req_params <- utils::modifyList(user_params, req_params)
+      req_params <- utils::modifyList(user_params, req_params, keep.null = FALSE)
     }
 
     if (isTRUE(use_basic_auth)) {

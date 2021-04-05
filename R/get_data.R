@@ -15,7 +15,7 @@
 #' @importFrom httr content
 get_geojson <- function(query_url, query) {
   # Request the data using POST
-  response <- httr::POST(url = query_url, body = as.list(query))
+  response <- httr::POST(url = query_url, body = query)
 
   # Fail on error
   stopifnot(httr::status_code(response) == 200)
@@ -59,7 +59,7 @@ get_geojson <- function(query_url, query) {
 get_tibble <-
   function(query_url, query){
     # Request the data using POST
-    response <- httr::POST(url = query_url, body = as.list(query))
+    response <- httr::POST(url = query_url, body = query)
 
     # Fail on error
     stopifnot(httr::status_code(response) == 200)

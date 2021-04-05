@@ -18,11 +18,13 @@ lower_logical <-
 #' @param x a named vector to replace
 #' @param y a named vector to combine with x
 #' @return a named vector that is the combination of x and y, not containing any elements in x with matches in y
-modify_named_vector <-
-  function(x, y){
-    x[names(y)] <- y
-    return(x)
-  }
+# modifyList <-
+#   function(x, y){
+#     x[names(y)] <- y
+#     is_null <- lapply(x, is.null)
+#     x <- x[!unlist(is_null)]
+#     return(x)
+#   }
 #' Map Server
 #'
 #' Is an endpoint a map server
@@ -315,4 +317,9 @@ cache_method <-
     if(feature_edit_tracking){return("feature_edit")}
     if(last_edit){return("layer_edit")}
     return(NULL)
+  }
+
+drop_null <-
+  function(x){
+    x[!unlist(lapply(x, is.null))]
   }

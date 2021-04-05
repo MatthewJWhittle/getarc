@@ -4,12 +4,12 @@ endpoint_fs = endpoints$ancient_woodland_england
 endpoint_ms = endpoints$gb_postcodes
 
 # Get the geometry with get_geojson
-query_geom <- modify_named_vector(default_query_parameters(),
-                                  c(resultRecordCount = 1, geometryPrecision = 1))
+query_geom <- utils::modifyList(default_query_parameters(),
+                                  list(resultRecordCount = 1, geometryPrecision = 1), keep.null = FALSE)
 
 # Don't get the geometry with get_tibble
-query_no_geom <- modify_named_vector(default_query_parameters(),
-                                     c(resultRecordCount = 1, returnGeometry = "false"))
+query_no_geom <- utils::modifyList(default_query_parameters(),
+                                     list(resultRecordCount = 1, returnGeometry = "false"), keep.null = FALSE)
 
 # Map Server
 query_url_ms <- paste0(endpoint_ms, "/query")
@@ -18,7 +18,7 @@ geom_data_ms <- get_geojson(query_url = query_url_ms,
 no_geom_data_ms <-  get_tibble(query_url = query_url_ms,
                                query = query_no_geom)
 
-# Freture Server
+# Feature Server
 query_url_fs <- paste0(endpoint_fs, "/query")
 geom_data_fs <- get_geojson(query_url = query_url_fs,
                             query = query_geom)

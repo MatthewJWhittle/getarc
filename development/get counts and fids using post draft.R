@@ -13,8 +13,8 @@ my_token = NULL
 
     token <- parse_access_token(my_token)
 
-    query <- modify_named_vector(default_query_parameters(),
-                                 c(query, token = token, returnIdsOnly = "true"))
+    query <- utils::modifyList(default_query_parameters(),
+                                 c(query, token = token, returnIdsOnly = "true"), keep.null = FALSE)
 
     query_url <- paste0(endpoint, "/query")
 
@@ -53,9 +53,9 @@ my_token = NULL
     token <- parse_access_token(my_token)
 
     # Modify the standard query parameters and insert any that are required for the request
-    query <- modify_named_vector(default_query_parameters(),
+    query <- utils::modifyList(default_query_parameters(),
                                  c(query, token = token,
-                                   returnCountOnly = "true"))
+                                   returnCountOnly = "true"), keep.null = FALSE)
 
     # Define the query url by appending query to the endpoint url
     query_url <- paste0(endpoint, "/query")

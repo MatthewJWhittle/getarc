@@ -18,6 +18,7 @@
 #' @importFrom progress progress_bar
 #' @importFrom purrr map
 #' @importFrom dplyr bind_rows
+#' @importFrom utils modifyList
 get_by_fids <-
   function(endpoint,
            query,
@@ -33,7 +34,7 @@ get_by_fids <-
 
     # Add the token into the query
     query <-
-      modify_named_vector(query, c(token = parse_access_token(my_token)))
+      utils::modifyList(query, list(token = parse_access_token(my_token)), keep.null = FALSE)
 
     # Check if the user has requested less rows than the maxrecord count, if so don't initiate
     # getting the FIDs and the where in query and just return the data
@@ -96,10 +97,10 @@ get_by_fids <-
 
     querys <-
       purrr::map(object_ids_split,
-                 ~ modify_named_vector(
+                 ~ utils::modifyList(
                    query,
                    where_in_query(object_ids$objectIdFieldName, .x, named = TRUE)
-                 ))
+                 ), keep.null = FALSE)
 
     # Define a progress bar
     pb <- progress::progress_bar$new(

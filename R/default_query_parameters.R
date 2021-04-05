@@ -1,6 +1,6 @@
 default_query_parameters <-
   function() {
-    c(
+    list(
       returnIdsOnly = "false",
       # Get all features with sql query 1 = 1
       where = "1=1",
