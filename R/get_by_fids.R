@@ -18,6 +18,7 @@
 #' @importFrom progress progress_bar
 #' @importFrom purrr map
 #' @importFrom dplyr bind_rows
+#' @importFrom utils modifyList
 get_by_fids <-
   function(endpoint,
            query,
@@ -25,7 +26,8 @@ get_by_fids <-
            return_geometry,
            return_n,
            layer_details,
-           out_fields) {
+           out_fields,
+           object_ids = NULL) {
     # This function works by checking if the requested return count is less tha the max record count.
     # If so, it doesnn't bother with getting the FIDs and just requests the data and returns it.
     # Getting FIDs is a big overhea so this should be avoided where possible.
@@ -33,7 +35,7 @@ get_by_fids <-
 
     # Add the token into the query
     query <-
-      modify_named_vector(query, c(token = parse_access_token(my_token)))
+      utils::modifyList(query, list(token = parse_access_token(my_token)), keep.null = FALSE)
 
     # Check if the user has requested less rows than the maxrecord count, if so don't initiate
     # getting the FIDs and the where in query and just return the data
@@ -68,10 +70,12 @@ get_by_fids <-
     # Otherwise, get the FIDs and return the data
     # The FIDs are used for two things: first to determine if any results will be returned by a query;
     # second to get the data by FIDs
+    if(is.null(object_ids)){
     object_ids <-
       get_feature_ids(endpoint = endpoint,
                       query = query,
                       my_token = my_token)
+    }
 
     # Check if any FIDs will be returned by the query, if not return an empty tibble avoiding the query
     if (length(object_ids$objectIds) == 0) {
@@ -96,10 +100,10 @@ get_by_fids <-
 
     querys <-
       purrr::map(object_ids_split,
-                 ~ modify_named_vector(
+                 ~ utils::modifyList(
                    query,
                    where_in_query(object_ids$objectIdFieldName, .x, named = TRUE)
-                 ))
+                 ), keep.null = FALSE)
 
     # Define a progress bar
     pb <- progress::progress_bar$new(

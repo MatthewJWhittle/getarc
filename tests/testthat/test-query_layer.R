@@ -20,7 +20,7 @@ one_row_bng <- query_layer(
 
 small_feature <-
   query_layer(endpoints$gb_wood_pasture_parkland,
-              "where" = "Shape__Area < 30",
+              where = "Shape__Area < 30",
               return_n = 1,
               geometry_precision = 1)
 
@@ -78,8 +78,7 @@ ms_nogeom <-
   query_layer(
     endpoints$english_counties,
     return_geometry = FALSE,
-    return_n = 2,
-    geometry_precision = 1
+    return_n = 2
   )
 fs_nogeom <-
   query_layer(endpoint = endpoints$ancient_woodland_england,
@@ -88,6 +87,7 @@ fs_nogeom <-
   )
 
 
+# debugonce(query_layer)
 awi_2510 <-
   query_layer(endpoint = endpoints$ancient_woodland_england,
             out_fields = "objectid",
@@ -95,17 +95,20 @@ awi_2510 <-
             return_geometry = FALSE)
 
 
-
 # tibble(OBJECTID = character(0),
 #        NAME = character(0)
 # )
 
+# Suppress the warnings so that they don't trigger a test fail
 no_awi <-
-query_layer(endpoint = endpoints$ancient_woodland_england,
-            where = "1=2",
-            out_fields = c("NAME", "OBJECTID"),
-            return_geometry = FALSE
-)
+  suppressWarnings({
+    query_layer(
+      endpoint = endpoints$ancient_woodland_england,
+      where = "1=2",
+      out_fields = c("NAME", "OBJECTID"),
+      return_geometry = FALSE
+    )
+  })
 
 # The API returns NULL values and these were not being converted to NA properly
 # This tests against an endpoint where there are known null values
@@ -143,8 +146,8 @@ test_that("query layer works", {
                TRUE)
 
   expect_warning(query_layer(endpoint = endpoints$gb_wood_pasture_parkland, where = "1 = 2"))
-  expect_error(query_layer(endpoint = endpoints$gb_wood_pasture_parkland, where = "1 = 2", return_n = 1), NA)
-  expect_error(query_layer(endpoint = endpoints$gb_wood_pasture_parkland, where = "1 = 2", return_n = 1, return_geometry = FALSE), NA)
+  expect_warning(query_layer(endpoint = endpoints$gb_wood_pasture_parkland, where = "1 = 2", return_n = 1))
+  expect_warning(query_layer(endpoint = endpoints$gb_wood_pasture_parkland, where = "1 = 2", return_n = 1, return_geometry = FALSE))
   # Does the area query have the desired result
   expect_equal(small_feature$Shape__Area < 30, TRUE)
   # return_geometry = FALSE returns a data.frame for both map servers and feature servers
@@ -200,4 +203,9 @@ test_that("Caching Works",
             expect_equivalent(updated_cache_file, updated_layer)
             # The updated cache returned by query layer should have one additional row from adding a point
             expect_equal(nrow(updated_cache) - nrow(points_dl), 1)
+            expect_warning(query_layer(endpoint = endpoints$cairns_corals,
+                                       return_n = 1,
+                                       cache = "development/data-cache/cairns-corals-1.geojson"
+                                       ),
+                           NA)
           })

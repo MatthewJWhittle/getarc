@@ -29,6 +29,154 @@
 #' @importFrom dplyr filter
 #' @importFrom sf st_read
 #' @importFrom glue glue
+#' @importFrom utils modifyList
+# query_layer <-
+#   function(endpoint,
+#            in_geometry = NULL,
+#            spatial_filter = "intersects",
+#            return_geometry = TRUE,
+#            where = NULL,
+#            out_fields = c("*"),
+#            return_n = NULL,
+#            geometry_precision = NULL,
+#            query = NULL,
+#            crs = 4326,
+#            my_token = NULL,
+#            cache = NULL) {
+#     #https://developers.arcgis.com/rest/services-reference/layer-feature-service-.htm
+#     # It would be useful to add a line of code in here to check and auto refresh the token
+#     # Get the details of the layer to
+#     layer_details <-
+#       get_layer_details(endpoint = endpoint, my_token = my_token)
+#
+#     # Get the unique ID field from the layer details.
+#     id_field <- get_unique_id_field(endpoint = endpoint, layer_details = layer_details)
+#     # Caching ------
+#     # Should a cache be used? A cache should be used if the user has supplied a path, and the layer supports
+#     # edit tracking
+#     edit_tracking <- supports_edit_tracking(layer_details)
+#       if(!all(unlist(edit_tracking)) & !is.null(cache)){
+#         warning("This layer doesn't support edit tracking so cannot be cached")
+#       }
+#
+#     use_cache <- (!is.null(cache) & any(unlist(edit_tracking)))
+#     # Does the cache exist?
+#     if (use_cache) {
+#
+#       cache_exists <- file.exists(cache)
+#       # Fail quickly if the cache directory doesn't exist
+#       stopifnot(dir.exists(dirname(cache)))
+#       last_layer_edit <-
+#         parse_esri_datetime(layer_details$editingInfo$lastEditDate)
+#       # Load cache
+#       if (cache_exists) {
+#         cached_time <- file.info(cache)$ctime
+#         # Print a message to make it clear which cache is being loaded & when it is from
+#         message(glue::glue("Loading cached data ({cached_time}) from: '{cache}'"))
+#         # Conver the Cache time to UTC as this is what is accepted by esri api
+#         cached_time <- lubridate::with_tz(cached_time, tzone = "UTC")
+#         data_cache <- sf::st_read(cache, quiet = TRUE)
+#         # If there haven't been any edits since the data was last cached, return the data
+#         if (last_layer_edit < cached_time) {
+#           return(data_cache)
+#         }
+#         # Generate the edits query from the field records the edit times and the last download time
+#         # Between the time the data is downloaded and written to file, there will be  gap where some edits are missed
+#         # I need a way of recording the actual dl time in the file
+#         edits_query <-
+#           glue::glue(
+#             "{layer_details$editFieldsInfo$editDateField} > '{as.character(cached_time)}'"
+#           )
+#
+#         # If a where query hasn't been passed in, then use the edits query. If not combine them
+#         if (is.null(where)) {
+#           where <- edits_query
+#         } else{
+#           where <- glue::glue("({where}) AND {edits_query}")
+#         }
+#       }
+#     }
+#
+#
+#     # If an in_geometry has been specified then generate the spatial query and combine with the query parameters
+#     if (!is.null(in_geometry)) {
+#       query <- utils::modifyList(query,
+#                                    spatial_query(x = in_geometry,
+#                                                  spatial_filter = esri_spatial_filter(spatial_filter)))
+#     }
+#
+#     argument_parameters <-
+#       c(
+#         returnGeometry = lower_logical(return_geometry),
+#         outFields = paste0(out_fields, collapse = ","),
+#         resultRecordCount = return_n,
+#         geometryPrecision = geometry_precision,
+#         where = where
+#       )
+#
+#
+#     # Add query parameters which have been set as arguments in the function
+#     query <- utils::modifyList(query, argument_parameters)
+#
+#     # Add in the default parameters but only where they are not present in query
+#     query <- utils::modifyList(default_query_parameters(), query)
+#
+#     # Get the data by feature IDs allowing us to exceed the max record count
+#     data <-
+#       get_by_fids(endpoint,
+#                   query = query,
+#                   my_token,
+#                   return_geometry,
+#                   return_n,
+#                   layer_details,
+#                   out_fields)
+#
+#     ####
+#     # Parse the variables -----
+#     # This should probably be wrapped up into one parsing function at some point
+#     data <-
+#       parse_coded_domains(data,
+#                           domain_lookup(layer_details))
+#
+#     data <- parse_datetimes(data = data,
+#                             feature_details = layer_details)
+#
+#     # If the specified crs is not 4326 (the current crs) then transform the data
+#     # This might be redundant as we can specify the outcrs when requesting the data
+#     if (crs != 4326 &
+#         return_geometry & any(c("sf", "sfc") %in% class(data))) {
+#       data <- data %>% sf::st_transform(crs = crs)
+#     }
+#
+#     # Print a warning if the query didn't return any data
+#     if (nrow(data) == 0) {
+#       warning("No data returned by query.")
+#     }
+#
+#     if(!use_cache){
+#       return(data)
+#     }else{
+#     # Write Cache
+#       if (!cache_exists) {
+#         sf::st_write(data, cache, delete_dsn = TRUE, quiet = TRUE)
+#         return(data)
+#       }
+#       new_data_ids <- dplyr::pull(data, id_field)
+#       cache_data_ids <- dplyr::pull(data_cache, id_field)
+#
+#
+#       data_refreshed <-
+#         dplyr::bind_rows(# Remove anything from the cache that has been updated
+#           dplyr::filter(data_cache, !cache_data_ids %in% new_data_ids),
+#           data)
+#       sf::st_write(data_refreshed,
+#                    cache,
+#                    delete_dsn = TRUE,
+#                    quiet = TRUE)
+#     return(data_refreshed)
+#     }
+#
+#   }
 query_layer <-
   function(endpoint,
            in_geometry = NULL,
@@ -38,96 +186,67 @@ query_layer <-
            out_fields = c("*"),
            return_n = NULL,
            geometry_precision = NULL,
-           query = NULL,
+           query = list(),
            crs = 4326,
            my_token = NULL,
            cache = NULL) {
     #https://developers.arcgis.com/rest/services-reference/layer-feature-service-.htm
     # It would be useful to add a line of code in here to check and auto refresh the token
     # Get the details of the layer to
-    layer_details <-
-      get_layer_details(endpoint = endpoint, my_token = my_token)
-
-    # Get the unique ID field from the layer details.
-    id_field <- get_unique_id_field(endpoint = endpoint, layer_details = layer_details)
-    # Caching ------
-    # Should a cache be used? A cache should be used if the user has supplied a path, and the layer supports
-    # edit tracking
-    edit_tracking <- supports_edit_tracking(layer_details)
-      if(!edit_tracking & !is.null(cache)){
-        warning("This layer doesn't support edit tracking so cannot be cached")
-      }
-    use_cache <- (!is.null(cache) & edit_tracking)
-    # Does the cache exist?
-    if (use_cache) {
-
-      cache_exists <- file.exists(cache)
-      # Fail quickly if the cache directory doesn't exist
-      stopifnot(dir.exists(dirname(cache)))
-      last_layer_edit <-
-        parse_esri_datetime(layer_details$editingInfo$lastEditDate)
-      # Load cache
-      if (cache_exists) {
-        cached_time <- file.info(cache)$ctime
-        # Print a message to make it clear which cache is being loaded & when it is from
-        message(glue::glue("Loading cached data ({cached_time}) from: '{cache}'"))
-        # Conver the Cache time to UTC as this is what is accepted by esri api
-        cached_time <- lubridate::with_tz(cached_time, tzone = "UTC")
-        data_cache <- sf::st_read(cache, quiet = TRUE)
-        # If there haven't been any edits since the data was last cached, return the data
-        if (last_layer_edit < cached_time) {
-          return(data_cache)
-        }
-        # Generate the edits query from the field records the edit times and the last download time
-        # Between the time the data is downloaded and written to file, there will be  gap where some edits are missed
-        # I need a way of recording the actual dl time in the file
-        edits_query <-
-          glue::glue(
-            "{layer_details$editFieldsInfo$editDateField} > '{as.character(cached_time)}'"
-          )
-
-        # If a where query hasn't been passed in, then use the edits query. If not combine them
-        if (is.null(where)) {
-          where <- edits_query
-        } else{
-          where <- glue::glue("({where}) AND {edits_query}")
-        }
-      }
-    }
-
-
-    # If an in_geometry has been specified then generate the spatial query and combine with the query parameters
-    if (!is.null(in_geometry)) {
-      query <- modify_named_vector(query,
-                                   spatial_query(x = in_geometry,
-                                                 spatial_filter = esri_spatial_filter(spatial_filter)))
-    }
 
     argument_parameters <-
-      c(
+      list(
         returnGeometry = lower_logical(return_geometry),
         outFields = paste0(out_fields, collapse = ","),
         resultRecordCount = return_n,
         geometryPrecision = geometry_precision,
         where = where
       )
+    argument_parameters <- drop_null(argument_parameters)
+
+    user_query <- utils::modifyList(query, argument_parameters, keep.null = FALSE)
 
 
-    # Add query parameters which have been set as arguments in the function
-    query <- modify_named_vector(query, argument_parameters)
+    # If an in_geometry has been specified then generate the spatial query and combine with the query parameters
+    if (!is.null(in_geometry)) {
+      spatial_query <- spatial_query(x = in_geometry,
+                                     spatial_filter = esri_spatial_filter(spatial_filter))
+      user_query <- utils::modifyList(user_query, spatial_query, keep.null = FALSE)
+    }
 
-    # Add in the default parameters but only where they are not present in query
-    query <- modify_named_vector(default_query_parameters(), query)
+    query <- query_object(default = default_query_parameters(), user_query = user_query, my_token = my_token)
+
+    layer_details <-
+      get_layer_details(endpoint = endpoint, my_token = my_token)
+
+    # Get the unique ID field from the layer details.
+    id_field <-
+      get_unique_id_field(endpoint = endpoint, layer_details = layer_details)
+
+    cache_object <-
+      init_cache(
+        endpoint = endpoint,
+        query = query,
+        cache = cache,
+        layer_details = layer_details,
+        id_field = id_field
+      )
+    if(!cache_object$any_changes & cache_object$use_cache){return(cache_object$data_cache)}
+
+    # Drop parts of the query that are NULL which was automatically done for vectors
+    # But isn't now it is a list object
+    cache_object$query <- drop_null(cache_object$query)
 
     # Get the data by feature IDs allowing us to exceed the max record count
     data <-
       get_by_fids(endpoint,
-                  query = query,
+                  query = cache_object$query,
                   my_token,
                   return_geometry,
                   return_n,
                   layer_details,
-                  out_fields)
+                  out_fields,
+                  object_ids = cache_object$object_ids)
 
     ####
     # Parse the variables -----
@@ -150,28 +269,170 @@ query_layer <-
     if (nrow(data) == 0) {
       warning("No data returned by query.")
     }
+    data <- refresh_cache(data, cache_object)
+    return(data)
 
-    if(!use_cache){
-      return(data)
-    }else{
+  }
+
+#' Refresh cache
+#'
+#' Refresh the data cache
+#' @param data the newly downloaded data
+#' @param cache_object the cache object generated by init_cache
+#' @return a tibble
+refresh_cache <-
+  function(data, cache_object){
+    if (!cache_object$use_cache) {return(data)}
+
+
     # Write Cache
-      if (!cache_exists) {
-        sf::st_write(data, cache, delete_dsn = TRUE, quiet = TRUE)
-        return(data)
-      }
-      new_data_ids <- dplyr::pull(data, id_field)
-      cache_data_ids <- dplyr::pull(data_cache, id_field)
-
-
-      data_refreshed <-
-        dplyr::bind_rows(# Remove anything from the cache that has been updated
-          dplyr::filter(data_cache, !cache_data_ids %in% new_data_ids),
-          data)
-      sf::st_write(data_refreshed,
-                   cache,
+    if (!cache_object$cache_exists) {
+      sf::st_write(data,
+                   cache_object$cache_path,
                    delete_dsn = TRUE,
                    quiet = TRUE)
-    return(data_refreshed)
+      return(data)
     }
 
+    new_data_ids <- dplyr::pull(data, cache_object$id_field)
+    cache_data_ids <- dplyr::pull(cache_object$data_cache, cache_object$id_field)
+
+
+    data_refreshed <-
+      dplyr::bind_rows(
+        # Remove anything from the cache that has been updated
+        dplyr::filter(cache_object$data_cache, !cache_data_ids %in% new_data_ids | cache_data_ids %in% cache_object$object_ids$objectIds),
+        data
+      )
+    sf::st_write(data_refreshed,
+                 cache_object$cache_path,
+                 delete_dsn = TRUE,
+                 quiet = TRUE)
+    return(data_refreshed)
+  }
+#' Init Cache
+#'
+#' Initialise the cache
+#'
+#' @param endpoint the endpoint against which to query
+#' @param query the query to execute
+#' @param cache the cache path supplied by the user, can be null
+#' @param layer_details the layer details argument supplied by get layer details
+#' @param id_field the id field against which to renew the cache
+#' @return a cache object defining the cached data & various bits of info to determine how the cache should be updated if at all
+init_cache <-
+  function(endpoint,
+           query,
+           cache,
+           layer_details,
+           my_token = NULL,
+           id_field) {
+
+    cache_object <- init_cache_object(query = query,
+                                      use_cache = !is.null(cache),
+                                      cache = cache,
+                                      id_field = id_field)
+
+    if(!cache_object$use_cache){return(cache_object)}
+
+    # Caching ------
+    # Should a cache be used? A cache should be used if the user has supplied a path, and the layer supports
+    # edit tracking
+    cache_object$method <- cache_method(layer_details)
+    cache_object$cache_exists <- file.exists(cache)
+
+    if (is.null(cache_object$method) & cache_object$use_cache) {
+      warning("This layer doesn't support edit tracking so cannot be cached")
+      # Return an empty cache object if the layer doesn't support any for of edit tracking
+      # Change use cache to FALSE
+      cache_object$use_cache <- FALSE
+      return(cache_object)
+    }
+
+    # Fail quickly if the cache directory doesn't exist
+    stopifnot(dir.exists(dirname(cache)))
+
+    if(!cache_object$cache_exists){
+      return(cache_object)
+    }
+
+
+    last_layer_edit <-
+      parse_esri_datetime(layer_details$editingInfo$lastEditDate)
+
+    # Load cache
+    if (cache_object$cache_exists) {
+      cached_time <- file.info(cache)$ctime
+      # Print a message to make it clear which cache is being loaded & when it is from
+      message(glue::glue("Loading cached data ({cached_time}) from: '{cache}'"))
+      # Conver the Cache time to UTC as this is what is accepted by esri api
+      cached_time <- lubridate::with_tz(cached_time, tzone = "UTC")
+      cache_object$data_cache <- sf::st_read(cache, quiet = TRUE)
+      cache_object$any_changes <- last_layer_edit > cached_time
+
+      # If there haven't been any edits since the data was last cached or the
+      # the method is using layer edits then return the object
+      if (!cache_object$any_changes | cache_object$method == "layer_edit") {
+        return(cache_object)
+      }
+
+      # Edits Query
+      # First get the FIDs to know which should be dropped from the cache
+      cache_object$object_ids <-
+        get_feature_ids(endpoint = endpoint,
+                              query = cache_object$query,
+                              my_token = my_token)
+      # Otherwise generate an edits query
+      # Generate the edits query from the field records the edit times and the last download time
+      # Between the time the data is downloaded and written to file, there will be  gap where some edits are missed
+      # I need a way of recording the actual dl time in the file
+      edits_query <-
+        glue::glue(
+          "{layer_details$editFieldsInfo$editDateField} > '{as.character(cached_time)}'"
+        )
+
+
+      # If a where query hasn't been passed in, then use the edits query. If not combine them
+      if (is.null(cache_object$query$where)) {
+        cache_object$query$where <- edits_query
+      } else{
+        cache_object$query$where <- glue::glue("({cache_object$query$where}) AND {edits_query}")
+      }
+    }
+
+    return(cache_object)
+  }
+
+#' Init Cache Object
+#'
+#' Initialise the cache object
+#' @param data_cache the cached data
+#' @param object_ids the object ids to request
+#' @param query the query to execute
+#' @param method the caching method to use
+#' @param any_changes Have there been any changes to the data since the last cache?
+#' @param cache_path where is/should the data be saved
+#' @param id_field which is the unique id field
+#' @return a cache_object
+init_cache_object <-
+  function(data_cache = NULL,
+           object_ids = NULL,
+           query = NULL,
+           method = NULL,
+           any_changes = TRUE,
+           use_cache = FALSE,
+           cache_path = NULL,
+           id_field = NULL) {
+    return(
+      list(
+        data_cache = data_cache,
+        object_ids = object_ids,
+        query = query,
+        method = method,
+        any_changes = any_changes,
+        use_cache = use_cache,
+        cache_path = cache_path,
+        id_field = id_field
+      )
+    )
   }

@@ -4,7 +4,7 @@
 \alias{get_feature_ids}
 \title{Get Feature IDs}
 \usage{
-get_feature_ids(endpoint, query = NULL, my_token = NULL)
+get_feature_ids(endpoint, query = list(), my_token = NULL)
 }
 \arguments{
 \item{endpoint}{the url endpoint of the service. See feature_server_endpoint and map_server_endpoint}

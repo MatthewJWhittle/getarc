@@ -11,25 +11,25 @@
 #' @importFrom httr content
 #' @importFrom rjson fromJSON
 #' @export get_feature_ids
+#' @importFrom utils modifyList
 get_feature_ids <-
-  function(endpoint, query = NULL, my_token = NULL){
-    token <- parse_access_token(my_token)
+  function(endpoint, query = list(), my_token = NULL){
 
-    query <- modify_named_vector(default_query_parameters(),
-                                 c(query, token = token, returnIdsOnly = "true"))
+    query <- query_object(default = default_query_parameters(),
+                          user_query = query,
+                          my_token = my_token,
+                          mandatory = list(returnIdsOnly = "true")
+                          )
 
-    # there is a known limitation in arc gis api where the result record parameter doesn't work with
-    # the return count or return ids only parameter
-    # This is a workaround
+    # Get the request number of records to return and drop the param from the query
+    # This can then be used to limit the number of FIDs returned by the function
     return_count <-  as.numeric(query[names(query) == "resultRecordCount"])
     query <- query[names(query) != "resultRecordCount"]
-
-
 
     query_url <- paste0(endpoint, "/query")
 
     # Download the data using a post query
-    response <- httr::POST(query_url, body = as.list(query))
+    response <- httr::POST(query_url, body = query)
 
     # Fail if the response is not 200
     # Print an error message if the status code isn't 200
@@ -73,12 +73,14 @@ get_feature_ids <-
 #' @importFrom rjson fromJSON
 #' @export get_count
 get_count <-
-  function(endpoint, query = NULL, my_token = NULL){
-    token <- parse_access_token(my_token)
+  function(endpoint, query = list(), my_token = NULL){
 
-    query <- modify_named_vector(default_query_parameters(),
-                                 c(query, token = token,
-                                   returnCountOnly = "true"))
+    query <- query_object(default = default_query_parameters(),
+                          user_query = query,
+                          my_token = my_token,
+                          mandatory = list(returnCountOnly = "true")
+    )
+
 
     query_url <- paste0(endpoint, "/query")
 

@@ -46,17 +46,17 @@ bounding_box = lifecycle::deprecated()
 
     # If an in_geometry has been specified then generate the spatial query and combine with the query parameters
     if (!is.null(in_geometry)) {
-      query <- modify_named_vector(query, spatial_query(in_geometry,
+      query <- utils::modifyList(query, spatial_query(in_geometry,
                                                         spatial_filter = esri_spatial_filter(spatial_filter),
-                                                        max_char = 1000))
+                                                        max_char = 1000), keep.null = FALSE)
     }
 
     argument_parameters <- c(returnGeometry = lower_logical(return_geometry))
 
     # Add query parameters which have been set as arguments in the function
-    query <- modify_named_vector(query, argument_parameters)
+    query <- utils::modifyList(query, argument_parameters, keep.null = FALSE)
     # Add in the default parameters but only where they are not present in query
-    query <- modify_named_vector(default_query_parameters(), query)
+    query <- utils::modifyList(default_query_parameters(), query, keep.null = FALSE)
 
     count <- get_count(endpoint = endpoint, query = query, my_token = my_token)
 

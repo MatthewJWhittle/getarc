@@ -43,9 +43,9 @@ return_geometry = FALSE
     argument_parameters <- c(returnGeometry = lower_logical(return_geometry))
 
     # Add query parameters which have been set as arguments in the function
-    query <- modify_named_vector(query, argument_parameters)
+    query <- utils::modifyList(query, argument_parameters, keep.null = FALSE)
     # Add in the default parameters but only where they are not present in query
-    query <- modify_named_vector(default_query_parameters(), query)
+    query <- utils::modifyList(default_query_parameters(), query, keep.null = FALSE)
 
     feature_ids <- get_feature_ids(endpoint = endpoint, query = query, my_token = my_token)
 

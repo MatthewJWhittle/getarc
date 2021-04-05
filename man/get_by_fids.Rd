@@ -11,7 +11,8 @@ get_by_fids(
   return_geometry,
   return_n,
   layer_details,
-  out_fields
+  out_fields,
+  object_ids = NULL
 )
 }
 \arguments{
