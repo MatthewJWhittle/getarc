@@ -341,20 +341,20 @@ drop_null <-
 #' @param default the default query parameters such as return format and crs (list).
 #' @param user_query the user query passed into the query argument or as argument params (list).
 #' @param mandatory the mandatory query parameters (list).
-#' @param token the access token if required.
+#' @param my_token the access token if required.
 #' @return a list of query parameters to pass as the post body in a request
 query_object <-
   function(default = default_query_parameters(),
            user_query = list(),
            mandatory = list(),
-           token = NULL) {
+           my_token = NULL) {
     # Check Arguments
     stopifnot(is.list(default))
     stopifnot(is.list(user_query))
     stopifnot(is.list(mandatory))
 
     # Parse the access token
-    token <- parse_access_token(token)
+    token <- parse_access_token(my_token = my_token)
 
     # Combine the query sequentially, favouring user specified arguments over
     # the default params, but ensuring mandatory ones are included

@@ -17,7 +17,7 @@ get_feature_ids <-
 
     query <- query_object(default = default_query_parameters(),
                           user_query = query,
-                          token = my_token,
+                          my_token = my_token,
                           mandatory = list(returnIdsOnly = "true")
                           )
 
@@ -77,7 +77,7 @@ get_count <-
 
     query <- query_object(default = default_query_parameters(),
                           user_query = query,
-                          token = my_token,
+                          my_token = my_token,
                           mandatory = list(returnCountOnly = "true")
     )
 

@@ -8,7 +8,7 @@ query_object(
   default = default_query_parameters(),
   user_query = list(),
   mandatory = list(),
-  token = NULL
+  my_token = NULL
 )
 }
 \arguments{
@@ -18,7 +18,7 @@ query_object(
 
 \item{mandatory}{the mandatory query parameters (list).}
 
-\item{token}{the access token if required.}
+\item{my_token}{the access token if required.}
 }
 \value{
 a list of query parameters to pass as the post body in a request

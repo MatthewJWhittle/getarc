@@ -26,7 +26,8 @@ get_by_fids <-
            return_geometry,
            return_n,
            layer_details,
-           out_fields) {
+           out_fields,
+           object_ids = NULL) {
     # This function works by checking if the requested return count is less tha the max record count.
     # If so, it doesnn't bother with getting the FIDs and just requests the data and returns it.
     # Getting FIDs is a big overhea so this should be avoided where possible.
@@ -69,10 +70,12 @@ get_by_fids <-
     # Otherwise, get the FIDs and return the data
     # The FIDs are used for two things: first to determine if any results will be returned by a query;
     # second to get the data by FIDs
+    if(is.null(object_ids)){
     object_ids <-
       get_feature_ids(endpoint = endpoint,
                       query = query,
                       my_token = my_token)
+    }
 
     # Check if any FIDs will be returned by the query, if not return an empty tibble avoiding the query
     if (length(object_ids$objectIds) == 0) {
