@@ -367,7 +367,7 @@ init_cache <-
       message(glue::glue("Loading cached data ({cached_time}) from: '{cache}'"))
       # Conver the Cache time to UTC as this is what is accepted by esri api
       cached_time <- lubridate::with_tz(cached_time, tzone = "UTC")
-      cache_object$data_cache <- sf::st_read(cache, quiet = TRUE)
+      cache_object$data_cache <- sf::st_read(cache, quiet = TRUE, stringsAsFactors = FALSE)
       cache_object$any_changes <- last_layer_edit > cached_time
 
       # If there haven't been any edits since the data was last cached or the
