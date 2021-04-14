@@ -54,8 +54,12 @@ get_token <-
                                                         access_grant_datetime = Sys.time()
                                                         ))
 
-    # httr doesn't parse the credentials correctly into a list
+    # httr doesn't parse the credentials correctly into a list sometimes
+    # Think this may be fixed somewhere now so i've added conditional
+    # logic to parse it if neccessary
+    if(!is.list(my_token$credentials)){
     my_token$credentials <- jsonlite::fromJSON(my_token$credentials)
+    }
 
 
 
