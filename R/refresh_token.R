@@ -63,8 +63,10 @@ refresh_token <-
 
     httr::stop_for_status(response)
     refresh_data <- httr::content(response)
+    # The arc gis server returns a format that httr doesn't auto parse (previously, API appears to be fixed now)
+    # This line is added in to parse it and add the new credentials in
+    # Only parse the JSON if it isn't already a list
+    if(!is.list(refresh_data)){refresh_data <- jsonlite::fromJSON(refresh_data)}
     utils::modifyList(credentials,
-                      # The arc gis server returns a format that httr doesn't auto parse
-                      # This line is added in to parse it and add the new credentials in
-                      jsonlite::fromJSON(refresh_data))
+                      refresh_data)
   }
