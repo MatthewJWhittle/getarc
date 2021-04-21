@@ -61,7 +61,15 @@ get_by_fids <-
 
     # If the number of rows returned is less than the max record count then return the
     # data and don't execute the rest of the function
-    if (nrow(data) < layer_details$maxRecordCount ||
+    # This fails when there is an issue with parsing the jsonby st_read
+    # It doesn't always return the max record count even if that is what is returned by the api
+    # As a result this will fail
+    # This is a temporary fix to get the count which should be returned by the query and
+    # Then check whether the data can be returned without acquiring more
+    feature_count <-
+      get_count(endpoint, query =  query, my_token = my_token)
+
+    if (feature_count < layer_details$maxRecordCount ||
         ((!is.null(return_n)) &&
          return_n < layer_details$maxRecordCount)) {
       return(data)
