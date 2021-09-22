@@ -65,7 +65,7 @@ get_by_fids <-
       warning("No data matching query, returning an empty tibble")
       return(
         make_empty_tibble(
-          field_names = layer_details$fields$name,
+          field_names = field_names(layer_details),
           out_fields = out_fields
         )
       )

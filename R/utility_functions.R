@@ -198,3 +198,14 @@ make_empty_tibble <-
 parse_rjson <- function(response){
   rjson::fromJSON(httr::content(response, as = "text"))
 }
+#' Field Names
+#'
+#' Get the field names from layer details
+#'
+#' @param layer_details the layer_details object
+#' @return a character vector of field names
+#' @importFrom purrr map_chr
+field_names <-
+  function(layer_details){
+    purrr::map_chr(layer_details$fields, "name")
+  }

@@ -87,7 +87,7 @@ fs_nogeom <-
     return_n = 1
   )
 
-
+# debugonce(query_layer)
 awi_2510 <-
   query_layer(endpoint = endpoints$ancient_woodland_england,
             out_fields = "objectid",
