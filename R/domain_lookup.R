@@ -11,6 +11,7 @@
 #' @importFrom purrr map
 #' @importFrom purrr map_lgl
 #' @importFrom dplyr mutate
+#' @importFrom dplyr across
 #' @importFrom dplyr select
 
 #' @return a tibble with three columns: the field name, the descriptive value and the coded value
@@ -39,13 +40,15 @@ domain_lookup <-
     domains <- domains[coded_domains]
     domain_names <- field_names[coded_domains]
 
-    # Extract them and bind into a longform table
+    # Extract them into tibbles
+    domain_table_list <- purrr::map2(.x = domains,
+                                     .y = domain_names,
+                                     ~ dplyr::mutate(dplyr::bind_rows(.x$codedValues),
+                                                     field_name = .y))
+    # Codes can be a character or a integer so need to convert all to caracter first then bind_rows
     domain_table <-
-      dplyr::bind_rows(purrr::map2(
-        .x = domains,
-        .y = domain_names,
-        ~ dplyr::mutate(dplyr::bind_rows(.x$codedValues), field_name = .y)
-      ))
+      dplyr::bind_rows(purrr::map(domain_table_list,
+                                  ~ dplyr::mutate(.x, dplyr::across(.fns = as.character))))
 
     dplyr::select(domain_table, .data$field_name, .data$name, .data$code)
 
