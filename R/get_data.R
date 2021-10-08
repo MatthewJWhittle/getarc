@@ -25,11 +25,11 @@ get_geojson <- function(query_url, query) {
   check_esri_error(content = content)
   # Read the data from the json text
   data <- sf::st_read(dsn = content,
-                      quiet = TRUE, stringsAsFactors = FALSE)
+                      quiet = TRUE,
+                      stringsAsFactors = FALSE)
 
   # Possibly return the data or an error
   if (is.null(data)) {
-
     stop(paste0("Error: ",
                 print(httr::content(response))))
   }
@@ -53,7 +53,7 @@ get_geojson <- function(query_url, query) {
 #' @importFrom purrr map
 #' @importFrom dplyr bind_rows
 get_tibble <-
-  function(query_url, query){
+  function(query_url, query) {
     # Request the data using POST
     response <- httr::POST(url = query_url, body = as.list(query))
 
@@ -69,9 +69,9 @@ get_tibble <-
     # I've added some control flow in here to modulate the behaviour if it is a map server
     # if(map_server(query_url)){
     # Map servers return data in a different format which needs a different method of parsing
-      data <-
-        dplyr::bind_rows(purrr::map(content$features,
-                           "attributes"))
+    data <-
+      dplyr::bind_rows(purrr::map(content$features,
+                                  "attributes"))
     # }else{
     #   # This line is causing issues due to the use of rjson should be an easy fix but something to do with rjson
     # data_list <- jsonlite::fromJSON(content)
@@ -93,11 +93,21 @@ get_tibble <-
 #' @param query the query to POST
 #' @param return_geometry should the geometry be returned, this is passed in to query_layer & must also from part of the query
 #' @param pb progress bar - default is NULL for no progress bar
+#' @param my_token the access token or function used to generate one
 #' @return either a tibble or sf object depending on return_geometry
 get_data <-
-  function(query_url, query, return_geometry, pb = NULL) {
+  function(query_url,
+           query,
+           return_geometry,
+           pb = NULL,
+           my_token) {
+
+    # Add the token into the query
+    query <-
+      modify_named_vector(query, c(token = parse_access_token(my_token)))
+
     # only tick if it exists
-    if(!is.null(pb)) {
+    if (!is.null(pb)) {
       pb$tick()
     }
     if (return_geometry) {
