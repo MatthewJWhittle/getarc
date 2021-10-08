@@ -43,7 +43,8 @@ get_by_fids <-
           query_url = query_url,
           query = query,
           return_geometry = return_geometry,
-          pb = NULL
+          pb = NULL,
+          my_token = my_token
         )
       # Print a warning if there are no features returned by the query.
       if(nrow(data) == 0){

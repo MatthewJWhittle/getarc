@@ -9,7 +9,12 @@ parse_access_token <-
   function(my_token){
     # Check that a valid token has been passed in
     # This have been changed now it needs to be more flexible and accept character tokens
-    stopifnot(is.null(my_token) || c("Token") %in% class(my_token) || is.character(my_token))
+    stopifnot(is.null(my_token) || c("Token") %in% class(my_token) || is.character(my_token) || is.function(my_token))
+
+    # If the token has been passed in as a function, then execute it to get the result
+    # This allows the user to pas in a functional to generate the token
+    # this is useful when the token is short lived and the user is querying for many FIDs
+    if(is.function(my_token)){my_token <- my_token()}
 
     if(is.null(my_token)){return(my_token)}
     # This allows us to deal with access tokens that are generate by generate Tokens process
