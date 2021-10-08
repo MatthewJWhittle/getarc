@@ -95,6 +95,7 @@ get_by_fids <-
         query_url = query_url,
         query = .x,
         return_geometry = return_geometry,
+        my_token = my_token,
         pb = pb
       )
     )
