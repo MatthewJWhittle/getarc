@@ -82,7 +82,7 @@ get_by_fids <-
       warning("No data matching query, returning an empty tibble")
       return(
         make_empty_tibble(
-          field_names = layer_details$fields$name,
+          field_names = field_names(layer_details),
           out_fields = out_fields
         )
       )
@@ -120,6 +120,7 @@ get_by_fids <-
         query_url = query_url,
         query = .x,
         return_geometry = return_geometry,
+        my_token = my_token,
         pb = pb
       )
     )
