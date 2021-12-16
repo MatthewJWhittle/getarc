@@ -7,7 +7,7 @@
 parse_access_token(my_token)
 }
 \arguments{
-\item{my_token}{an access token acquired via get_token}
+\item{my_token}{an access token acquired via get_token or a function used to generate the access token}
 }
 \value{
 the access token as a string

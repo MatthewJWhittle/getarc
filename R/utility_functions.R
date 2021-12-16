@@ -358,7 +358,17 @@ query_object <-
       utils::modifyList(query, list(token = token), keep.null = FALSE)
 
     return(query)
-
+           }
+#' Field Names
+#'
+#' Get the field names from layer details
+#'
+#' @param layer_details the layer_details object
+#' @return a character vector of field names
+#' @importFrom purrr map_chr
+field_names <-
+  function(layer_details){
+    purrr::map_chr(layer_details$fields, "name")
   }
 
 #' Parse Types
