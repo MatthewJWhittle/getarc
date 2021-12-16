@@ -1,0 +1,11 @@
+{
+"type": "FeatureCollection",
+"name": "test-dttm",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{ "type": "Feature", "properties": { "OBJECTID": 1, "GlobalID": "c8b27888-6be3-44c3-bf30-3b4b5cd1b41b", "CreationDate": "2021-10-24T09:31:47.156Z", "Creator": "", "EditDate": "2021-10-24T09:31:47.156Z", "Editor": "", "dttm": "1970-01-19T15:04:19.201Z", "a_string": "a" }, "geometry": { "type": "Point", "coordinates": [ 0.000467805536449, -0.000013084756058 ] } },
+{ "type": "Feature", "properties": { "OBJECTID": 2, "GlobalID": "332c95b1-25b1-4d2b-b9f0-b2b61bf4e569", "CreationDate": "2021-10-24T09:38:08.798Z", "Creator": "", "EditDate": "2021-10-24T09:38:08.798Z", "Editor": "", "dttm": "1970-01-19T15:04:19.201Z", "a_string": "a" }, "geometry": { "type": "Point", "coordinates": [ 0.000492074793041, -0.000027413438222 ] } },
+{ "type": "Feature", "properties": { "OBJECTID": 3, "GlobalID": "82d66554-778e-4fe8-900a-7379b73dddbb", "CreationDate": "2021-10-24T09:40:09.827Z", "Creator": "", "EditDate": "2021-10-24T09:40:09.827Z", "Editor": "", "dttm": "1970-01-19T14:24:00.329Z", "a_string": "h" }, "geometry": { "type": "Point", "coordinates": [ 0.000485567435147, -0.000000633226122 ] } },
+{ "type": "Feature", "properties": { "OBJECTID": 4, "GlobalID": "f0b2db36-d2d1-4cbb-b54b-8cb6ca9a1ee4", "CreationDate": "2021-12-16T07:25:21.598Z", "Creator": "", "EditDate": "2021-12-16T07:25:21.598Z", "Editor": "", "dttm": "1970-01-19T14:08:19.832Z", "a_string": "w" }, "geometry": { "type": "Point", "coordinates": [ 0.000477230577746, -0.00001262924054 ] } }
+]
+}

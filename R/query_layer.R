@@ -256,7 +256,11 @@ query_layer <-
                           domain_lookup(layer_details))
 
     data <- parse_datetimes(data = data,
-                            feature_details = layer_details)
+                            layer_details = layer_details)
+
+    # Parse variable types
+    data <- parse_types(x  = data,
+                        layer_details = layer_details)
 
     # If the specified crs is not 4326 (the current crs) then transform the data
     # This might be redundant as we can specify the outcrs when requesting the data
@@ -284,7 +288,6 @@ refresh_cache <-
   function(data, cache_object){
     if (!cache_object$use_cache) {return(data)}
 
-
     # Write Cache
     if (!cache_object$cache_exists) {
       sf::st_write(data,
@@ -293,6 +296,20 @@ refresh_cache <-
                    quiet = TRUE)
       return(data)
     }
+
+    # If there are no rows in the cache and there are in the data then write the data
+    # and return it
+    # This avoids an error that occurs when the cache data is loaded from a layer with no
+    # features when cached and a row has been added, meaning the onject ID col isn't present in cache
+    if(nrow(cache_object$data_cache) == 0 &
+       nrow(data) != 0) {
+      sf::st_write(data,
+                   cache_object$cache_path,
+                   delete_dsn = TRUE,
+                   quiet = TRUE)
+      return(data)
+    }
+
 
     new_data_ids <- dplyr::pull(data, cache_object$id_field)
     cache_data_ids <- dplyr::pull(cache_object$data_cache, cache_object$id_field)
@@ -319,6 +336,7 @@ refresh_cache <-
 #' @param cache the cache path supplied by the user, can be null
 #' @param layer_details the layer details argument supplied by get layer details
 #' @param id_field the id field against which to renew the cache
+#' @param my_token the authentication token returned by get_token or other oauth method
 #' @return a cache object defining the cached data & various bits of info to determine how the cache should be updated if at all
 init_cache <-
   function(endpoint,
@@ -330,7 +348,7 @@ init_cache <-
 
     cache_object <- init_cache_object(query = query,
                                       use_cache = !is.null(cache),
-                                      cache = cache,
+                                      cache_path = cache,
                                       id_field = id_field)
 
     if(!cache_object$use_cache){return(cache_object)}
@@ -358,16 +376,19 @@ init_cache <-
 
 
     last_layer_edit <-
-      parse_esri_datetime(layer_details$editingInfo$lastEditDate)
+      parse_esri_datetime(layer_details$editingInfo$lastEditDate, tz = layer_details$dateFieldsTimeReference$timeZone)
 
     # Load cache
     if (cache_object$cache_exists) {
       cached_time <- file.info(cache)$ctime
       # Print a message to make it clear which cache is being loaded & when it is from
       message(glue::glue("Loading cached data ({cached_time}) from: '{cache}'"))
-      # Conver the Cache time to UTC as this is what is accepted by esri api
+      # Convert the Cache time to UTC as this is what is accepted by esri api
+      # I may need to use force_tz here
       cached_time <- lubridate::with_tz(cached_time, tzone = "UTC")
       cache_object$data_cache <- sf::st_read(cache, quiet = TRUE)
+      # parse the types
+      cache_object$data_cache <- parse_types(x = cache_object$data_cache, layer_details = layer_details)
       cache_object$any_changes <- last_layer_edit > cached_time
 
       # If there haven't been any edits since the data was last cached or the
@@ -413,6 +434,8 @@ init_cache <-
 #' @param any_changes Have there been any changes to the data since the last cache?
 #' @param cache_path where is/should the data be saved
 #' @param id_field which is the unique id field
+#' @param use_cache should a cache be used? This is interpreted from whether the user
+#' passes in a cache path
 #' @return a cache_object
 init_cache_object <-
   function(data_cache = NULL,

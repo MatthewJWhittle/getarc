@@ -7,7 +7,7 @@
 #' @param client_id app credential: client ID
 #' @param client_secret app credential: client secret
 #' @param app_name app credential: app name
-#' @param redirect_uri te url to redirect to after authenticating. default is httr::oauth_callback(). This needs to be added into your web app on arc gis for developers.
+#' @param redirect_uri the url to redirect to after authenticating. default is httr::oauth_callback(). This needs to be added into your web app on arc gis for developers.
 #' @export get_token
 #' @importFrom httr oauth_endpoint
 #' @importFrom httr oauth_app
@@ -175,8 +175,8 @@ get_credentials <-
 #' You could write a wrapper function around this function which gets your credentials from an
 #' environment variable, calls the function and returns a token. getarc may provide this functionality eventually.
 #' @param endpoint the endpoint against which to request the token. this is generally in the format of:
-#' https://<host>:<port>/<site>/tokens/generateToken
-#' e.g: https://sampleserver6.arcgisonline.com/arcgis/tokens/generateToken
+#' `https://{host}:{port}/{site}/tokens/generateToken`
+#' e.g: `https://sampleserver6.arcgisonline.com/arcgis/tokens/generateToken`
 #' @param  username your ArcGIS online username. You should make an effort to protect this by accessing it from an
 #' environment variable so that it isn't saved in your source code or .Rhistory file.
 #' @param  password your ArcGIS online password. You should make an effort to protect this by accessing it from an

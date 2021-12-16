@@ -2,30 +2,19 @@
 % Please edit documentation in R/utility_functions.R
 \name{map_server}
 \alias{map_server}
-\title{Modify vector}
+\title{Map Server}
 \usage{
 map_server(endpoint)
 }
 \arguments{
 \item{endpoint}{a string defining an esri endpoint}
-
-\item{x}{a named vector to replace}
-
-\item{y}{a named vector to combine with x}
 }
 \value{
-a named vector that is the combination of x and y, not containing any elements in x with matches in y
-Map Server
-
-Is an endpoint a map server
-
-Feature & Map servers have different formats of querying and data. This function checks an endpoint string and returns TRUE or FALSE.
-
 TRUE or FALSE
 }
 \description{
-Modify a vector using names
+Is an endpoint a map server
 }
 \details{
-This function combines two named vectors, replacing elements in x where their names have matches in y.
+Feature & Map servers have different formats of querying and data. This function checks an endpoint string and returns TRUE or FALSE.
 }

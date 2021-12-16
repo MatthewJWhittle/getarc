@@ -157,7 +157,7 @@ test_that("query layer works", {
   # the return record count param works properly with get by fids method
   expect_equal(nrow(awi_2510), 2510)
 
-  expect_equal(no_awi, tibble(OBJECTID = character(0),
+  expect_equal(no_awi, tibble(OBJECTID = numeric(0),
                               NAME = character(0)
   ))
   # Expect that null values are parsed correctly and returned as a tibble
@@ -184,13 +184,24 @@ points_dl <- query_layer(endpoint = ep_test_points,
 # read the cached data
 cached_data <- sf::st_read(cache_file, stringsAsFactors = FALSE)
 # Add a new point to the layer to the retreive when updating the cache
-add_point_to_test_ep()
+add_point_to_test_ep(endpoint = ep_test_points)
 # Retrieve the updated layer without caching so the results can be compared
 updated_layer <- query_layer(endpoint = ep_test_points)
 updated_cache <- query_layer(endpoint = ep_test_points,
                          cache = cache_file)
 # Check the file on disk
 updated_cache_file <- sf::st_read(cache_file, stringsAsFactors = FALSE)
+
+
+# Fixing time-zones to pass test
+cache_details <- get_layer_details(ep_test_points)
+
+updated_cache_file <-
+  convert_tz(
+    updated_cache_file,
+    dttm_fields = detect_dttm_fields(updated_cache_file, layer_details = cache_details),
+    tz = cache_details$dateFieldsTimeReference$timeZone
+  )
 
 
 test_that("Caching Works",

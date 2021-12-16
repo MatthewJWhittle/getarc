@@ -14,6 +14,8 @@
 #' @param return_n how many features (maximum) should be returned by the query?
 #' @param layer_details the layer details returned by the get_layer_details function
 #' @param out_fields the fields of the layer to return (character vector)
+#' @param object_ids a vector of object IDs to return if this argument is NULL the function will get them
+#' but passing them in aids performance if they have already been returned
 #' @return a tibble or sf object
 #' @importFrom progress progress_bar
 #' @importFrom purrr map
@@ -53,7 +55,8 @@ get_by_fids <-
       warning("No data matching query, returning an empty tibble")
       return(
         make_empty_tibble(
-          field_names = layer_details$fields$name,
+          # Temp fix: when I merge the branches I'll alter this
+          field_names = purrr::map_chr(layer_details$fields, ~ .x$name),
           out_fields = out_fields
         )
       )
