@@ -8,7 +8,7 @@ generate_token(endpoint, username, password, expiration = 60)
 }
 \arguments{
 \item{endpoint}{the endpoint against which to request the token. this is generally in the format of:
-\verb{https://host:port/site/tokens/generateToken}
+\verb{https://\{host\}:\{port\}/\{site\}/tokens/generateToken}
 e.g: \verb{https://sampleserver6.arcgisonline.com/arcgis/tokens/generateToken}}
 
 \item{username}{your ArcGIS online username. You should make an effort to protect this by accessing it from an

@@ -35,10 +35,6 @@ get_by_fids <-
     # Getting FIDs is a big overhea so this should be avoided where possible.
     query_url <- paste0(endpoint, "/query")
 
-    # Add the token into the query
-    query <-
-      utils::modifyList(query, list(token = parse_access_token(my_token)), keep.null = FALSE)
-
     # Check if the user has requested less rows than the maxrecord count, if so don't initiate
     # getting the FIDs and the where in query and just return the data
     # if ((!is.null(return_n)) && return_n < layer_details$maxRecordCount) {
@@ -47,7 +43,8 @@ get_by_fids <-
         query_url = query_url,
         query = query,
         return_geometry = return_geometry,
-        pb = NULL
+        pb = NULL,
+        my_token = my_token
       )
     # Print a warning if there are no features returned by the query.
     # Return an empty tibble

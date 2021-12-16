@@ -119,7 +119,7 @@ get_data <-
 
     # Add the token into the query
     query <-
-      modify_named_vector(query, c(token = parse_access_token(my_token)))
+      utils::modifyList(query, list(token = parse_access_token(my_token)), keep.null = FALSE)
 
     # only tick if it exists
     if (!is.null(pb)) {
