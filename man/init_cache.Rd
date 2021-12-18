@@ -15,6 +15,8 @@ init_cache(endpoint, query, cache, layer_details, my_token = NULL, id_field)
 
 \item{layer_details}{the layer details argument supplied by get layer details}
 
+\item{my_token}{the authentication token returned by get_token or other oauth method}
+
 \item{id_field}{the id field against which to renew the cache}
 }
 \value{

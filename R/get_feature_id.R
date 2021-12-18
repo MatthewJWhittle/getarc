@@ -49,7 +49,11 @@ get_feature_ids <-
     if(length(return_count) > 0 && length(object_ids$objectIds) > return_count){
       object_ids$objectIds <- object_ids$objectIds[c(1:return_count)]
     }
-
+    
+    # If the number of object IDs exceeds 100000 and a where_in query is used then paste0 functino will send number in scientific notation
+    # to avoid this I'm going to assert that the data type is an integer
+    object_ids$objectIds <- as.integer(object_ids$objectIds)
+    
     return(object_ids)
     # The below code might be required but unsure if it will error (above) or not
     # Map servers and Feature servers return data in a slightly different format

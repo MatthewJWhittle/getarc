@@ -5,11 +5,10 @@
 \title{Add a point to EP}
 \usage{
 add_point_to_test_ep(
- 
-    endpoint = "https://services6.arcgis.com/k3kybwIccWQ0A7BB/arcgis/rest/services/Points/FeatureServer/0",
+  endpoint,
   x = rnorm(mean = 53.317749, sd = 1, n = 1),
   y = rnorm(mean = -1.0546875, sd = 1, n = 1),
-  id = sample(c(1:1000), 1)
+  attributes = list(id = sample(c(1:1000), 1))
 )
 }
 \arguments{
@@ -18,6 +17,8 @@ add_point_to_test_ep(
 \item{x}{the x coordinate of the point (EPSG:4326)}
 
 \item{y}{the y coordinate of the point (EPSG:4326)}
+
+\item{attributes}{the attributes of the point (a named list)}
 
 \item{id}{an integar to give the point an ID (not unique)}
 }

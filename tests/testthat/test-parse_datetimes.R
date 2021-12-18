@@ -22,26 +22,44 @@ no_dates <-
     query = c(resultRecordCount = 10, default_query_parameters())
   )
 
+# Get the datetime fields
+date_fields <- detect_dttm_fields(dates, dates_details)
+
+# Parse dates
+dates_parsed <- parse_datetimes(dates, dates_details)
+
+# Convert TZs
+convert_to_tz <- "Europe/Amsterdam"
+tz_converted <- convert_tz(dates_parsed, tz = convert_to_tz,
+                           dttm_fields = date_fields)$Survey_Dat
 
 test_that("datetimes parse", {
+  expect_equal(
+    info = "Detects DTTM Field",
+    date_fields, "Survey_Dat"
+  )
   expect_equal(info = "returns datetime",
-               class(parse_datetimes(dates, dates_details)$Survey_Dat),
+               class(dates_parsed$Survey_Dat),
                c("POSIXct", "POSIXt"))
   expect_equal(info = "No missing values",
                any(is.na(
-                 parse_datetimes(dates, dates_details)$Survey_Dat
+                 dates_parsed$Survey_Dat
                )),
                FALSE)
+  expect_equal(
+    info = "Timezones convert",
+    lubridate::tz(tz_converted),  convert_to_tz
+  )
   expect_equal(info = "returns an sf object when no date variabes are present",
                class(parse_datetimes(no_dates, no_dates_details)),
                c("sf", "data.frame"))
   # Check that if the date column is not present in the data (due to a outFields query)
   # Then the function doesn't throw an error
   expect_error(info = "doesn't error when datetime col not present",
-               parse_datetimes(data = dates[colnames(dates) != "Survey_Dat"], feature_details = dates_details),
+               parse_datetimes(data = dates[colnames(dates) != "Survey_Dat"], layer_details = dates_details),
                NA)
   expect_equal(info = "returns the input data untouched when no datetime cols present",
-               parse_datetimes(data = dates[colnames(dates) != "Survey_Dat"], feature_details = dates_details),
+               parse_datetimes(data = dates[colnames(dates) != "Survey_Dat"], layer_details = dates_details),
                dates[colnames(dates) != "Survey_Dat"])
 
 })

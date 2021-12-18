@@ -31,6 +31,9 @@ See https://developers.arcgis.com/rest/services-reference/get-started-with-the-s
 \item{layer_details}{the layer details returned by the get_layer_details function}
 
 \item{out_fields}{the fields of the layer to return (character vector)}
+
+\item{object_ids}{a vector of object IDs to return if this argument is NULL the function will get them
+but passing them in aids performance if they have already been returned}
 }
 \value{
 a tibble or sf object

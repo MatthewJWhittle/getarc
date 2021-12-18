@@ -26,6 +26,9 @@ init_cache_object(
 
 \item{any_changes}{Have there been any changes to the data since the last cache?}
 
+\item{use_cache}{should a cache be used? This is interpreted from whether the user
+passes in a cache path}
+
 \item{cache_path}{where is/should the data be saved}
 
 \item{id_field}{which is the unique id field}

@@ -61,7 +61,7 @@ sf_to_json <-
     x_geom_type <- sf::st_geometry_type(x)
     # Don't query if the geom type isn't supported
     stopifnot(x_geom_type %in% getarc::esri_sf_type_lookup$sf)
-    json_type <- dplyr::filter(getarc::esri_sf_type_lookup, sf == x_geom_type)$json
+    json_type <- dplyr::filter(getarc::esri_sf_type_lookup, .data$sf == x_geom_type)$json
 
     # Convert the boundary to an sfc objet
     x_sfc <- sf::st_geometry(x)

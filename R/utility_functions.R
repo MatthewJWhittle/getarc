@@ -10,21 +10,6 @@ lower_logical <-
     stopifnot(is.logical(x))
     tolower(as.character(x))
   }
-#' Modify vector
-#'
-#' Modify a vector using names
-#'
-#' This function combines two named vectors, replacing elements in x where their names have matches in y.
-#' @param x a named vector to replace
-#' @param y a named vector to combine with x
-#' @return a named vector that is the combination of x and y, not containing any elements in x with matches in y
-# modifyList <-
-#   function(x, y){
-#     x[names(y)] <- y
-#     is_null <- lapply(x, is.null)
-#     x <- x[!unlist(is_null)]
-#     return(x)
-#   }
 #' Map Server
 #'
 #' Is an endpoint a map server
@@ -222,27 +207,32 @@ parse_rjson <- function(response) {
 #' @param x the x coordinate of the point (EPSG:4326)
 #' @param y the y coordinate of the point (EPSG:4326)
 #' @param id an integar to give the point an ID (not unique)
+#' @param attributes the attributes of the point (a named list)
 #' @return the status code of the response (integar)
 #' @importFrom stats rnorm
+#' @importFrom  rjson toJSON
 add_point_to_test_ep <-
-  function(endpoint =  "https://services6.arcgis.com/k3kybwIccWQ0A7BB/arcgis/rest/services/Points/FeatureServer/0",
+  function(endpoint,
            x = rnorm(mean = 53.317749,
                      sd = 1,
                      n = 1),
            y = rnorm(mean = -1.0546875,
                      sd = 1,
                      n = 1),
-           id = sample(c(1:1000), 1)) {
+           attributes = list(id = sample(c(1:1000), 1))
+           ) {
+
+
+    attributes_json <- rjson::toJSON(attributes)
+
     features <-
       glue::glue(
         '[
-  {
-    "geometry" : {"x" : (x), "y" : (y)},
-    "attributes" : {
-      "id" : (id)
-    }
-  }
-  ]',
+            {
+              "geometry" : {"x" : (x), "y" : (y)},
+              "attributes" : (attributes_json)
+            }
+          ]',
         .open = "(",
         .close = ")"
       )
@@ -368,5 +358,70 @@ query_object <-
       utils::modifyList(query, list(token = token), keep.null = FALSE)
 
     return(query)
+           }
+#' Field Names
+#'
+#' Get the field names from layer details
+#'
+#' @param layer_details the layer_details object
+#' @return a character vector of field names
+#' @importFrom purrr map_chr
+field_names <-
+  function(layer_details){
+    purrr::map_chr(layer_details$fields, "name")
+  }
 
+#' Parse Types
+#'
+#' Parse column types
+#'
+#' Parse the tibbles column types using the layer details obect to define them
+#' @param  x the dataframe to parse
+#' @param layer_details the layer details object
+#' @importFrom purrr map_chr
+#' @importFrom purrr map2
+#' @importFrom dplyr left_join
+#' @importFrom dplyr filter
+#' @importFrom sf st_drop_geometry
+#' @return a dataframe like x but with variabes matching the specified types
+parse_types <-
+  function(x, layer_details) {
+
+    # Make a table of the field types from the layer details
+    field_types <-
+      tibble::tibble(
+        name = purrr::map_chr(layer_details$fields, "name"),
+        type = purrr::map_chr(layer_details$fields, "type")
+      )
+
+    # Drop any columns not present in the dataframe
+    # Avoids errors when only returing asubset of columns
+    field_types <- dplyr::filter(field_types, .data$name %in% colnames(x))
+
+    # Join in the functions which parse each field type
+    field_types <- dplyr::left_join(field_types, type_functions, by = "type")
+
+    # Add in the timezone argument for datetime so that when dttms are parsed
+    # they are in the right timezone. This needs to be done once the data is downloaded
+    # Because that is when the expected TZ is known
+    is_dttm <- type_functions$type == "esriFieldTypeDate"
+    dttm_function <- type_functions$type_function[[which(is_dttm)]]
+    type_functions$type_function[[which(is_dttm)]] <- purrr::partial(dttm_function,
+                                                                     tz = layer_details$dateFieldsTimeReference$timeZone)
+
+    # function to check sf
+    is_sf <- function(x){any(c("sf", "sfc") %in% class(x))}
+    # only drop geom if sf
+    if (is_sf(x)) {
+      x_to_parse <- sf::st_drop_geometry(x)
+    } else{
+      x_to_parse <- x
+    }
+
+    modifyList(x,
+               purrr::map2(
+                 .x = x_to_parse[field_types$name],
+                 .y = field_types$type_function,
+                 ~ .y(.x)
+               ))
   }
