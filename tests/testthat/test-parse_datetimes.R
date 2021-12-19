@@ -61,5 +61,6 @@ test_that("datetimes parse", {
   expect_equal(info = "returns the input data untouched when no datetime cols present",
                parse_datetimes(data = dates[colnames(dates) != "Survey_Dat"], layer_details = dates_details),
                dates[colnames(dates) != "Survey_Dat"])
+  expect_error(query_layer(endpoints$us_fire_occurrence, return_n = 100), NA)
 
 })

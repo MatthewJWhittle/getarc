@@ -87,8 +87,7 @@ parse_datetimes <-
     data[, dttm_fields] <-
       purrr::map(
         dttm_fields,
-        ~ parse_esri_datetime(data[[.x]],
-                              tz = layer_details$dateFieldsTimeReference$timeZone)
+        ~ parse_esri_datetime(data[[.x]], tz = layer_timezone(layer_details))
       )
 
     return(data)
@@ -106,4 +105,18 @@ parse_datetimes <-
 parse_esri_datetime <-
   function(x, tz){
     lubridate::as_datetime(as.numeric(x) * 0.001, tz = tz)
+  }
+
+#' Timezone
+#'
+#' Get the layers timezone for parsing
+#'
+#' @param layer_details the layer details object
+#' @param default the default timezone - UTC
+#' @return a string defining the timezone, either form the layer details or the default
+layer_timezone <-
+  function(layer_details, default = "UTC"){
+    timezone <- layer_details$dateFieldsTimeReference$timeZone
+    if(is.null(timezone)){return(default)}
+    return(timezone)
   }

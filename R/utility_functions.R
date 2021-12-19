@@ -190,11 +190,13 @@ make_empty_tibble <-
 #' Parse a httr response using rjson
 #'
 #' This function implements faster json parsing the jsonlite and httr
+#' This would be slightly faster with jsonify for large json objects but it is only a minimal performance increase
 #' @param response a response object returned by a GET or POST request
 #' @return an R object of parsed json
 #' @importFrom httr content
 #' @importFrom rjson fromJSON
 parse_rjson <- function(response) {
+  # This would be slightly faster with jsonify::from_json for large json objects but it is only a minimal performance increase
   rjson::fromJSON(httr::content(response, as = "text"))
 }
 
@@ -407,7 +409,7 @@ parse_types <-
     is_dttm <- type_functions$type == "esriFieldTypeDate"
     dttm_function <- type_functions$type_function[[which(is_dttm)]]
     type_functions$type_function[[which(is_dttm)]] <- purrr::partial(dttm_function,
-                                                                     tz = layer_details$dateFieldsTimeReference$timeZone)
+                                                                     tz = layer_timezone(layer_details))
 
     # function to check sf
     is_sf <- function(x){any(c("sf", "sfc") %in% class(x))}
@@ -425,3 +427,12 @@ parse_types <-
                  ~ .y(.x)
                ))
   }
+#' Detect Tables
+#'
+#' Is the endpoint a table
+#'
+#' This function finds out if the layer is a table from the layer_details
+#'
+#' @param layer_details the layer details object returnd by get_layer_details
+#' @return TRUE/FALSE
+is_table <- function(layer_details){layer_details$type == "Table"}

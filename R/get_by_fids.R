@@ -35,55 +35,13 @@ get_by_fids <-
     # Getting FIDs is a big overhea so this should be avoided where possible.
     query_url <- paste0(endpoint, "/query")
 
-    # Check if the user has requested less rows than the maxrecord count, if so don't initiate
-    # getting the FIDs and the where in query and just return the data
-    # if ((!is.null(return_n)) && return_n < layer_details$maxRecordCount) {
-    data <-
-      get_data(
-        query_url = query_url,
-        query = query,
-        return_geometry = return_geometry,
-        pb = NULL,
-        my_token = my_token
-      )
-    # Print a warning if there are no features returned by the query.
-    # Return an empty tibble
-    if (nrow(data) == 0) {
-      warning("No data matching query, returning an empty tibble")
-      return(
-        make_empty_tibble(
-          # Temp fix: when I merge the branches I'll alter this
-          field_names = purrr::map_chr(layer_details$fields, ~ .x$name),
-          out_fields = out_fields
-        )
-      )
-    }
-
-    # If the number of rows returned is less than the max record count then return the
-    # data and don't execute the rest of the function
-    # This fails when there is an issue with parsing the jsonby st_read
-    # It doesn't always return the max record count even if that is what is returned by the api
-    # As a result this will fail
-    # This is a temporary fix to get the count which should be returned by the query and
-    # Then check whether the data can be returned without acquiring more
-    feature_count <-
-      get_count(endpoint, query =  query, my_token = my_token)
-
-    if (feature_count < layer_details$maxRecordCount ||
-        ((!is.null(return_n)) &&
-         return_n < layer_details$maxRecordCount)) {
-      return(data)
-    }
-
     # Otherwise, get the FIDs and return the data
     # The FIDs are used for two things: first to determine if any results will be returned by a query;
     # second to get the data by FIDs
-    if(is.null(object_ids)){
-    object_ids <-
-      get_feature_ids(endpoint = endpoint,
-                      query = query,
-                      my_token = my_token)
-    }
+      object_ids <-
+        get_feature_ids(endpoint = endpoint,
+                        query = query,
+                        my_token = my_token)
 
     # Check if any FIDs will be returned by the query, if not return an empty tibble avoiding the query
     if (length(object_ids$objectIds) == 0) {
@@ -95,11 +53,6 @@ get_by_fids <-
         )
       )
     }
-
-    # Work out which IDs have already been downloaded and drop them to avoid downloading
-    # data that has already been downloaded
-    keep <- c((nrow(data) + 1):length(object_ids$objectIds))
-    object_ids$objectIds <- object_ids$objectIds[keep]
 
     # Then split the vector so it doesn't exceed the max record count
     object_ids_split <-
@@ -133,6 +86,7 @@ get_by_fids <-
       )
     )
 
-    data_list <- c(list(data), data_list)
-    dplyr::bind_rows(data_list)
+    # Parse the json returned by the api
+    parse_esri_json(data_list,
+                            geometry = return_geometry & !is_table(layer_details))
   }

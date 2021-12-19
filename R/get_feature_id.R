@@ -18,7 +18,7 @@ get_feature_ids <-
     query <- query_object(default = default_query_parameters(),
                           user_query = query,
                           my_token = my_token,
-                          mandatory = list(returnIdsOnly = "true")
+                          mandatory = list(returnIdsOnly = "true", f = "json")
                           )
 
     # Get the request number of records to return and drop the param from the query
@@ -49,11 +49,11 @@ get_feature_ids <-
     if(length(return_count) > 0 && length(object_ids$objectIds) > return_count){
       object_ids$objectIds <- object_ids$objectIds[c(1:return_count)]
     }
-    
+
     # If the number of object IDs exceeds 100000 and a where_in query is used then paste0 functino will send number in scientific notation
     # to avoid this I'm going to assert that the data type is an integer
     object_ids$objectIds <- as.integer(object_ids$objectIds)
-    
+
     return(object_ids)
     # The below code might be required but unsure if it will error (above) or not
     # Map servers and Feature servers return data in a slightly different format
@@ -64,7 +64,6 @@ get_feature_ids <-
     #   return(jsonlite::fromJSON(content))
     # }
   }
-
 #' Get Count
 #'
 #' This function accepts an endpoint and a query and returns the count of features matching the query. It is a useful and fast method of determining if the query will return any data.
@@ -82,7 +81,7 @@ get_count <-
     query <- query_object(default = default_query_parameters(),
                           user_query = query,
                           my_token = my_token,
-                          mandatory = list(returnCountOnly = "true")
+                          mandatory = list(returnCountOnly = "true", f = "json")
     )
 
 
@@ -99,8 +98,7 @@ get_count <-
 
 
     # Parse and return the content
-    content <- httr::content(response, as = "text")
-    count <- rjson::fromJSON(content)
+    count <- parse_rjson(response)
 
     return(count$count)
     # The below code might be required but unsure if it will error (above) or not

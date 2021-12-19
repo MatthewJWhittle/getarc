@@ -8,6 +8,7 @@ fid_query <-
     query = list(resultRecordCount = 1, where = "Shape__Area < 100")
   )$objectIds
 
+
 small_feature <-
   query_layer(endpoint,
               query = list("where" = where_in_query("OBJECTID", fid_query),
@@ -22,3 +23,7 @@ test_that("get feature ids works", {
   expect_equal(small_feature$Shape__Area < 100, TRUE)
   expect_equal(nrow(small_feature), 1)
 })
+
+
+
+
