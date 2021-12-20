@@ -80,13 +80,12 @@ get_by_fids <-
       ~ get_data(
         query_url = query_url,
         query = .x,
-        return_geometry = return_geometry,
         my_token = my_token,
         pb = pb
       )
     )
 
     # Parse the json returned by the api
-    parse_esri_json(data_list,
+    parse_esri_data(data_list,
                             geometry = return_geometry & !is_table(layer_details))
   }

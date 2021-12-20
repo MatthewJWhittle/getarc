@@ -14,10 +14,10 @@ dates <-
              endpoint = dates_endpoint,
              query = query_object(user_query = list(resultRecordCount = 10)),
              return_n = 10,
-             return_geometry = TRUE,
              my_token = NULL,
-             layer_details = no_dates_details,
+             layer_details = dates_details,
              out_fields = "*",
+             return_geometry = TRUE,
              object_ids = NULL
            )
 

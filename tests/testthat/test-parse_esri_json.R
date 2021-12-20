@@ -65,7 +65,6 @@ get_json_list <-
       ~ get_data(
         query_url = query_url,
         query = .x,
-        return_geometry = geometry,
         my_token = NULL,
         pb = NULL
       )
@@ -74,11 +73,11 @@ get_json_list <-
 
 
 
-basic_parse <-
-  function(json_list){
-    map(json_list,
-        ~sf::st_read(.x, quiet = TRUE, stringsAsFactors = FALSE)) %>% bind_rows()
-  }
+# basic_parse <-
+#   function(json_list){
+#     map(json_list,
+#         ~sf::st_read(.x, quiet = TRUE, stringsAsFactors = FALSE)) %>% bind_rows()
+#   }
 
 
 
@@ -103,30 +102,30 @@ json_list_1l <- get_json_list(endpoint = endpoints$ancient_woodland_england,
 # # Uncomment to benchmark
 # microbenchmark::microbenchmark(
 #   basic_parse(json_list_geom_point),
-#   parse_esri_json(json_list_geom_point, geometry = TRUE), times = 30
+#   parse_esri_data(json_list_geom_point, geometry = TRUE), times = 30
 # )
 #
 # microbenchmark::microbenchmark(
 #   basic_parse(json_list_geom_polygon),
-#   parse_esri_json(json_list_geom_polygon, geometry = TRUE), times = 30
+#   parse_esri_data(json_list_geom_polygon, geometry = TRUE), times = 30
 # )
 #
 #
 # microbenchmark::microbenchmark(
 #   basic_parse(json_list_no_geom),
-#   parse_esri_json(json_list_no_geom, geometry = FALSE), times = 30
+#   parse_esri_data(json_list_no_geom, geometry = FALSE), times = 30
 # )
 #
 # microbenchmark::microbenchmark(
 #   basic_parse(json_list_1l),
-#   parse_esri_json(json_list_1l, geometry = TRUE), times = 30
+#   parse_esri_data(json_list_1l, geometry = TRUE), times = 30
 # )
 
 # Tests ---------
-points <- parse_esri_json(json_list_geom_point, geometry = TRUE)
-table <- parse_esri_json(json_list_no_geom, geometry = FALSE)
-polygon <- parse_esri_json(json_list_geom_polygon, geometry = TRUE)
-length_1 <- parse_esri_json(json_list_1l, geometry = TRUE)
+points <- parse_esri_data(json_list_geom_point, geometry = TRUE)
+table <- parse_esri_data(json_list_no_geom, geometry = FALSE)
+polygon <- parse_esri_data(json_list_geom_polygon, geometry = TRUE)
+length_1 <- parse_esri_data(json_list_1l, geometry = TRUE)
 
 test_that("Parsing JSON works",
           {
@@ -153,7 +152,6 @@ ep_null_values <- "https://services6.arcgis.com/k3kybwIccWQ0A7BB/arcgis/rest/ser
 
 
 null_json <- get_data(query_url = paste0(ep_null_values, "/query?"),
-                 return_geometry = FALSE,
                  query = query_object(user_query = list(returnGeometry = "false", outFields = "null_values")), my_token = NULL, pb = NULL)
 
 null_count <- get_count(endpoint = ep_null_values)
@@ -161,7 +159,7 @@ null_count <- get_count(endpoint = ep_null_values)
 test_that("Null values parse as NA",
           {
             expect_equal(
-              nrow(parse_json_table(null_json)), 3
+              nrow(parse_table(null_json)), 3
             )
           }
           )

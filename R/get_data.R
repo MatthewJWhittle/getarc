@@ -31,65 +31,7 @@ get_data <-
     # Fail on error
     stopifnot(httr::status_code(response) == 200)
 
-    content <- httr::content(response, as = "text")
-    # Check for an error if it doesn't return api fail
-    check_esri_error(content = content)
-
-    # Check if no features have been returned and return an empty sf object
-    # This avoids st_read hitting an error where no features are returned
-    # if(grepl('"features":\\[\\]', content)){return(sf::st_sf(sf::st_sfc()))}
-
-    return(content)
-  }
-get_data_2 <-
-  function(query_url,
-           query,
-           pb = NULL,
-           my_token) {
-
-    # Add the token into the query
-    query <-
-      utils::modifyList(query, list(token = parse_access_token(my_token)), keep.null = FALSE)
-
-    # only tick if it exists
-    if (!is.null(pb)) {
-      pb$tick()
-    }
-    # Request the data using POST
-    response <- httr::POST(url = query_url, body = query)
-    # Fail on error
-    stopifnot(httr::status_code(response) == 200)
-
-    content <- httr::content(response, as = "text")
-    # Check for an error if it doesn't return api fail
-    check_esri_error(content = content)
-
-    # Check if no features have been returned and return an empty sf object
-    # This avoids st_read hitting an error where no features are returned
-    # if(grepl('"features":\\[\\]', content)){return(sf::st_sf(sf::st_sfc()))}
-
-    return(rjson::fromJSON(content))
-  }
-get_data_3 <-
-  function(query_url,
-           query,
-           pb = NULL,
-           my_token) {
-
-    # Add the token into the query
-    query <-
-      utils::modifyList(query, list(token = parse_access_token(my_token)), keep.null = FALSE)
-
-    # only tick if it exists
-    if (!is.null(pb)) {
-      pb$tick()
-    }
-    # Request the data using POST
-    response <- httr::POST(url = query_url, body = query)
-    # Fail on error
-    stopifnot(httr::status_code(response) == 200)
-
-    content <- RcppSimdJson::fparse(response$content)
+    content <- RcppSimdJson::fparse(response$content, max_simplify_lvl = "list")
     # # Check for an error if it doesn't return api fail
     # check_esri_error(content = content)
 
