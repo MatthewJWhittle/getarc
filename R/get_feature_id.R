@@ -39,7 +39,7 @@ get_feature_ids <-
 
 
     # Parse and return the content
-    object_ids <- parse_rjson(response)
+    object_ids <- RcppSimdJson::fparse(response$content, max_simplify_lvl = "list")
     # cut down the object ids vector if a returnRecordCount has been sent & the
     # return count is less than the object_ids vector length
     # This enables us to work around the issue with the feature service not returning
@@ -98,7 +98,7 @@ get_count <-
 
 
     # Parse and return the content
-    count <- parse_rjson(response)
+    count <- RcppSimdJson::fparse(response$content, max_simplify_lvl = "list")
 
     return(count$count)
     # The below code might be required but unsure if it will error (above) or not
