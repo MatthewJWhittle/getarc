@@ -17,4 +17,5 @@ Parse a httr response using rjson
 }
 \details{
 This function implements faster json parsing the jsonlite and httr
+This would be slightly faster with jsonify for large json objects but it is only a minimal performance increase
 }
