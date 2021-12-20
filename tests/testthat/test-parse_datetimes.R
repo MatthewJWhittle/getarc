@@ -10,17 +10,32 @@ dates_endpoint <-
 dates_details <-
   get_layer_details(dates_endpoint)
 dates <-
-  get_geojson(paste0(dates_endpoint, "/query"),
-    query = c(resultRecordCount = 10, default_query_parameters())
-  )
+           get_by_fids(
+             endpoint = dates_endpoint,
+             query = query_object(user_query = list(resultRecordCount = 10)),
+             return_n = 10,
+             return_geometry = TRUE,
+             my_token = NULL,
+             layer_details = no_dates_details,
+             out_fields = "*",
+             object_ids = NULL
+           )
 
 # Contains no dates
 no_dates_details <-
   get_layer_details(no_dates_endpoint)
 no_dates <-
-  get_geojson(paste0(no_dates_endpoint, "/query"),
-    query = c(resultRecordCount = 10, default_query_parameters())
+  get_by_fids(
+    endpoint = no_dates_endpoint,
+    query = query_object(user_query = list(resultRecordCount = 10)),
+    return_n = 10,
+    return_geometry = TRUE,
+    my_token = NULL,
+    layer_details = no_dates_details,
+    out_fields = "*",
+    object_ids = NULL
   )
+
 
 # Get the datetime fields
 date_fields <- detect_dttm_fields(dates, dates_details)
