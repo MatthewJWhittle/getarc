@@ -4,14 +4,12 @@
 \alias{get_data}
 \title{Get Data}
 \usage{
-get_data(query_url, query, return_geometry, pb = NULL, my_token)
+get_data(query_url, query, pb = NULL, my_token)
 }
 \arguments{
 \item{query_url}{the query url which is passed to httr::POST()}
 
 \item{query}{the query to POST}
-
-\item{return_geometry}{should the geometry be returned, this is passed in to query_layer & must also from part of the query}
 
 \item{pb}{progress bar - default is NULL for no progress bar}
 

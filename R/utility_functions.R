@@ -462,22 +462,3 @@ sf_geojson_write <-
     close(connection)
   }
 
-#' Convert Datetimes to ISO8601
-#'
-#' Convert datetime fields to the ISO8601 standard
-#' @param x a dataframe that may contain datetime fields to convert to iso 8601
-#' @return a dataframe with converted dttms
-convert_datetimes_to_iso8601 <-
-  function(x){
-    # First detect the dttm fields
-    # I'm doing this from the data rather than layer details because it is more portable and reduces the
-    # need to have layer details available (minimised unneccessary function arguments)
-    dttm_fields <- colnames(x)[purrr::map_lgl(x, lubridate::is.POSIXct)]
-
-    # If there aren't any DTTM fields then return the DF
-    if(length(dttm_fields) == 0){return(x)}
-
-    # Convert the dttm fields to character
-    modifyList(x,
-               purrr::map(dttm_fields, ~lubridate::format_ISO8601(x[[.x]], usetz = TRUE)))
-  }

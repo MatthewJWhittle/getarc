@@ -182,6 +182,11 @@ refresh_cache <-
 #' @param id_field the id field against which to renew the cache
 #' @param my_token the authentication token returned by get_token or other oauth method
 #' @return a cache object defining the cached data & various bits of info to determine how the cache should be updated if at all
+#' @importFrom dplyr any_of
+#' @importFrom dplyr select
+#' @importFrom glue glue
+#' @importFrom geojsonsf geojson_sf
+#' @importFrom lubridate with_tz
 init_cache <-
   function(endpoint,
            query,
@@ -231,6 +236,10 @@ init_cache <-
       # I may need to use force_tz here
       cached_time <- lubridate::with_tz(cached_time, tzone = "UTC")
       cache_object$data_cache <- geojsonsf::geojson_sf(cache)
+      # Order the columns as per the layer from arcgis
+      cache_object$data_cache <- dplyr::select(cache_object$data_cache,
+                                               # Using Any Of as sometimes the column names may not be present
+                                               dplyr::any_of(field_names(layer_details)))
       # parse the types
       cache_object$data_cache <- parse_types(x = cache_object$data_cache, layer_details = layer_details)
       cache_object$any_changes <- last_layer_edit > cached_time

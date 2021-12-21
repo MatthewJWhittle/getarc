@@ -1,7 +1,7 @@
 type_functions <-
   tibble::tribble(~type, ~type_function, ~type_assert_function,
                   "esriFieldTypeBlob", NA, NA,
-                  "esriFieldTypeDate", as.POSIXct, lubridate::is.POSIXct,
+                  "esriFieldTypeDate", parse_iso8601_datetime, lubridate::is.POSIXct,
                   "esriFieldTypeDouble", as.double, is.double,
                   "esriFieldTypeGeometry", NA, NA,
                   "esriFieldTypeGlobalID", as.character, is.character,

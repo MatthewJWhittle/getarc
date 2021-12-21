@@ -190,27 +190,26 @@ updated_cache <- query_layer(endpoint = ep_test_points,
                          cache = cache_file)
 # Check the file on disk
 updated_cache_file <- geojsonsf::geojson_sf(cache_file)
-
-
-# Fixing time-zones to pass test
 cache_details <- get_layer_details(ep_test_points)
-#
-# updated_cache_file <-
-#   convert_tz(
-#     updated_cache_file,
-#     dttm_fields = detect_dttm_fields(updated_cache_file, layer_details = cache_details),
-#     tz = cache_details$dateFieldsTimeReference$timeZone
-#   )
+updated_cache_file <- parse_types(updated_cache_file, layer_details = cache_details)
+updated_cache_file <-
+  dplyr::select(updated_cache_file,
+              # Using Any Of as sometimes the column names may not be present
+              dplyr::any_of(field_names(cache_details)))
+
+
 
 
 test_that("Caching Works",
           {
+            local_edition(3)
             # The cache has been created
             expect_true(file.exists(cache_file))
             # The updated cache should be equivalent to the updated layer
-            expect_equivalent(updated_cache, updated_layer)
+            expect_equal(updated_cache, updated_layer, tolerance = 1, ignore_attr = TRUE)
             # The updated file on disk should be equivalent to the updated layer
-            expect_equivalent(updated_cache_file, updated_layer)
+            expect_equal(updated_cache_file, updated_layer, tolerance = 1, ignore_attr = TRUE)
+            expect_equal(st_crs(updated_cache)$epsg, st_crs(updated_layer)$epsg)
             # The updated cache returned by query layer should have one additional row from adding a point
             expect_equal(nrow(updated_cache) - nrow(points_dl), 1)
             expect_warning(query_layer(endpoint = endpoints$cairns_corals,
@@ -221,6 +220,6 @@ test_that("Caching Works",
           })
 
 
-map(colnames(st_drop_geometry(updated_cache)),
-    ~updated_cache[[.x]] == updated_layer[[.x]]
-    )
+query_layer(endpoint = endpoints$cairns_corals,
+            return_n = 1,
+            cache = "development/data-cache/cairns-corals-1.geojson")

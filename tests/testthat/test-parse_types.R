@@ -1,3 +1,5 @@
+require(magrittr)
+require(dplyr)
 # First get the metadata of the layer as this is required for get_by_fids & type parsing functions
 fire_metadata <- get_layer_details(endpoints$us_fire_occurrence)
 
@@ -19,17 +21,17 @@ fires <-
     object_ids = NULL
   )
 
+
 # Add in the feature metadata to the fields table
 fields <-
   fields %>%
-  left_join(fire_metadata$fields %>% bind_rows()) %>%
-  left_join(type_functions)
+  dplyr::left_join(dplyr::bind_rows(fire_metadata$fields)) %>%
+  dplyr::left_join(type_functions)
 
 #First parse the datestimes (as is done in query layer)
 fires_dttm <- parse_datetimes(fires, fire_metadata)
-
 # Then convert all columns to character to test parsing
-fires_chr <- mutate(fires_dttm, across(fields$name, .fns = as.character))
+fires_chr <- dplyr::mutate(fires_dttm, dplyr::across(fields$name, .fns = as.character))
 
 # Parse the data
 fires_parsed <- parse_types(fires_chr, layer_details = fire_metadata)
@@ -44,8 +46,8 @@ test_that("Parsing types works correctly",
           {
             expect_equal(map(fires_parsed, class), expected_types)
             expect_equal(all(
-              map2_lgl(
-                .x = st_drop_geometry(fires_parsed[fields$name]),
+              purrr::map2_lgl(
+                .x = sf::st_drop_geometry(fires_parsed[fields$name]),
                 .y = fields$type_assert_function,
                 ~ .y(.x)
               )
