@@ -436,3 +436,48 @@ parse_types <-
 #' @param layer_details the layer details object returnd by get_layer_details
 #' @return TRUE/FALSE
 is_table <- function(layer_details){layer_details$type == "Table"}
+#' Write sf as GEOJSON
+#'
+#' Write a GeoJSON file
+#'
+#' This function takes an sf object and writes it to a specified filepath as geojson
+#' This is a faster alternative to sf::st_write
+#' @param sf an sf object to be written to disk
+#' @param filepath the filepath of the sf object
+#' @importFrom geojsonsf sf_geojson
+#' @return NULL
+sf_geojson_write <-
+  function(sf, filepath) {
+    # First convert dates to character
+    # Writing datetimes strips out the timezone and causes mismatches between
+    # data from the API and disk. This properly formats them to iso8601
+    sf <- convert_datetimes_to_iso8601(sf)
+    # Convert the sf object to a geojson file
+    geojson <- geojsonsf::sf_geojson(sf)
+    # Writing to disk
+    # Open a file connetion & write the lines of the geojson string
+    connection <- file(filepath)
+    writeLines(geojson, connection)
+    # Close the file connetion
+    close(connection)
+  }
+
+#' Convert Datetimes to ISO8601
+#'
+#' Convert datetime fields to the ISO8601 standard
+#' @param x a dataframe that may contain datetime fields to convert to iso 8601
+#' @return a dataframe with converted dttms
+convert_datetimes_to_iso8601 <-
+  function(x){
+    # First detect the dttm fields
+    # I'm doing this from the data rather than layer details because it is more portable and reduces the
+    # need to have layer details available (minimised unneccessary function arguments)
+    dttm_fields <- colnames(x)[purrr::map_lgl(x, lubridate::is.POSIXct)]
+
+    # If there aren't any DTTM fields then return the DF
+    if(length(dttm_fields) == 0){return(x)}
+
+    # Convert the dttm fields to character
+    modifyList(x,
+               purrr::map(dttm_fields, ~lubridate::format_ISO8601(x[[.x]], usetz = TRUE)))
+  }

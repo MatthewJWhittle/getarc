@@ -143,10 +143,7 @@ refresh_cache <-
 
     # Write Cache
     if (!cache_object$cache_exists) {
-      sf::st_write(data,
-                   cache_object$cache_path,
-                   delete_dsn = TRUE,
-                   quiet = TRUE)
+      sf_geojson_write(sf = data,filepath = cache_object$cache_path)
       return(data)
     }
 
@@ -156,10 +153,7 @@ refresh_cache <-
     # features when cached and a row has been added, meaning the onject ID col isn't present in cache
     if(nrow(cache_object$data_cache) == 0 &
        nrow(data) != 0) {
-      sf::st_write(data,
-                   cache_object$cache_path,
-                   delete_dsn = TRUE,
-                   quiet = TRUE)
+      sf_geojson_write(sf = data,filepath = cache_object$cache_path)
       return(data)
     }
 
@@ -174,10 +168,7 @@ refresh_cache <-
         dplyr::filter(cache_object$data_cache, !cache_data_ids %in% new_data_ids | cache_data_ids %in% cache_object$object_ids$objectIds),
         data
       )
-    sf::st_write(data_refreshed,
-                 cache_object$cache_path,
-                 delete_dsn = TRUE,
-                 quiet = TRUE)
+    sf_geojson_write(sf = data_refreshed, filepath = cache_object$cache_path)
     return(data_refreshed)
   }
 #' Init Cache
@@ -229,7 +220,7 @@ init_cache <-
 
 
     last_layer_edit <-
-      parse_esri_datetime(layer_details$editingInfo$lastEditDate, tz = layer_details$dateFieldsTimeReference$timeZone)
+      parse_esri_datetime(layer_details$editingInfo$lastEditDate, tz = layer_timezone(layer_details))
 
     # Load cache
     if (cache_object$cache_exists) {
@@ -239,7 +230,7 @@ init_cache <-
       # Convert the Cache time to UTC as this is what is accepted by esri api
       # I may need to use force_tz here
       cached_time <- lubridate::with_tz(cached_time, tzone = "UTC")
-      cache_object$data_cache <- sf::st_read(cache, quiet = TRUE, stringsAsFactors = FALSE)
+      cache_object$data_cache <- geojsonsf::geojson_sf(cache)
       # parse the types
       cache_object$data_cache <- parse_types(x = cache_object$data_cache, layer_details = layer_details)
       cache_object$any_changes <- last_layer_edit > cached_time

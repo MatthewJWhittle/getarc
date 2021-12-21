@@ -163,7 +163,7 @@ test_that("query layer works", {
   expect_equal(nrow(null_column), null_expected)
 
   # Some layers don't support edit tracking. This tests that a warning is returned.
-  expect_warning(query_layer(endpoint = endpoints$gb_postcodes,
+  expect_warning(query_layer(endpoint = endpoints$us_fire_occurrence,
                              cache = "development/data-cache/test-warning.geojson",
                              return_n = 1, return_geometry = FALSE))
 
@@ -181,7 +181,7 @@ ep_test_points <- "https://services6.arcgis.com/k3kybwIccWQ0A7BB/arcgis/rest/ser
 points_dl <- query_layer(endpoint = ep_test_points,
                          cache = cache_file)
 # read the cached data
-cached_data <- sf::st_read(cache_file, stringsAsFactors = FALSE)
+cached_data <- geojsonsf::geojson_sf(cache_file)
 # Add a new point to the layer to the retreive when updating the cache
 add_point_to_test_ep(endpoint = ep_test_points)
 # Retrieve the updated layer without caching so the results can be compared
@@ -189,18 +189,18 @@ updated_layer <- query_layer(endpoint = ep_test_points)
 updated_cache <- query_layer(endpoint = ep_test_points,
                          cache = cache_file)
 # Check the file on disk
-updated_cache_file <- sf::st_read(cache_file, stringsAsFactors = FALSE)
+updated_cache_file <- geojsonsf::geojson_sf(cache_file)
 
 
 # Fixing time-zones to pass test
 cache_details <- get_layer_details(ep_test_points)
-
-updated_cache_file <-
-  convert_tz(
-    updated_cache_file,
-    dttm_fields = detect_dttm_fields(updated_cache_file, layer_details = cache_details),
-    tz = cache_details$dateFieldsTimeReference$timeZone
-  )
+#
+# updated_cache_file <-
+#   convert_tz(
+#     updated_cache_file,
+#     dttm_fields = detect_dttm_fields(updated_cache_file, layer_details = cache_details),
+#     tz = cache_details$dateFieldsTimeReference$timeZone
+#   )
 
 
 test_that("Caching Works",
@@ -219,3 +219,8 @@ test_that("Caching Works",
                                        ),
                            NA)
           })
+
+
+map(colnames(st_drop_geometry(updated_cache)),
+    ~updated_cache[[.x]] == updated_layer[[.x]]
+    )

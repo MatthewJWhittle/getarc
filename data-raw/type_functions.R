@@ -6,7 +6,7 @@ type_functions <-
                   "esriFieldTypeGeometry", NA, NA,
                   "esriFieldTypeGlobalID", as.character, is.character,
                   "esriFieldTypeGUID", as.character,  is.character,
-                  "esriFieldTypeInteger", as.integer,  is.character,
+                  "esriFieldTypeInteger", as.integer,  is.integer,
                   "esriFieldTypeOID", as.integer, is.integer,
                   "esriFieldTypeRaster", NA, NA,
                   "esriFieldTypeSingle", as.integer, is.integer,
