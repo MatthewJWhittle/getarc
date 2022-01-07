@@ -84,7 +84,8 @@ query_layer <-
         query = query,
         cache = cache,
         layer_details = layer_details,
-        id_field = id_field
+        id_field = id_field,
+        my_token = my_token
       )
     if(!cache_object$any_changes & cache_object$use_cache){return(cache_object$data_cache)}
 
@@ -94,13 +95,13 @@ query_layer <-
 
     # Get the data by feature IDs allowing us to exceed the max record count
     data <-
-      get_by_fids(endpoint,
+      get_by_fids(endpoint = endpoint,
                   query = cache_object$query,
-                  my_token,
-                  return_geometry,
-                  return_n,
-                  layer_details,
-                  out_fields,
+                  my_token = my_token,
+                  return_geometry = return_geometry,
+                  return_n = return_n,
+                  layer_details = layer_details,
+                  out_fields = out_fields,
                   object_ids = cache_object$object_ids)
 
     ####
