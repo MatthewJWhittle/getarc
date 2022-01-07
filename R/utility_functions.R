@@ -146,7 +146,7 @@ where_in_query <-
   function(field, matching, named = FALSE) {
     # Avoid scientific notation
     if (is.numeric(matching)) {
-      matching <- as.character(format(matching, scientific = FALSE))
+      matching <- as.character(format(matching, scientific = FALSE, trim = TRUE))
     }
 
     query <-
@@ -462,3 +462,27 @@ sf_geojson_write <-
     close(connection)
   }
 
+#' ObjectID Query
+#'
+#' Generate an object ID query to get data
+#'
+#' This function takes object IDs and properly formats a query parameter based on whether the service
+#' is a map server or feature server. For Map Servers the query should be in the form objectIds=1,2,3
+#' and for Feature Servers the query should be where=ObjectId IN ('1', '2', ...)
+#' @param object_id_name the field name for object ids
+#' @param object_ids a numeric vector of object IDs
+#' @param map_server TRUE/FALSE is the service a map server
+#' @return a list with one named character element
+id_query <-
+  function(object_id_name, object_ids, map_server){
+
+  object_ids <- as.character(format(object_ids, scientific = FALSE, trim = TRUE))
+
+  if(map_server){
+    parameter <- list(objectIds = paste0(object_ids, collapse = ","))
+  }else{
+    parameter <- where_in_query(field = object_id_name, matching = object_ids, named = TRUE)
+  }
+    return(parameter)
+
+}

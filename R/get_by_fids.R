@@ -63,7 +63,7 @@ get_by_fids <-
       purrr::map(object_ids_split,
                  ~ utils::modifyList(
                    query,
-                   where_in_query(object_ids$objectIdFieldName, .x, named = TRUE)
+                   id_query(object_id_name = object_ids$objectIdFieldName, object_ids = .x, map_server = map_server(endpoint))
                  ), keep.null = FALSE)
 
     # Define a progress bar
@@ -84,6 +84,9 @@ get_by_fids <-
         pb = pb
       )
     )
+
+    # Need to add some error checking functionality here
+    # any(names(data_list) == "error") stop() message(cat(data_list))
 
     # Parse the json returned by the api
     parse_esri_data(data_list,

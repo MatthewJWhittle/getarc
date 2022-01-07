@@ -72,13 +72,13 @@ mp <- st_union(
 spatial_query_mp <-
   query_layer(endpoint = endpoints$gb_wood_pasture_parkland,
               in_geometry = mp,
-              return_n = 2,
+              return_n = 1,
               geometry_precision = 1)
 ms_nogeom <-
   query_layer(
     endpoints$english_counties,
     return_geometry = FALSE,
-    return_n = 2
+    return_n = 1
   )
 fs_nogeom <-
   query_layer(endpoint = endpoints$ancient_woodland_england,
@@ -86,12 +86,12 @@ fs_nogeom <-
     return_n = 1
   )
 
-# debugonce(query_layer)
-awi_2510 <-
-  query_layer(endpoint = endpoints$ancient_woodland_england,
-            out_fields = "objectid",
-            return_n = 2510,
-            return_geometry = FALSE)
+# debugonce(get_feature_ids)
+us_fire_1001 <-
+  query_layer(endpoint = endpoints$us_fire_occurrence,
+            out_fields = "OBJECTID",
+            return_n = 1001,
+            return_geometry = TRUE)
 
 
 # tibble(OBJECTID = character(0),
@@ -147,6 +147,7 @@ test_that("query layer works", {
   expect_warning(query_layer(endpoint = endpoints$gb_wood_pasture_parkland, where = "1 = 2"))
   expect_warning(query_layer(endpoint = endpoints$gb_wood_pasture_parkland, where = "1 = 2", return_n = 1))
   expect_warning(query_layer(endpoint = endpoints$gb_wood_pasture_parkland, where = "1 = 2", return_n = 1, return_geometry = FALSE))
+
   # Does the area query have the desired result
   expect_equal(small_feature$Shape__Area < 30, TRUE)
   # return_geometry = FALSE returns a data.frame for both map servers and feature servers
@@ -154,7 +155,7 @@ test_that("query layer works", {
   expect_equal("data.frame" %in% class(fs_nogeom), TRUE)
 
   # the return record count param works properly with get by fids method
-  expect_equal(nrow(awi_2510), 2510)
+  expect_equal(nrow(us_fire_1001), 1001)
 
   expect_equal(no_awi, tibble(OBJECTID = numeric(0),
                               NAME = character(0)

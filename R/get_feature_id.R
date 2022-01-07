@@ -18,7 +18,8 @@ get_feature_ids <-
     query <- query_object(default = default_query_parameters(),
                           user_query = query,
                           my_token = my_token,
-                          mandatory = list(returnIdsOnly = "true", f = "json")
+                          mandatory = list(returnIdsOnly = "true",
+                                           f = "json")
                           )
 
     # Get the request number of records to return and drop the param from the query
@@ -55,14 +56,6 @@ get_feature_ids <-
     object_ids$objectIds <- as.integer(object_ids$objectIds)
 
     return(object_ids)
-    # The below code might be required but unsure if it will error (above) or not
-    # Map servers and Feature servers return data in a slightly different format
-    # Need to parse the content, then check if it is a list, if not use fromJSON to extract a list
-    # if(is.list(content)){
-    #   return(content)
-    # }else{
-    #   return(jsonlite::fromJSON(content))
-    # }
   }
 #' Get Count
 #'
@@ -101,12 +94,5 @@ get_count <-
     count <- RcppSimdJson::fparse(response$content, max_simplify_lvl = "list")
 
     return(count$count)
-    # The below code might be required but unsure if it will error (above) or not
-    # Map servers and Feature servers return data in a slightly different format
-    # Need to parse the content, then check if it is a list, if not use fromJSON to extract a list
-    # if(is.list(content)){
-    #   return(content)
-    # }else{
-    #   return(jsonlite::fromJSON(content))
-    # }
+
   }

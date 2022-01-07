@@ -8,7 +8,7 @@
 #' @importFrom httr GET
 #' @importFrom httr content
 #' @importFrom httr status_code
-#' @importFrom jsonlite fromJSON
+#' @importFrom RcppSimdJson fparse
 get_layer_details <-
   function(endpoint, my_token = NULL) {
     # Parse the access token, returning NULL if it is null

@@ -34,5 +34,5 @@ Refresh  Oauth 2.0 Token
 }
 \details{
 This function is baseed upon httr:::refresh_oauth2.0 which doesn't parse the credentials into a list.
-An additional call to jsonlite::fromJSON has been added to parse the credentials correctly
+An additional call to rjson::fromJSON has been added to parse the credentials correctly
 }

@@ -67,7 +67,9 @@ query_layer <-
       user_query <- utils::modifyList(user_query, spatial_query, keep.null = FALSE)
     }
 
-    query <- query_object(default = default_query_parameters(), user_query = user_query, my_token = my_token)
+    query <- query_object(default = default_query_parameters(map_server = map_server(endpoint)),
+                          user_query = user_query,
+                          my_token = my_token)
 
     layer_details <-
       get_layer_details(endpoint = endpoint, my_token = my_token)

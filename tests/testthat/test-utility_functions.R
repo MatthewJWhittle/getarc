@@ -9,6 +9,10 @@ test_that("assert that works", {
 
 v_to_split <- sample(c(1:100), replace = TRUE, size = 100)
 max_length <- 9
+
+split_1001_2 <- split_vector(x = c(1:1001),
+             max_length = 1000)
+
 test_that("splitting a vector works",
           {
             # Length should not exceed max length
@@ -21,6 +25,8 @@ test_that("splitting a vector works",
 
             # It should return a list
             expect_type(split_vector(v_to_split, max_length = max_length), "list")
+            # This should be split into two parts
+            expect_equal(length(split_1001_2), 2)
 
           })
 
