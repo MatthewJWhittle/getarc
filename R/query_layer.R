@@ -87,7 +87,10 @@ query_layer <-
         id_field = id_field,
         my_token = my_token
       )
-    if(!cache_object$any_changes & cache_object$use_cache){return(cache_object$data_cache)}
+    if(!cache_object$any_changes & cache_object$use_cache){
+      # Return the data in the right CRS
+      return(st_transform(cache_object$data_cache, crs))
+             }
 
     # Drop parts of the query that are NULL which was automatically done for vectors
     # But isn't now it is a list object

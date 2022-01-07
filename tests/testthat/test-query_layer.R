@@ -198,7 +198,9 @@ updated_cache_file <-
               # Using Any Of as sometimes the column names may not be present
               dplyr::any_of(field_names(cache_details)))
 
-
+cache_bng <- query_layer(endpoint = ep_test_points,
+                         cache = cache_file,
+                         crs = 27700)
 
 
 test_that("Caching Works",
@@ -220,6 +222,7 @@ test_that("Caching Works",
             #                            cache = "development/data-cache/cairns-corals-1.geojson"
             #                            ),
             #                NA)
+            expect_equal(st_crs(cache_bng)$epsg, 27700)
           })
 #
 #
