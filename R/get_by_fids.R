@@ -35,6 +35,7 @@ get_by_fids <-
     # Getting FIDs is a big overhea so this should be avoided where possible.
     query_url <- paste0(endpoint, "/query")
 
+    if(is.null(object_ids)){
     # Otherwise, get the FIDs and return the data
     # The FIDs are used for two things: first to determine if any results will be returned by a query;
     # second to get the data by FIDs
@@ -42,6 +43,7 @@ get_by_fids <-
         get_feature_ids(endpoint = endpoint,
                         query = query,
                         my_token = my_token)
+    }
 
     # Check if any FIDs will be returned by the query, if not return an empty tibble avoiding the query
     if (length(object_ids$objectIds) == 0) {

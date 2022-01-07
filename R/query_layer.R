@@ -255,10 +255,10 @@ init_cache <-
 
       # Edits Query
       # First get the FIDs to know which should be dropped from the cache
-      cache_object$object_ids <-
-        get_feature_ids(endpoint = endpoint,
-                              query = cache_object$query,
-                              my_token = my_token)
+      # cache_object$object_ids <-
+      #   get_feature_ids(endpoint = endpoint,
+      #                         query = cache_object$query,
+      #                         my_token = my_token)
       # Otherwise generate an edits query
       # Generate the edits query from the field records the edit times and the last download time
       # Between the time the data is downloaded and written to file, there will be  gap where some edits are missed
