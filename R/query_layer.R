@@ -118,18 +118,22 @@ query_layer <-
     data <- parse_types(x  = data,
                         layer_details = layer_details)
 
-    # If the specified crs is not 4326 (the current crs) then transform the data
-    # This might be redundant as we can specify the outcrs when requesting the data
-    if (crs != 4326 &
-        return_geometry & any(c("sf", "sfc") %in% class(data))) {
-      data <- data %>% sf::st_transform(crs = crs)
-    }
 
     # Print a warning if the query didn't return any data
     if (nrow(data) == 0) {
       warning("No data returned by query.")
     }
     data <- refresh_cache(data, cache_object)
+
+        # If the specified crs is not 4326 (the current crs) then transform the data
+    # This might be redundant as we can specify the outcrs when requesting the data
+
+    # Transform data after dealing with cache as data should always be saved as 4326 in geojson
+    if (crs != 4326 &
+        return_geometry & any(c("sf", "sfc") %in% class(data))) {
+      data <- data %>% sf::st_transform(crs = crs)
+    }
+
     return(data)
 
   }
