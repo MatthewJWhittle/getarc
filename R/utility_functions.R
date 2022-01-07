@@ -108,12 +108,13 @@ split_vector <-
     # create a sequence of the start of each vector
     starts <- seq(from = 1, to = x_length, by = max_length)
 
-    # If the last element of the vector is the final element then it should be dropped
-    if (utils::tail(starts, 1) == x_length) {
-      starts <- starts[c(1:(length(starts) - 1))]
-      # If the start vector ends on the length then parts needs to be one less
-      parts <- parts - 1
-    }
+    ## This was causing errors with a vector 1 element longer than max length returning parts -1
+    # # If the last element of the vector is the final element then it should be dropped
+    # if (utils::tail(starts, 1) == x_length) {
+    #   starts <- starts[c(1:(length(starts) - 1))]
+    #   # If the start vector ends on the length then parts needs to be one less
+    #   parts <- parts - 1
+    # }
 
     # Construct the ends of each part so that the parts don't overlap
     # The sequence should end on the length of x so it doesn't exceed the vector length
