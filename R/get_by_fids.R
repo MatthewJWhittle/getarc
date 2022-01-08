@@ -36,7 +36,7 @@ get_by_fids <-
     query_url <- paste0(endpoint, "/query")
 
     if(is.null(object_ids)){
-    # Otherwise, get the FIDs and return the data
+    # If Object IDs are null then get them for the query
     # The FIDs are used for two things: first to determine if any results will be returned by a query;
     # second to get the data by FIDs
       object_ids <-

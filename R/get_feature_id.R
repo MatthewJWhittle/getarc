@@ -39,8 +39,13 @@ get_feature_ids <-
     )
 
 
+
     # Parse and return the content
     object_ids <- RcppSimdJson::fparse(response$content, max_simplify_lvl = "list")
+
+    # Check for any esri errors not communicated in the status code
+    check_esri_error(object_ids)
+
     # cut down the object ids vector if a returnRecordCount has been sent & the
     # return count is less than the object_ids vector length
     # This enables us to work around the issue with the feature service not returning
