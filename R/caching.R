@@ -35,7 +35,7 @@ cache_dir <- function(){
 #' @export clear_layer_cache
 clear_layer_cache <-
   function(endpoint){
-    path <- construct_cache_path(endpoint = endpoint, cache_dir = cache_dir(), create_dir = FALSE)
+    path <- construct_cache_path(endpoint = endpoint, create_dir = FALSE)
     file.remove(path)
   }
 #' Empty the cache
