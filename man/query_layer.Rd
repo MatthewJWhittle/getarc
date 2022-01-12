@@ -45,7 +45,7 @@ Options are: intersects, contains, crosses, envelope_intersects, index_intersect
 
 \item{my_token}{an access token acquired via \code{get_token}}
 
-\item{cache}{a path to an optional cache to refresh. The cache must be unique to a query, e.g you can run different queries on the same cache. Using a cache is much faster as only newly created/edited features are created. The cache can be refreshed completely by deleting it and running the function}
+\item{cache}{either: TRUE to use default caching (in the cache directory set with set_cache_directory()); a path to an alternative cache location or NULL for no caching (default)}
 }
 \value{
 an sf object
