@@ -55,6 +55,14 @@ test_that("Parsing types works correctly",
             , TRUE)
           })
 
+ep_domain_points <- "https://services6.arcgis.com/k3kybwIccWQ0A7BB/arcgis/rest/services/Domain_Points/FeatureServer/0"
+layer_details <- get_layer_details(ep_domain_points)
+domain_p <- query_layer(ep_domain_points)
+
+test_that("Parsing coded domains works with correct type",
+          {
+            expect_equal(parse_types(domain_p, layer_details)$CodedDomain,  c("Zero", "Two"))
+          })
 # Trying to make it faster:...
 #
 # parse_types_2 <-

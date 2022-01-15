@@ -401,6 +401,17 @@ parse_types <-
     # Avoids errors when only returing asubset of columns
     field_types <- dplyr::filter(field_types, .data$name %in% colnames(x))
 
+    # For any coded domains, set the type automatically as a string.
+    # This catches an error where the type is set to an integar but the actual value isn't
+    # Need to alter this at some point to check the type of the value rather than assuming a string
+    # because it could be an integar (unlikely)
+    field_types <-
+      dplyr::mutate(
+        field_types,
+        coded_domain = name %in% domain_lookup(layer_details)$field_name,
+        type = dplyr::if_else(coded_domain, "esriFieldTypeString", type)
+      )
+
     # Join in the functions which parse each field type
     field_types <- dplyr::left_join(field_types, type_functions, by = "type")
 
