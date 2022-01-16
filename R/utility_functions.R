@@ -169,19 +169,31 @@ where_in_query <-
 #'
 #' @param field_names the names of the columns to include
 #' @param out_fields the fields to filter from the field_names if user has specified wanting certain fields
+#' @param id_field the unique ID field
+#' @param return_geometry should the geometry be returned
+#' @param crs the CRS requested by the user
 #' @importFrom tibble tibble
 #' @return an emtpy tibble with the names in out_fields
-make_empty_tibble <-
-  function(field_names, out_fields) {
+make_empty_table <-
+  function(field_names, id_field, out_fields, return_geometry, crs = 4326) {
     # If the user wants to only return certain fields, then filter the field names data
     if (all(out_fields != "*")) {
       field_names <- field_names[field_names %in% out_fields]
+      # Add in the Unique ID field
+      field_names <- unique(c(id_field, field_names))
     }
     # then make an empty tibble and fill it with empty columns which match the data
     empty_df <- tibble::tibble()
     for (field in field_names) {
       empty_df[field] <- character(0)
     }
+
+    if(return_geometry) {
+      empty_df <-
+        sf::st_as_sf(dplyr::mutate(empty_df,
+                                   geometry = sf::st_sfc(sf::st_multipolygon())), crs = crs)
+    }
+
     return(empty_df)
 
   }
@@ -498,3 +510,35 @@ id_query <-
     return(parameter)
 
 }
+#' Order Data by Object ID
+#'
+#' Order a dataset by the object IDs returned by the query
+#'
+#' This function taks a dataset formed of cached data and data from a query and orders it
+#' by the object IDs returned from the initial query.
+#'
+#' @param data the combined dataset from the cache and query
+#' @param cache_object the cache_object which contains data on the id field and object ids returned by the inital query
+#' @return a data from
+#' @importFrom dplyr pull
+order_data_by_oid <-
+  function(data, cache_object){
+    data[match(cache_object$query_object_ids$objectIds,
+               dplyr::pull(data, cache_object$id_field)), ]
+  }
+#' Format outFields parameter
+#'
+#' Format outFields parameter
+#'
+#' Format the outFields query parameter from user input. This ensures that the outFields request always includes the unique ID field
+#' @param id_field the unique ID field of the layer
+#' @param out_fields the fields the user has requested be returned
+#' @return a character vector of length 1 with either "*" for all fields or in the form "Field1,Field2,..."
+format_out_fields <-
+  function(id_field, out_fields){
+    if(out_fields == "*"){return(out_fields)}
+    fields <- unique(c(id_field, out_fields))
+    return(
+      paste0(fields, collapse = ",")
+    )
+  }

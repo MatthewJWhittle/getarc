@@ -107,6 +107,7 @@ construct_cache_path <-
 #' Initialise the cache object
 #' @param data_cache the cached data
 #' @param object_ids the object ids to request
+#' @param query_object_ids the object IDs which should actually be returned (with their attributes & features)
 #' @param query the query to execute
 #' @param method the caching method to use
 #' @param any_changes Have there been any changes to the data since the last cache?
@@ -118,6 +119,7 @@ construct_cache_path <-
 init_cache_object <-
   function(data_cache = NULL,
            object_ids = NULL,
+           query_object_ids = NULL,
            query = NULL,
            method = NULL,
            any_changes = TRUE,
@@ -171,7 +173,24 @@ init_cache <-
                                       cache_path = cache,
                                       id_field = id_field)
 
-    if(!cache_object$use_cache){return(cache_object)}
+    # Get the object IDs returned by the query (not just those that have changed)
+    # This allows us to check if all are in the cache and then get the extras as required
+    # This is neccessary in a scenario where the cache was initially generated based upon a
+    # restricted query and then used to return data for a query that returns FIDs not in the cache
+    # The function will check what the query needs, what the cache contains and what has changed.
+    # It will return the object IDs which need to be downloaded
+    cache_object$query_object_ids <-
+      get_feature_ids(endpoint = endpoint,
+                      query = cache_object$query,
+                      my_token = my_token)
+
+    # If a cache isn't being used, the put the query object IDs (those which should be
+    # returned by the user query - even if part from a cache) into the object IDs (those
+    # which are actually requested from the API)
+    if(!cache_object$use_cache){
+      cache_object$object_ids <- cache_object$query_object_ids
+      return(cache_object)
+      }
 
     # Should a cache be used? A cache should be used if the user has supplied a path, and the layer supports
     # edit tracking
@@ -214,9 +233,25 @@ init_cache <-
       cache_object$data_cache <- parse_types(x = cache_object$data_cache, layer_details = layer_details)
       cache_object$any_changes <- last_layer_edit > cached_time
 
-      # If there haven't been any edits since the data was last cached or the
-      # the method is using layer edits then return the object
-      if (!cache_object$any_changes | cache_object$method == "layer_edit") {
+
+      # Check which object IDs are in the data cache
+      ids_in_cache <- dplyr::pull(cache_object$data_cache, cache_object$id_field)
+
+      # Drop any IDs not requested from the cache
+      cache_object$data_cache <- dplyr::filter(cache_object$data_cache,
+                                               ids_in_cache %in% cache_object$query_object_ids$objectIds)
+
+      # Keep only IDs which aren't already in the cache
+      not_cached_object_ids <- cache_object$query_object_ids$objectIds[!cache_object$query_object_ids$objectIds %in% ids_in_cache]
+
+      # Set 'any_changes' to true if there are object ids requested which aren't in the cache
+      cache_object$any_changes <- length(not_cached_object_ids) > 0 | cache_object$any_changes
+
+      # If:
+      # - there haven't been any edits since the data was last cached, and
+      # - the cache contains all object ids requested (no additional object ids to request) or
+      # - the method is using layer edits then return the object
+      if (!cache_object$any_changes | cache_object$method == "layer_edit" ) {
         return(cache_object)
       }
 
@@ -229,21 +264,29 @@ init_cache <-
           "{layer_details$editFieldsInfo$editDateField} > '{as.character(cached_time)}'"
         )
 
+      ## Change the where query to request the object ids (which i've already requested)
+      # rather than sending over all the query data (which may be large if it includes spatial data)
+      cache_object$query$where <-
+        id_query(object_id_name = cache_object$query_object_ids$objectIdFieldName,
+               object_ids = cache_object$query_object_ids$objectIds,
+               map_server = map_server(endpoint))
 
-      # If a where query hasn't been passed in, then use the edits query. If not combine them
-      if (is.null(cache_object$query$where)) {
-        cache_object$query$where <- edits_query
-      } else{
+      # Combine the edits and OID query
         cache_object$query$where <- glue::glue("({cache_object$query$where}) AND {edits_query}")
-      }
-    }
+
     cache_object$object_ids <-
       get_feature_ids(endpoint = endpoint,
                       query = cache_object$query,
                       my_token = my_token)
 
+    # Add in any object IDs which weren't the cached doesn't already include but may not have changed
+    # and therefore wouldn't be picked up in the edits query
+    # Sort them so that the data is returned in the correct order (not sure if this is actually)
+    # neccessary
+    cache_object$object_ids$objectIds <- unique(sort(c(cache_object$object_ids$objectIds, not_cached_object_ids)))
+
     return(cache_object)
-  }
+  }}
 
 #' Refresh cache
 #'
@@ -253,11 +296,16 @@ init_cache <-
 #' @return a tibble
 refresh_cache <-
   function(data, cache_object){
-    if (!cache_object$use_cache) {return(data)}
+    if (!cache_object$use_cache) {
+      data <- order_data_by_oid(data = data, cache_object = cache_object)
+      return(data)
+      }
 
     # Write Cache
     if (!cache_object$cache_exists) {
-      sf_geojson_write(sf = data,filepath = cache_object$cache_path)
+      data <- order_data_by_oid(data = data, cache_object = cache_object)
+      sf_geojson_write(sf = data,
+                       filepath = cache_object$cache_path)
       return(data)
     }
 
@@ -282,6 +330,11 @@ refresh_cache <-
         dplyr::filter(cache_object$data_cache, !cache_data_ids %in% new_data_ids | cache_data_ids %in% cache_object$object_ids$objectIds),
         data
       )
+
+    # Order it so it matches the format that would be returned by a normal query
+    data_refreshed <- order_data_by_oid(data = data_refreshed, cache_object = cache_object)
+    # Write the data to the cach
     sf_geojson_write(sf = data_refreshed, filepath = cache_object$cache_path)
+
     return(data_refreshed)
   }

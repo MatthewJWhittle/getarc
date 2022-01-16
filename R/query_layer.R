@@ -46,11 +46,19 @@ query_layer <-
     #https://developers.arcgis.com/rest/services-reference/layer-feature-service-.htm
     # It would be useful to add a line of code in here to check and auto refresh the token
     # Get the details of the layer to
+    layer_details <- get_layer_details(endpoint = endpoint, my_token = my_token)
+
+    # Get the unique ID field from the layer details.
+    id_field <-
+      get_unique_id_field(endpoint = endpoint,
+                          layer_details = layer_details)
+
+
 
     argument_parameters <-
       list(
         returnGeometry = lower_logical(return_geometry),
-        outFields = paste0(out_fields, collapse = ","),
+        outFields = format_out_fields(id_field, out_fields),
         resultRecordCount = return_n,
         geometryPrecision = geometry_precision,
         where = where
@@ -71,12 +79,7 @@ query_layer <-
                           user_query = user_query,
                           my_token = my_token)
 
-    layer_details <-
-      get_layer_details(endpoint = endpoint, my_token = my_token)
 
-    # Get the unique ID field from the layer details.
-    id_field <-
-      get_unique_id_field(endpoint = endpoint, layer_details = layer_details)
 
     cache_object <-
       init_cache(

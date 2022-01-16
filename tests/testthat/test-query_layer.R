@@ -86,6 +86,15 @@ fs_nogeom <-
     return_n = 1
   )
 
+
+one_field <-
+  query_layer(endpoint = endpoints$ancient_woodland_england,
+              return_geometry = FALSE,
+              out_fields = "THEMNAME",
+              return_n = 1
+  )
+
+
 # debugonce(get_feature_ids)
 us_fire_1001 <-
   query_layer(endpoint = endpoints$us_fire_occurrence,
@@ -106,6 +115,16 @@ no_awi <-
       where = "1=2",
       out_fields = c("NAME", "OBJECTID"),
       return_geometry = FALSE
+    )
+  })
+
+no_awi_geom <-
+  suppressWarnings({
+    query_layer(
+      endpoint = endpoints$ancient_woodland_england,
+      where = "1=2",
+      out_fields = c("NAME", "OBJECTID"),
+      return_geometry = TRUE
     )
   })
 
@@ -135,6 +154,8 @@ test_that("query layer works", {
   # Check that sql  where query works
   expect_equal(sql_query$SUBTYPE, "Parkland")
   expect_equal(sql_query$INTERPQUAL, "Medium")
+  # When the user requests fields that don't include the Unique ID it is still returned
+  expect_equal(colnames(one_field), c("OBJECTID", "THEMNAME"))
   # Did the spatial query only return one result?
   expect_equal(nrow(spatial_query_bbox),
                1)
@@ -160,6 +181,7 @@ test_that("query layer works", {
   expect_equal(no_awi, tibble(OBJECTID = numeric(0),
                               NAME = character(0)
   ))
+  expect_equal(class(no_awi_geom), c("sf", "tbl_df", "tbl", "data.frame"))
   # Expect that null values are parsed correctly and returned as a tibble
   expect_equal(nrow(null_column), null_expected)
 
@@ -184,11 +206,12 @@ points_dl <- query_layer(endpoint = ep_test_points,
 # read the cached data
 cached_data <- geojsonsf::geojson_sf(cache_file)
 # Add a new point to the layer to the retreive when updating the cache
-add_point_to_test_ep(endpoint = ep_test_points)
+add_point_to_test_ep(endpoint = ep_test_points,attributes = list(test_string = sample(letters[c(1:4)], 1)))
 # Retrieve the updated layer without caching so the results can be compared
 updated_layer <- query_layer(endpoint = ep_test_points)
 updated_cache <- query_layer(endpoint = ep_test_points,
                          cache = cache_file)
+cache_made <- file.exists(cache_file)
 # Check the file on disk
 updated_cache_file <- geojsonsf::geojson_sf(cache_file)
 cache_details <- get_layer_details(ep_test_points)
@@ -203,11 +226,40 @@ cache_bng <- query_layer(endpoint = ep_test_points,
                          crs = 27700)
 
 
+## Issues with mismatch due to ordering of object id
+# coming from get_by_fids:
+# parse_esri_data(data_list, geometry = return_geometry & !is_table(layer_details))
+
+# Testing caching where the initial cache didn't include all the FIDs in the layer
+# First clear the old cache
+cache_file <- "development/data-cache/test-points-restricted.geojson"
+if(file.exists(cache_file)) {file.remove(cache_file)}
+if(!dir.exists(dirname(cache_file))) {dir.create(dirname(cache_file), recursive = TRUE)}
+# define the layer to cache and where to cache it
+ep_test_points <- "https://services6.arcgis.com/k3kybwIccWQ0A7BB/arcgis/rest/services/Points/FeatureServer/0"
+# Download the points layer and cache it
+points_a <- query_layer(endpoint = ep_test_points,
+                         where = "test_string = 'a'",
+                         cache = cache_file)
+
+cache_a <- geojsonsf::geojson_sf(cache_file)
+
+points_ab <- query_layer(endpoint = ep_test_points,
+                        where = "test_string IN ('a', 'b')")
+
+points_ab_cache <- query_layer(endpoint = ep_test_points,
+                         where = "test_string IN ('a', 'b')",
+                         cache = cache_file)
+
+
+
+
+
 test_that("Caching Works",
           {
             local_edition(3)
             # The cache has been created
-            expect_true(file.exists(cache_file))
+            expect_true(cache_made)
             # The updated cache should be equivalent to the updated layer
             expect_equal(updated_cache, updated_layer, tolerance = 1, ignore_attr = TRUE)
             # The updated file on disk should be equivalent to the updated layer
@@ -223,6 +275,9 @@ test_that("Caching Works",
             #                            ),
             #                NA)
             expect_equal(st_crs(cache_bng)$epsg, 27700)
+
+            # The data returned by a query is exactly the same as that composed partly of the cache and a query
+            expect_equal(points_ab, points_ab_cache, ignore_attr = TRUE)
           })
 #
 #

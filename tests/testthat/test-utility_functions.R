@@ -35,13 +35,18 @@ test_that("splitting a vector works",
 test_that("making empty tibbles works",
           {
             expect_equal(
-              tibble(A = character(0), B = character(0)),
-              make_empty_tibble(field_names = c("A", "B"), out_fields = "*")
+              tibble( OID = character(0), A = character(0), B = character(0)),
+              make_empty_table(field_names = c("OID", "A", "B"), out_fields = "*", return_geometry = FALSE, id_field = "OID")
             )
 
             expect_equal(
-              tibble(A = character(0)),
-              make_empty_tibble(field_names = c("A", "B"), out_fields = "A")
+              tibble( OID = character(0), A = character(0)),
+              make_empty_table(field_names = c("A", "B"), out_fields = "A",return_geometry = FALSE, id_field = "OID")
+            )
+
+            expect_equal(
+              class( make_empty_table(field_names = c("A", "B"), out_fields = "A",return_geometry = TRUE, id_field = "OID")),
+              c("sf","tbl_df","tbl","data.frame")
             )
           }
           )

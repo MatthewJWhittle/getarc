@@ -49,9 +49,11 @@ get_by_fids <-
     if (length(object_ids$objectIds) == 0) {
       warning("No data matching query, returning an empty tibble")
       return(
-        make_empty_tibble(
+        make_empty_table(
           field_names = field_names(layer_details),
-          out_fields = out_fields
+          out_fields = out_fields,
+          id_field = object_ids$objectIdFieldName,
+          return_geometry = return_geometry
         )
       )
     }
