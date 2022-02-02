@@ -323,11 +323,15 @@ refresh_cache <-
     new_data_ids <- dplyr::pull(data, cache_object$id_field)
     cache_data_ids <- dplyr::pull(cache_object$data_cache, cache_object$id_field)
 
+    # Which IDs from the cache are in the query
+    in_query <- cache_data_ids %in% cache_object$query_object_ids$objectIds
+    # Which IDs in the cache need to be refreshed
+    refresh <- cache_data_ids %in% new_data_ids
 
     data_refreshed <-
       dplyr::bind_rows(
         # Remove anything from the cache that has been updated
-        dplyr::filter(cache_object$data_cache, !cache_data_ids %in% new_data_ids | cache_data_ids %in% cache_object$object_ids$objectIds),
+        dplyr::filter(cache_object$data_cache, in_query & !refresh),
         data
       )
 
