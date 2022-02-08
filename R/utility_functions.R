@@ -303,8 +303,14 @@ get_unique_id_field <-
                        ~ .x[["type"]] == "esriFieldTypeOID")
       return(layer_details$fields[id_field][[1]]$name)
     }
+
+    # Look for the ID in this part of the list:
+    id_field <- layer_details$uniqueIdField$name
+
+    if(!is.null(id_field)){return(id_field)}
+
     # Otherwise, return the id field
-    return(layer_details$uniqueIdField$name)
+    return(layer_details$objectIdField)
   }
 #' Caching Method
 #'
