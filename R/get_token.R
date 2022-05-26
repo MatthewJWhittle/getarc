@@ -190,6 +190,7 @@ get_credentials <-
 #' @importFrom httr content
 #' @importFrom rjson fromJSON
 #' @importFrom httr oauth_callback
+#' @export generate_token
 generate_token <-
   function(endpoint, username, password, expiration = 60) {
     token <-
