@@ -9,6 +9,7 @@
 #' @importFrom httr content
 #' @importFrom httr status_code
 #' @importFrom RcppSimdJson fparse
+#' @importFrom httr oauth_callback
 get_layer_details <-
   function(endpoint, my_token = NULL) {
     # Parse the access token, returning NULL if it is null
@@ -16,7 +17,7 @@ get_layer_details <-
     # Build the parameters - json & token
     query_string <- query_string(my_token = my_token)
     query_url <- paste0(endpoint, query_string)
-    response <- httr::GET(query_url)
+    response <- httr::GET(query_url, httr::add_headers(referer = httr::oauth_callback()))
 
     # Fail if api Error
     # This does not fail properly if the layer is not found

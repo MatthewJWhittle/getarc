@@ -12,6 +12,7 @@
 #' @importFrom rjson fromJSON
 #' @export get_feature_ids
 #' @importFrom utils modifyList
+#' @importFrom httr oauth_callback
 get_feature_ids <-
   function(endpoint, query = list(), my_token = NULL){
 
@@ -30,7 +31,7 @@ get_feature_ids <-
     query_url <- paste0(endpoint, "/query")
 
     # Download the data using a post query
-    response <- httr::POST(query_url, body = query)
+    response <- httr::POST(query_url, body = query, httr::add_headers(referer = httr::oauth_callback()))
 
     # Fail if the response is not 200
     # Print an error message if the status code isn't 200
@@ -72,6 +73,7 @@ get_feature_ids <-
 #' @importFrom httr POST
 #' @importFrom httr content
 #' @importFrom rjson fromJSON
+#' @importFrom httr oauth_callback
 #' @export get_count
 get_count <-
   function(endpoint, query = list(), my_token = NULL){
@@ -86,7 +88,7 @@ get_count <-
     query_url <- paste0(endpoint, "/query")
 
     # Download the data using a post query
-    response <- httr::POST(query_url, body = as.list(query))
+    response <- httr::POST(query_url, body = as.list(query), httr::add_headers(referer = httr::oauth_callback()))
 
     # Fail if the response is not 200
     # Print an error message if the status code isn't 200

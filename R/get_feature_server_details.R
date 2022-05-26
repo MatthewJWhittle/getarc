@@ -10,6 +10,8 @@
 #' @importFrom httr content
 #' @importFrom httr status_code
 #' @importFrom stringr str_remove_all
+#' @importFrom httr oauth_callback
+
 #' @export get_feature_server_details
 get_feature_server_details <-
   function(endpoint, my_token = NULL){
@@ -25,7 +27,7 @@ get_feature_server_details <-
     query_url <- paste0(endpoint, query_string)
 
     response <-
-      httr::GET(query_url)
+      httr::GET(query_url, httr::add_headers(referer = httr::oauth_callback()))
 
     # Fail if api Error
     # This does not fail properly if the layer is not found

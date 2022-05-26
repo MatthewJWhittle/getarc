@@ -189,6 +189,7 @@ get_credentials <-
 #' @importFrom httr POST
 #' @importFrom httr content
 #' @importFrom rjson fromJSON
+#' @importFrom httr oauth_callback
 generate_token <-
   function(endpoint, username, password, expiration = 60) {
     token <-
@@ -199,7 +200,8 @@ generate_token <-
           username = username,
           password = password,
           f = "json",
-          client = "requestip",
+          client = "referer",
+          referer = httr::oauth_callback(),
           expiration = expiration
         )
       )

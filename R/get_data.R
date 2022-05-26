@@ -15,6 +15,7 @@
 #' @importFrom RcppSimdJson fparse
 #' @importFrom httr status_code
 #' @importFrom httr POST
+#' @importFrom httr oauth_callback
 get_data <-
   function(query_url,
            query,
@@ -24,13 +25,14 @@ get_data <-
     # Add the token into the query
     query <-
       utils::modifyList(query, list(token = parse_access_token(my_token)), keep.null = FALSE)
-
+#
     # only tick if it exists
     if (!is.null(pb)) {
       pb$tick()
     }
     # Request the data using POST
-    response <- httr::POST(url = query_url, body = query)
+    response <- httr::POST(url = query_url, body = query,
+                           httr::add_headers(referer = httr::oauth_callback()))
     # Fail on error
     stopifnot(httr::status_code(response) == 200)
 
