@@ -7,12 +7,13 @@
 #' @param client_id app credential: client ID
 #' @param client_secret app credential: client secret
 #' @param app_name app credential: app name
-#' @param redirect_uri te url to redirect to after authenticating. default is httr::oauth_callback(). This needs to be added into your web app on arc gis for developers.
+#' @param redirect_uri the url to redirect to after authenticating. default is httr::oauth_callback(). This needs to be added into your web app on arc gis for developers.
 #' @export get_token
 #' @importFrom httr oauth_endpoint
 #' @importFrom httr oauth_app
 #' @importFrom httr oauth2.0_token
 #' @importFrom purrr map_lgl
+#' @importFrom rjson fromJSON
 get_token <-
   function(client_id = NULL, client_secret = NULL, app_name = NULL,
            use_cache = TRUE, auto_refresh = TRUE,
@@ -58,7 +59,7 @@ get_token <-
     # Think this may be fixed somewhere now so i've added conditional
     # logic to parse it if neccessary
     if(!is.list(my_token$credentials)){
-      my_token$credentials <- jsonlite::fromJSON(my_token$credentials)
+      my_token$credentials <- rjson::fromJSON(my_token$credentials)
     }
 
 
@@ -101,7 +102,7 @@ get_token <-
 #' @return logical value detailing whether the token has or has not expired
 #' @importFrom lubridate ymd_hms
 #' @importFrom lubridate seconds
-#' @importFrom jsonlite fromJSON
+#' @importFrom rjson fromJSON
 token_expired <-
   function(my_token){
     # Extract the grant time which is passed in when making the request
@@ -125,8 +126,8 @@ token_expired <-
 #' @param client_secret The client secret. Taken from you app dashboard on arcgis for developers
 #' @param app_name The name of your app. Taken from you app dashboard on arcgis for developers
 #' @param path The path where the credentials should be saved
-#' @importFrom jsonlite toJSON
-#' @importFrom jsonlite fromJSON
+#' @importFrom rjson toJSON
+#' @importFrom rjson fromJSON
 #' @importFrom jsonlite  write_json
 #' @importFrom jsonlite  read_json
 #' @export set_credentials
@@ -145,7 +146,7 @@ set_credentials <-
     if (!dir.exists(dirname(path))) {
       dir.create(dirname(path))
     }
-    jsonlite::write_json(jsonlite::toJSON(credentials), path = path)
+    jsonlite::write_json(rjson::toJSON(credentials), path = path)
   }
 
 get_credentials <-
@@ -161,7 +162,7 @@ get_credentials <-
     }
     # Get the credentials from the path and return them in a list
     credentials <- jsonlite::read_json(path)
-    jsonlite::fromJSON(credentials[[1]])
+    rjson::fromJSON(credentials[[1]])
   }
 
 #' Generate a token
@@ -178,8 +179,8 @@ get_credentials <-
 #' You could write a wrapper function around this function which gets your credentials from an
 #' environment variable, calls the function and returns a token. getarc may provide this functionality eventually.
 #' @param endpoint the endpoint against which to request the token. this is generally in the format of:
-#' https://<host>:<port>/<site>/tokens/generateToken
-#' e.g: https://sampleserver6.arcgisonline.com/arcgis/tokens/generateToken
+#' `https://{host}:{port}/{site}/tokens/generateToken`
+#' e.g: `https://sampleserver6.arcgisonline.com/arcgis/tokens/generateToken`
 #' @param  username your ArcGIS online username. You should make an effort to protect this by accessing it from an
 #' environment variable so that it isn't saved in your source code or .Rhistory file.
 #' @param  password your ArcGIS online password. You should make an effort to protect this by accessing it from an
@@ -187,7 +188,9 @@ get_credentials <-
 #' @param expiration The token expiration time in minutes (defaults to 60)
 #' @importFrom httr POST
 #' @importFrom httr content
-#' @importFrom jsonlite fromJSON
+#' @importFrom rjson fromJSON
+#' @importFrom httr oauth_callback
+#' @export generate_token
 generate_token <-
   function(endpoint, username, password, expiration = 60) {
     token <-
@@ -198,11 +201,12 @@ generate_token <-
           username = username,
           password = password,
           f = "json",
-          client = "requestip",
+          client = "referer",
+          referer = httr::oauth_callback(),
           expiration = expiration
         )
       )
 
-    jsonlite::fromJSON(httr::content(token))
+    rjson::fromJSON(httr::content(token))
   }
 

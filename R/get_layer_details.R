@@ -8,21 +8,16 @@
 #' @importFrom httr GET
 #' @importFrom httr content
 #' @importFrom httr status_code
-#' @importFrom jsonlite fromJSON
+#' @importFrom RcppSimdJson fparse
+#' @importFrom httr oauth_callback
 get_layer_details <-
   function(endpoint, my_token = NULL) {
-    # If a token has been passed to the function then parse it, otherwise NULL
-    if (!is.null(my_token)) {
-      token <- parse_access_token(my_token)
-    } else{
-      token <- my_token
-    }
+    # Parse the access token, returning NULL if it is null
+    token <- parse_access_token(my_token)
     # Build the parameters - json & token
     query_string <- query_string(my_token = my_token)
-
     query_url <- paste0(endpoint, query_string)
-
-    response <- httr::GET(query_url)
+    response <- httr::GET(query_url, httr::add_headers(referer = httr::oauth_callback()))
 
     # Fail if api Error
     # This does not fail properly if the layer is not found
@@ -30,19 +25,15 @@ get_layer_details <-
     stopifnot(httr::status_code(response) == 200)
 
     # Convert the json to a list
-    content <- httr::content(response)
-    if (is.list(content)) {
-      parsed_content <-  content
-    } else{
-      parsed_content <- jsonlite::fromJSON(content)
-    }
+    parsed_content <- parse_rjson(response)
 
     # This code is added to catch an error where the api doesn't return a failed code but
     # should still error (where the layer wasn't found)
     #Add all clause to avoid R warning message
+    ## Turn this into a function at some point
     if (all(names(parsed_content) == "error")) {
       stop(paste0("\n", paste0(paste0("- ",
-        names(parsed_content$error), ": ", parsed_content$error
+                                      names(parsed_content$error), ": ", parsed_content$error
       ), collapse = "\n")))
     }
     return(parsed_content)

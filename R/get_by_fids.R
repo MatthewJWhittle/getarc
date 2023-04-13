@@ -14,10 +14,13 @@
 #' @param return_n how many features (maximum) should be returned by the query?
 #' @param layer_details the layer details returned by the get_layer_details function
 #' @param out_fields the fields of the layer to return (character vector)
+#' @param object_ids a vector of object IDs to return if this argument is NULL the function will get them
+#' but passing them in aids performance if they have already been returned
 #' @return a tibble or sf object
 #' @importFrom progress progress_bar
 #' @importFrom purrr map
 #' @importFrom dplyr bind_rows
+#' @importFrom utils modifyList
 get_by_fids <-
   function(endpoint,
            query,
@@ -25,51 +28,35 @@ get_by_fids <-
            return_geometry,
            return_n,
            layer_details,
-           out_fields) {
+           out_fields,
+           object_ids = NULL) {
     # This function works by checking if the requested return count is less tha the max record count.
     # If so, it doesnn't bother with getting the FIDs and just requests the data and returns it.
     # Getting FIDs is a big overhea so this should be avoided where possible.
     query_url <- paste0(endpoint, "/query")
 
-    # Check if the user has requested less rows than the maxrecord count, if so don't initiate
-    # getting the FIDs and the where in query and just return the data
-    if ((!is.null(return_n)) && return_n < layer_details$maxRecordCount) {
-      data <-
-        get_data(
-          query_url = query_url,
-          query = query,
-          return_geometry = return_geometry,
-          pb = NULL,
-          my_token = my_token
-        )
-      # Print a warning if there are no features returned by the query.
-      if(nrow(data) == 0){
-        warning("No data matching query, returning an empty tibble")
-      }
-      return(data)
-    }
-
-    # Otherwise, get the FIDs and return the data
+    if(is.null(object_ids)){
+    # If Object IDs are null then get them for the query
     # The FIDs are used for two things: first to determine if any results will be returned by a query;
     # second to get the data by FIDs
-    object_ids <-
-      get_feature_ids(endpoint = endpoint,
-                      query = query,
-                      my_token = my_token)
+      object_ids <-
+        get_feature_ids(endpoint = endpoint,
+                        query = query,
+                        my_token = my_token)
+    }
 
     # Check if any FIDs will be returned by the query, if not return an empty tibble avoiding the query
     if (length(object_ids$objectIds) == 0) {
       warning("No data matching query, returning an empty tibble")
       return(
-        make_empty_tibble(
+        make_empty_table(
           field_names = field_names(layer_details),
-          out_fields = out_fields
+          out_fields = out_fields,
+          id_field = object_ids$objectIdFieldName,
+          return_geometry = return_geometry
         )
       )
     }
-
-
-
 
     # Then split the vector so it doesn't exceed the max record count
     object_ids_split <-
@@ -78,7 +65,10 @@ get_by_fids <-
 
     querys <-
       purrr::map(object_ids_split,
-                 ~ modify_named_vector(query, where_in_query(object_ids$objectIdFieldName, .x)))
+                 ~ utils::modifyList(
+                   query,
+                   id_query(object_id_name = object_ids$objectIdFieldName, object_ids = .x, map_server = map_server(endpoint))
+                 ), keep.null = FALSE)
 
     # Define a progress bar
     pb <- progress::progress_bar$new(
@@ -94,11 +84,15 @@ get_by_fids <-
       ~ get_data(
         query_url = query_url,
         query = .x,
-        return_geometry = return_geometry,
         my_token = my_token,
         pb = pb
       )
     )
 
-    dplyr::bind_rows(data_list)
+    # Need to add some error checking functionality here
+    # any(names(data_list) == "error") stop() message(cat(data_list))
+
+    # Parse the json returned by the api
+    parse_esri_data(data_list,
+                            geometry = return_geometry & !is_table(layer_details))
   }

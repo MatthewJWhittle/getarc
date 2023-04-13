@@ -1,85 +1,3 @@
-#' Get GeoJSON
-#'
-#' Download geojson from a query url
-#'
-#' This function downloads geojson from a query_url, writes it to a temporary file and reads it in usinf st_read
-#'
-#' @param query_url the query url which is passed to httr::POST()
-#' @param query the query to POST
-#' @return an sf object
-#' @importFrom sf st_read
-#' @importFrom magrittr %>%
-#' @importFrom httr POST
-#' @importFrom httr write_disk
-#' @importFrom httr status_code
-#' @importFrom httr content
-get_geojson <- function(query_url, query) {
-  # Request the data using POST
-  response <- httr::POST(url = query_url, body = as.list(query))
-
-  # Fail on error
-  stopifnot(httr::status_code(response) == 200)
-
-  content <- httr::content(response, as = "text")
-  # Check for an error if it doesn't return api fail
-  check_esri_error(content = content)
-  # Read the data from the json text
-  data <- sf::st_read(dsn = content,
-                      quiet = TRUE,
-                      stringsAsFactors = FALSE)
-
-  # Possibly return the data or an error
-  if (is.null(data)) {
-    stop(paste0("Error: ",
-                print(httr::content(response))))
-  }
-
-  return(data)
-
-}
-#' Get Tibble
-#'
-#' Get a Tibble from an endpoint
-#'
-#' This function accepts a query URL and extracts a tibble from the response.
-#' @param query_url  the query url which is passed to httr::POST()
-#' @param query the query to POST
-#' @return a tibble
-#' @importFrom httr POST
-#' @importFrom httr status_code
-#' @importFrom httr content
-#' @importFrom jsonlite fromJSON
-#' @importFrom tibble as_tibble
-#' @importFrom purrr map
-#' @importFrom dplyr bind_rows
-get_tibble <-
-  function(query_url, query) {
-    # Request the data using POST
-    response <- httr::POST(url = query_url, body = as.list(query))
-
-    # Fail on error
-    stopifnot(httr::status_code(response) == 200)
-    # First convert JSON to a list.
-    # This list contains multiple levels with information about the data
-    # The desired table is contained in data_list$features$attributes
-    # Extract and return it
-    content <- parse_rjson(response)
-    # Check for an error if it doesn't return api fail
-    check_esri_error(content = content)
-    # I've added some control flow in here to modulate the behaviour if it is a map server
-    # if(map_server(query_url)){
-    # Map servers return data in a different format which needs a different method of parsing
-    data <-
-      dplyr::bind_rows(purrr::map(content$features,
-                                  "attributes"))
-    # }else{
-    #   # This line is causing issues due to the use of rjson should be an easy fix but something to do with rjson
-    # data_list <- jsonlite::fromJSON(content)
-    # data <- tibble::as_tibble(data_list$features$attributes)
-    # }
-    return(data)
-  }
-
 #' Get Data
 #'
 #' Get data from an endpoint
@@ -91,29 +9,40 @@ get_tibble <-
 #' when the geometry isn't returned.
 #' @param query_url  the query url which is passed to httr::POST()
 #' @param query the query to POST
-#' @param return_geometry should the geometry be returned, this is passed in to query_layer & must also from part of the query
 #' @param pb progress bar - default is NULL for no progress bar
 #' @param my_token the access token or function used to generate one
 #' @return either a tibble or sf object depending on return_geometry
+#' @importFrom RcppSimdJson fparse
+#' @importFrom httr status_code
+#' @importFrom httr POST
+#' @importFrom httr oauth_callback
 get_data <-
   function(query_url,
            query,
-           return_geometry,
            pb = NULL,
            my_token) {
 
     # Add the token into the query
     query <-
-      modify_named_vector(query, c(token = parse_access_token(my_token)))
-
+      utils::modifyList(query, list(token = parse_access_token(my_token)), keep.null = FALSE)
+#
     # only tick if it exists
     if (!is.null(pb)) {
       pb$tick()
     }
-    if (return_geometry) {
-      data <- get_geojson(query_url = query_url, query = query)
-    } else{
-      data <- get_tibble(query_url = query_url, query = query)
-    }
-    return(data)
+    # Request the data using POST
+    response <- httr::POST(url = query_url, body = query,
+                           httr::add_headers(referer = httr::oauth_callback()))
+    # Fail on error
+    stopifnot(httr::status_code(response) == 200)
+
+    content <- RcppSimdJson::fparse(response$content, max_simplify_lvl = "list")
+    # # Check for an error if it doesn't return api fail
+    # check_esri_error(content = content)
+
+    # Check if no features have been returned and return an empty sf object
+    # This avoids st_read hitting an error where no features are returned
+    # if(grepl('"features":\\[\\]', content)){return(sf::st_sf(sf::st_sfc()))}
+
+    return(content)
   }

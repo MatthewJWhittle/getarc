@@ -24,7 +24,7 @@ get_token(
 
 \item{auto_refresh}{should the token automatically be refreshed if it has expired?}
 
-\item{redirect_uri}{te url to redirect to after authenticating. default is httr::oauth_callback(). This needs to be added into your web app on arc gis for developers.}
+\item{redirect_uri}{the url to redirect to after authenticating. default is httr::oauth_callback(). This needs to be added into your web app on arc gis for developers.}
 }
 \description{
 Get an access token for accessing a service

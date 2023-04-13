@@ -4,12 +4,14 @@
 \alias{where_in_query}
 \title{Where In Query}
 \usage{
-where_in_query(field, matching)
+where_in_query(field, matching, named = FALSE)
 }
 \arguments{
 \item{field}{which field should match \code{matching}}
 
 \item{matching}{which elements of \code{field} should be returned}
+
+\item{named}{should a named vector e.g. c(where = "...") be returned or just the query string}
 }
 \value{
 a named character vector of length 1 to be included in query

@@ -1,6 +1,6 @@
 Package: getarc
 Title: An R Wrapper for the ArcGIS Rest API
-Version: 0.0.0.9500
+Version: 0.0.1.0000
 Authors@R: 
     person(given = "Matthew",
            family = "Whittle",
@@ -32,7 +32,10 @@ Imports:
     lifecycle,
     progress,
     glue,
-    rjson
+    rjson,
+    httpuv,
+    RcppSimdJson,
+    readr
 VignetteBuilder: knitr
 Depends: 
     R (>= 2.10)

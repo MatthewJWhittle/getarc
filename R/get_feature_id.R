@@ -11,25 +11,27 @@
 #' @importFrom httr content
 #' @importFrom rjson fromJSON
 #' @export get_feature_ids
+#' @importFrom utils modifyList
+#' @importFrom httr oauth_callback
 get_feature_ids <-
-  function(endpoint, query = NULL, my_token = NULL){
-    token <- parse_access_token(my_token)
+  function(endpoint, query = list(), my_token = NULL){
 
-    query <- modify_named_vector(default_query_parameters(),
-                                 c(query, token = token, returnIdsOnly = "true"))
+    query <- query_object(default = default_query_parameters(),
+                          user_query = query,
+                          my_token = my_token,
+                          mandatory = list(returnIdsOnly = "true",
+                                           f = "json")
+                          )
 
-    # there is a known limitation in arc gis api where the result record parameter doesn't work with
-    # the return count or return ids only parameter
-    # This is a workaround
+    # Get the request number of records to return and drop the param from the query
+    # This can then be used to limit the number of FIDs returned by the function
     return_count <-  as.numeric(query[names(query) == "resultRecordCount"])
     query <- query[names(query) != "resultRecordCount"]
-
-
 
     query_url <- paste0(endpoint, "/query")
 
     # Download the data using a post query
-    response <- httr::POST(query_url, body = as.list(query))
+    response <- httr::POST(query_url, body = query, httr::add_headers(referer = httr::oauth_callback()))
 
     # Fail if the response is not 200
     # Print an error message if the status code isn't 200
@@ -38,8 +40,13 @@ get_feature_ids <-
     )
 
 
+
     # Parse and return the content
-    object_ids <- parse_rjson(response)
+    object_ids <- RcppSimdJson::fparse(response$content, max_simplify_lvl = "list")
+
+    # Check for any esri errors not communicated in the status code
+    check_esri_error(object_ids)
+
     # cut down the object ids vector if a returnRecordCount has been sent & the
     # return count is less than the object_ids vector length
     # This enables us to work around the issue with the feature service not returning
@@ -49,22 +56,13 @@ get_feature_ids <-
     if(length(return_count) > 0 && length(object_ids$objectIds) > return_count){
       object_ids$objectIds <- object_ids$objectIds[c(1:return_count)]
     }
-    
+
     # If the number of object IDs exceeds 100000 and a where_in query is used then paste0 functino will send number in scientific notation
     # to avoid this I'm going to assert that the data type is an integer
     object_ids$objectIds <- as.integer(object_ids$objectIds)
-    
-    return(object_ids)
-    # The below code might be required but unsure if it will error (above) or not
-    # Map servers and Feature servers return data in a slightly different format
-    # Need to parse the content, then check if it is a list, if not use fromJSON to extract a list
-    # if(is.list(content)){
-    #   return(content)
-    # }else{
-    #   return(jsonlite::fromJSON(content))
-    # }
-  }
 
+    return(object_ids)
+  }
 #' Get Count
 #'
 #' This function accepts an endpoint and a query and returns the count of features matching the query. It is a useful and fast method of determining if the query will return any data.
@@ -75,19 +73,22 @@ get_feature_ids <-
 #' @importFrom httr POST
 #' @importFrom httr content
 #' @importFrom rjson fromJSON
+#' @importFrom httr oauth_callback
 #' @export get_count
 get_count <-
-  function(endpoint, query = NULL, my_token = NULL){
-    token <- parse_access_token(my_token)
+  function(endpoint, query = list(), my_token = NULL){
 
-    query <- modify_named_vector(default_query_parameters(),
-                                 c(query, token = token,
-                                   returnCountOnly = "true"))
+    query <- query_object(default = default_query_parameters(),
+                          user_query = query,
+                          my_token = my_token,
+                          mandatory = list(returnCountOnly = "true", f = "json")
+    )
+
 
     query_url <- paste0(endpoint, "/query")
 
     # Download the data using a post query
-    response <- httr::POST(query_url, body = as.list(query))
+    response <- httr::POST(query_url, body = as.list(query), httr::add_headers(referer = httr::oauth_callback()))
 
     # Fail if the response is not 200
     # Print an error message if the status code isn't 200
@@ -97,16 +98,8 @@ get_count <-
 
 
     # Parse and return the content
-    content <- httr::content(response, as = "text")
-    count <- rjson::fromJSON(content)
+    count <- RcppSimdJson::fparse(response$content, max_simplify_lvl = "list")
 
     return(count$count)
-    # The below code might be required but unsure if it will error (above) or not
-    # Map servers and Feature servers return data in a slightly different format
-    # Need to parse the content, then check if it is a list, if not use fromJSON to extract a list
-    # if(is.list(content)){
-    #   return(content)
-    # }else{
-    #   return(jsonlite::fromJSON(content))
-    # }
+
   }
